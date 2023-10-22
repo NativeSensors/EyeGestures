@@ -21,7 +21,6 @@ def getEyes(gray):
         # cv2.rectangle(gray, (x, y), (x+w, y+h), (255, 0, 0), 2)
     return eye_images
 
-
 def getFaces(gray):
     # Detect faces
     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
@@ -33,25 +32,27 @@ def getFaces(gray):
         # cv2.rectangle(gray, (x, y), (x+w, y+h), (255, 0, 0), 2)
     return faces_images
 
-while True:
+if __name__ == "__main__":
+    while True:
 
-    #print('About to start the Read command')
-    ret, frame = cap.read()
-    #print('Running..')
-    
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = getFaces(gray)
-    
-    for face in faces:
-        eyes = getEyes(face)
+        #print('About to start the Read command')
+        ret, frame = cap.read()
+        #print('Running..')
+        
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = getFaces(gray)
+        
+        for face in faces:
+            eyes = getEyes(face)
+        
 
-        for i,eye in enumerate(eyes):
-            if i >= 2:
-                break
-            cv2.imshow(f'eye_{i}', eye)
+            # find the smallest difference
+            for i,eye in enumerate(eyes):
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+                cv2.imshow(f'eye_{i}', eye)
 
-cap.release()
-cv2.destroyAllWindows()
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
