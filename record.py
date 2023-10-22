@@ -63,26 +63,25 @@ if __name__ == "__main__":
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = getFaces(gray)
         
-        for face in faces:
+        if len(faces) > 0:
+            
+            face = faces[0]
+        
             left_face = face[:int(face.shape[0]/2),:int(face.shape[0]/2)]
             right_face = face[:int(face.shape[0]/2),int(face.shape[0]/2):]
             leftEye = eyeFrame(getEyes(left_face))
             rightEye = eyeFrame(getEyes(right_face))
-            # ef = eyeFrame(getEyes(face)) 
-            # framesStorage.append(ef)
 
-            for i,eye in enumerate(leftEye.get()):
-                cv2.imshow(f'left_eye_{i}', eye)
+            if len(leftEye.get()) > 0:
+                cv2.imshow(f'left_eye', leftEye.get()[0])
+            
+            if len(rightEye.get()) > 0:    
+                cv2.imshow(f'right_eye', rightEye.get()[0])
 
-            for i,eye in enumerate(rightEye.get()):
-                cv2.imshow(f'right_eye_{i}', eye)
-            # cv2.imshow(f'left_face', left_face)
-            # cv2.imshow(f'right_face', right_face)
+            if cv2.waitKey(1) == ord('q'):
+                break
 
-        if cv2.waitKey(1) == ord('q'):
-            break
-
-    with open('recording/data.pkl', 'wb') as file:
+    with open(f'recording/data{time.time()}.pkl', 'wb') as file:
         pickle.dump(framesStorage, file)
 
     cap.release()
