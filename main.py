@@ -7,14 +7,15 @@ from utils.eyeframes import eyeFrame, eyeFrameStorage
 LEFT  = 0
 RIGHT = 1
 
-
+predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    
 def getFace(gray):
-    predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
-    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    # hog_face_detector = dlib.get_frontal_face_detector()
 
-    for (x, y, w, h) in face_cascade.detectMultiScale(gray, 1.1, 4):
+    for (x, y, w, h) in face_cascade.detectMultiScale(gray, 1.1, 9):
         
-        landmarks  = shape_to_np(predictor(gray, dlib.rectangle(x, y, w, h)))
+        landmarks  = shape_to_np(predictor(gray, dlib.rectangle(x, y, x+w, y+h)))
         faceSquare = gray[x:x+w,y:y+h]
         yield (faceSquare ,landmarks, (x, y, w, h))
   
@@ -46,10 +47,17 @@ def getEyes(image):
         left_eye_region  = faceSquare[:int(w/2),int(h/2):]
         right_eye_region = faceSquare[:int(w/2),:int(h/2)]        
 
-        print(x, y, w, h)
+        
+        for landmark in landmarks:
+            # print(/,landmark)
+
+            image = cv2.circle(image, (landmark[0],landmark[1]), 1, (0, 0, 255), 1) 
+            
         image = cv2.rectangle(image, (x,y), (x+w,y+h), (255, 0, 0), 2) 
         image = cv2.rectangle(image, (x,y), (x+int(w/2),y+int(h/2)), (0, 0, 255), 2) 
         image = cv2.rectangle(image, (x+int(w/2),y), (x+w,y+int(h/2)), (0, 255, 0), 2) 
+        image = cv2.circle(image, (x+int(w/2),y+int(h/2)), 5, (0, 255, 255), 5) 
+        image = cv2.circle(image, (x+int(w/2),y+int(h/2)), int(w/4), (0, 255, 255), 1) 
         # cv2.imshow(f'faceSquare', faceSquare)
         # cv2.imshow(f'left_eye_region', left_eye_region)
         # cv2.imshow(f'right_eye_region', right_eye_region)
