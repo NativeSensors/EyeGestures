@@ -9,7 +9,46 @@ RIGHT = 1
 
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-    
+
+class eyeFrame:    
+
+    def __init__(self):
+        self.center = (0.0,0.0)
+        self.radius = 0.0
+        self.leftEye = None
+        self.rightEye = None
+        self.landmarks = None
+        self.faceImg = None
+
+    def setParams(self,faceImg, landmarks, coors):
+        (x,y,w,h) = coors
+        self.faceImg = faceImg
+        self.landmarks = landmarks
+        self.coors = coors
+
+        self.leftEye  = faceSquare[:int(w/2),int(h/2):]
+        self.rightEye = faceSquare[:int(w/2),:int(h/2)]        
+
+        self.center = (x+int(w/2),y+int(h/2))
+        self.radius = int(w/4)
+
+        pass
+
+    def getCenter(self):
+        return self.center
+
+    def getRadius(self):
+        return self.radius
+
+    def getCoors(self):
+        return self.coors
+
+    def getFaceImg(self):
+        return self.faceImg
+
+    def getLandMarks(self):
+        return self.landmarks
+
 def getFace(gray):
     # hog_face_detector = dlib.get_frontal_face_detector()
 
@@ -43,14 +82,15 @@ def getEyes(image):
     
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     for faceSquare, landmarks, (x, y, w, h) in getFace(gray):
+        eFrame = eyeFrame()
         
+        eFrame.setParams(faceSquare, landmarks, (x, y, w, h))
         left_eye_region  = faceSquare[:int(w/2),int(h/2):]
         right_eye_region = faceSquare[:int(w/2),:int(h/2)]        
 
         
         for landmark in landmarks:
             # print(/,landmark)
-
             image = cv2.circle(image, (landmark[0],landmark[1]), 1, (0, 0, 255), 1) 
             
         image = cv2.rectangle(image, (x,y), (x+w,y+h), (255, 0, 0), 2) 
