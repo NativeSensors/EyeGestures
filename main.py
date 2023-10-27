@@ -2,52 +2,14 @@ import cv2
 import dlib
 import pickle
 import numpy as np
-from utils.eyeframes import eyeFrame, eyeFrameStorage
+from utils.eyeframes import eyeFrame, faceTracker
 
 LEFT  = 0
 RIGHT = 1
 
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-class eyeFrame:    
-
-    def __init__(self):
-        self.center = (0.0,0.0)
-        self.radius = 0.0
-        self.leftEye = None
-        self.rightEye = None
-        self.landmarks = None
-        self.faceImg = None
-
-    def setParams(self,faceImg, landmarks, coors):
-        (x,y,w,h) = coors
-        self.faceImg = faceImg
-        self.landmarks = landmarks
-        self.coors = coors
-
-        self.leftEye  = faceSquare[:int(w/2),int(h/2):]
-        self.rightEye = faceSquare[:int(w/2),:int(h/2)]        
-
-        self.center = (x+int(w/2),y+int(h/2))
-        self.radius = int(w/4)
-
-        pass
-
-    def getCenter(self):
-        return self.center
-
-    def getRadius(self):
-        return self.radius
-
-    def getCoors(self):
-        return self.coors
-
-    def getFaceImg(self):
-        return self.faceImg
-
-    def getLandMarks(self):
-        return self.landmarks
+tracker = faceTracker()
 
 def getFace(gray):
     # hog_face_detector = dlib.get_frontal_face_detector()
@@ -74,7 +36,6 @@ def getEye(image,eyeRect):
     return eyeImage
 
 def getEyes(image):
-
     LEFT_EYE_KEYPOINTS = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     RIGHT_EYE_KEYPOINTS = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
 
@@ -83,31 +44,13 @@ def getEyes(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     for faceSquare, landmarks, (x, y, w, h) in getFace(gray):
         eFrame = eyeFrame()
-        
         eFrame.setParams(faceSquare, landmarks, (x, y, w, h))
-        left_eye_region  = faceSquare[:int(w/2),int(h/2):]
-        right_eye_region = faceSquare[:int(w/2),:int(h/2)]        
-
+        tracker.update(eFrame)
         
-        for landmark in landmarks:
-            # print(/,landmark)
-            image = cv2.circle(image, (landmark[0],landmark[1]), 1, (0, 0, 255), 1) 
-            
-        image = cv2.rectangle(image, (x,y), (x+w,y+h), (255, 0, 0), 2) 
-        image = cv2.rectangle(image, (x,y), (x+int(w/2),y+int(h/2)), (0, 0, 255), 2) 
-        image = cv2.rectangle(image, (x+int(w/2),y), (x+w,y+int(h/2)), (0, 255, 0), 2) 
-        image = cv2.circle(image, (x+int(w/2),y+int(h/2)), 5, (0, 255, 255), 5) 
-        image = cv2.circle(image, (x+int(w/2),y+int(h/2)), int(w/4), (0, 255, 255), 1) 
-        # cv2.imshow(f'faceSquare', faceSquare)
-        # cv2.imshow(f'left_eye_region', left_eye_region)
-        # cv2.imshow(f'right_eye_region', right_eye_region)
-        
-        # left_eye  = getEye(left_eye_region  , eye_cascade.detectMultiScale(left_eye_region, 1.1, 4))
-        # right_eye = getEye(right_eye_region , eye_cascade.detectMultiScale(right_eye_region, 1.1, 4))
-
-        # left_eye_landmarks = landmarks[LEFT_EYE_KEYPOINTS,:]
-        # left_eye_landmarks = landmarks[RIGHT_EYE_KEYPOINTS,:]
-
+        left_eye_region  = eFrame.getLeftEye()
+        right_eye_region = eFrame.getRightEye()       
+    
+    eFrame = tracker.getFrame().addFeaturesToImg(image)
     cv2.imshow(f'image', image)
 
 
