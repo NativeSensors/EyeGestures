@@ -3,6 +3,17 @@ import math
 import numpy as np
 
 class eyeFrame:    
+    LEFT_EYE_KEYPOINTS = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
+    LL_EYE = 36
+    LR_EYE = 39
+    LU_EYE = 37
+    LD_EYE = 41
+
+    RIGHT_EYE_KEYPOINTS = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
+    RL_EYE = 42
+    RR_EYE = 45
+    RU_EYE = 43
+    RD_EYE = 47
 
     def __init__(self):
         self.coors = (0,0,2,2)
@@ -12,16 +23,27 @@ class eyeFrame:
         self.rightEye = None
         self.landmarks = []
         self.faceImg = None
+        self.leftEyeBoundingBox = []
+        self.rightEyeBoundingBox = []
 
-    def setParams(self,faceImg, landmarks, coors):
+    def setParams(self,orgImage,faceImg, landmarks, coors):
         self.faceImg = faceImg
         self.landmarks = landmarks
         self.coors = coors
+        (ox,oy,ow,oh) = coors
+
+        (x,w,y,h) = self.landmarks[[self.LL_EYE,self.LR_EYE,self.LU_EYE,self.LD_EYE]]
+        self.leftEyeBoundingBox = [x[0],y[1],w[0]-x[0],h[1]-y[1]]
+        (x,y,w,h) = self.leftEyeBoundingBox
+        self.leftEye = orgImage[y-10:y+h+10,x:x+w]
+        
+        (x,w,y,h) = self.landmarks[[self.RL_EYE,self.RR_EYE,self.RU_EYE,self.RD_EYE]]
+        self.rightEyeBoundingBox = [x[0],y[1],w[0]-x[0],h[1]-y[1]]
+        (x,y,w,h) = self.rightEyeBoundingBox
+        self.rightEye = orgImage[y-10:y+h+10,x:x+w]
+        # print(self.leftEye.shape)
+
         (x,y,w,h) = self.coors
-
-        self.leftEye  = faceImg[:int(w/2),int(h/2):]
-        self.rightEye = faceImg[:int(w/2),:int(h/2)]        
-
         self.center = (x+int(w/2),y+int(h/2))
         self.radius = int(w/4)
 
@@ -56,8 +78,12 @@ class eyeFrame:
             image = cv2.circle(image, (landmark[0],landmark[1]), 1, (0, 0, 255), 1) 
             
         image = cv2.rectangle(image, (x,y), (x+w,y+h), (255, 0, 0), 2) 
-        image = cv2.rectangle(image, (x,y), (x+int(w/2),y+int(h/2)), (0, 0, 255), 2) 
-        image = cv2.rectangle(image, (x+int(w/2),y), (x+w,y+int(h/2)), (0, 255, 0), 2) 
+        (x,y,w,h) = self.leftEyeBoundingBox
+        image = cv2.rectangle(image, (x,y), (x+w,y+h), (0, 0, 255), 1) 
+        (x,y,w,h) = self.rightEyeBoundingBox
+        image = cv2.rectangle(image, (x,y), (x+w,y+h), (0, 255, 0), 1) 
+        
+        (x,y,w,h) = self.coors
         image = cv2.circle(image, (x+int(w/2),y+int(h/2)), 5, (0, 255, 255), 5) 
         image = cv2.circle(image, (x+int(w/2),y+int(h/2)), int(w/4), (0, 255, 255), 1) 
 
@@ -70,11 +96,8 @@ class faceTracker:
 
     def update(self,frame: eyeFrame):
         if(isinstance(self.prevFrame, type(None))):
-            print(f"first update {self.prevFrame} and {self.nowFrame}")
             self.nowFrame = frame
             self.prevFrame = frame
-            print(f"first update {self.prevFrame} and {self.nowFrame}")
-            
         else:
             center = frame.getCenter()
             prevCenter = self.prevFrame.getCenter()

@@ -44,14 +44,24 @@ def getEyes(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     for faceSquare, landmarks, (x, y, w, h) in getFace(gray):
         eFrame = eyeFrame()
-        eFrame.setParams(faceSquare, landmarks, (x, y, w, h))
+        eFrame.setParams(gray,faceSquare, landmarks, (x, y, w, h))
         tracker.update(eFrame)
         
         left_eye_region  = eFrame.getLeftEye()
-        right_eye_region = eFrame.getRightEye()       
+        right_eye_region = eFrame.getRightEye()
+
+
+        cv2.imshow("left_eye", left_eye_region)
+        cv2.imshow("right_eye", right_eye_region)
+
+        # rx,ry = x+int(w/2),y    
+        # for eye_right in eyes_right:
+        #     (x,y,w,h) = eye_right
+        #     image = cv2.rectangle(image, (x,y), (x+w,y+h), (255, 0, 0), 2) 
     
     eFrame = tracker.getFrame().addFeaturesToImg(image)
     cv2.imshow(f'image', image)
+        
 
 
 def shape_to_np(shape, dtype="int"):
