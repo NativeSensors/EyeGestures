@@ -3,6 +3,7 @@ import dlib
 import pickle
 import numpy as np
 from utils.eyeframes import eyeFrame, faceTracker
+from utils.eyetracker import EyeSink
 
 LEFT  = 0
 RIGHT = 1
@@ -46,34 +47,29 @@ def getEyes(image):
         eFrame = eyeFrame()
         eFrame.setParams(gray,faceSquare, landmarks, (x, y, w, h))
         tracker.update(eFrame)
+
+        sink = EyeSink()
         
         left_eye_region  = eFrame.getLeftEye()
         right_eye_region = eFrame.getRightEye()
 
+        left_eye_show = cv2.cvtColor(left_eye_region,cv2.COLOR_GRAY2RGB)
+        right_eye_show = cv2.cvtColor(right_eye_region,cv2.COLOR_GRAY2RGB)
+
         cv2.imshow("left_eye", left_eye_region)
-        _,left_eye_region_thresh = cv2.threshold(left_eye_region, 40, 250 ,cv2.THRESH_BINARY)
-        left_eye_show = cv2.cvtColor(left_eye_region_thresh,cv2.COLOR_GRAY2RGB)
+        (cX,cY) = sink.push(left_eye_region)
         
-        x_center = 0
-        y_center = 0
-        N = 0
-        for row, pixels_row in enumerate(left_eye_region_thresh):
-            for col, pixel in enumerate(pixels_row):
-                if pixel == 0:
-                    x_center += col
-                    y_center += row        
-                    N += 1
+        if cX != 0 or cY != 0:
+            cv2.circle(left_eye_show , (cX,cY), 2, (0, 0, 255), -1)
         
-        if N > 0:
-            x_center = int(x_center / N)
-            y_center = int(y_center / N)
-            
-            cv2.circle(left_eye_show , (x_center, y_center), 1, (0, 0, 255), -1)
+        (cX,cY) = sink.push(right_eye_region)
+        if cX != 0 or cY != 0:
+            cv2.circle(right_eye_show , (cX,cY), 2, (255, 0, 0), -1)
             
         # put text and highlight the center
 
-        cv2.imshow("thresh_left_eye", left_eye_show )
-        cv2.imshow("right_eye", right_eye_region)
+        cv2.imshow("left_eye", left_eye_show )
+        cv2.imshow("right_eye", right_eye_show)
 
         # rx,ry = x+int(w/2),y    
         # for eye_right in eyes_right:
