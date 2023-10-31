@@ -50,8 +50,29 @@ def getEyes(image):
         left_eye_region  = eFrame.getLeftEye()
         right_eye_region = eFrame.getRightEye()
 
-
         cv2.imshow("left_eye", left_eye_region)
+        _,left_eye_region_thresh = cv2.threshold(left_eye_region, 40, 250 ,cv2.THRESH_BINARY)
+        left_eye_show = cv2.cvtColor(left_eye_region_thresh,cv2.COLOR_GRAY2RGB)
+        
+        x_center = 0
+        y_center = 0
+        N = 0
+        for row, pixels_row in enumerate(left_eye_region_thresh):
+            for col, pixel in enumerate(pixels_row):
+                if pixel == 0:
+                    x_center += col
+                    y_center += row        
+                    N += 1
+        
+        if N > 0:
+            x_center = int(x_center / N)
+            y_center = int(y_center / N)
+            
+            cv2.circle(left_eye_show , (x_center, y_center), 1, (0, 0, 255), -1)
+            
+        # put text and highlight the center
+
+        cv2.imshow("thresh_left_eye", left_eye_show )
         cv2.imshow("right_eye", right_eye_region)
 
         # rx,ry = x+int(w/2),y    
@@ -86,7 +107,7 @@ if __name__ == "__main__":
             # cv2.imshow(f'frame', frame)
             getEyes(frame)
             
-            if cv2.waitKey(1) == ord('q'):
+            if cv2.waitKey(10) == ord('q'):
                 run = False
                 break
 
