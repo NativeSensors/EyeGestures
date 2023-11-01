@@ -66,14 +66,9 @@ class EyeSink:
 
         
         # frame_show = cv2.cvtColor(frame,cv2.COLOR_GRAY2RGB)
-        (width, height, colours) = self.frame_now.shape
+        (height, width, colours) = self.frame_now.shape
 
-        (x_center,y_center) = (0,0)
         (x_center,y_center) = center
-        print(f"{center},{radius}")
-        print(f"{x_center/width},{y_center/height}")
-        cv2.circle(self.frame_now, center, 4, (255, 0, 0), 1)
-        cv2.imshow("frame_show",self.frame_now)
 
         return (x_center/width,y_center/height)
         pass

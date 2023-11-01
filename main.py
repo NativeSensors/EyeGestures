@@ -38,6 +38,33 @@ def getEye(image,eyeRect):
     eyeImage = image[x:x+w,y:y+h]
     return eyeImage
 
+def getCoordinates(image): 
+
+    sink = EyeSink()
+
+    (left_eye_region , right_eye_region) = getEyes(image)
+    left = sink.push(left_eye_region)
+    right = sink.push(right_eye_region)
+
+    left_eye_show = left_eye_region
+    right_eye_show = right_eye_region
+
+    (lcX,lcY) = left
+    (rcX,rcY) = right
+    (h,w,c) = left_eye_show.shape
+    cv2.circle(left_eye_show,(int(rcX*w),int(rcY*h)),2,(255,0,0),1)
+    (h,w,c) = right_eye_show.shape
+    cv2.circle(right_eye_show,(int(lcX*w),int(lcY*h)),2,(0,0,255),1)
+    cv2.imshow("left_eye_region", left_eye_show)
+    cv2.imshow("right_eye_region",right_eye_show)
+
+    return (left,right)
+
+    # print("returning zeros")
+    # right = (0,0)
+    # left = (0,0)
+    # return (left,right)
+
 def getEyes(image):
     LEFT_EYE_KEYPOINTS = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     RIGHT_EYE_KEYPOINTS = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
@@ -49,46 +76,11 @@ def getEyes(image):
         sandbox.fill(255)
         eFrame = eyeFrame()
         eFrame.setParams(image,faceSquare, landmarks, (x, y, w, h))
-        tracker.update(eFrame)
-
-        sink = EyeSink()
+        tracker.update(eFrame)      
         
         left_eye_region  = eFrame.getLeftEye()
         right_eye_region = eFrame.getRightEye()
-
-        left_eye_show = left_eye_region
-        right_eye_show = right_eye_region
-
-        (w,h,c) = left_eye_region.shape
-        (cX,cY) = sink.push(left_eye_region)
-        if cX != 0 or cY != 0:
-            cv2.circle(left_eye_show , (int(cX*w),int(cY*h)) , 1, (0, 0, 255), -1)
-
-        if cX != 0 or cY != 0:
-            cv2.circle(sandbox , (int(cX*256),int(cY*256)) , 2, (0, 0, 255), -1)
-
-        cv2.imshow("left_eye", left_eye_show)
-
-        (w,h,c) = right_eye_region.shape
-        (cX,cY) = sink.push(right_eye_region)
-        if cX != 0 or cY != 0:
-            cv2.circle(right_eye_show , (int(cX*w),int(cY*h)), 1, (255, 0, 0), -1)
-            
-        (cX,cY) = sink.push(right_eye_region)
-        if cX != 0 or cY != 0:
-            cv2.circle(sandbox , (int(cX*256),int(cY*256)), 2, (255, 0, 0), -1)
-
-        cv2.imshow("right_eye", right_eye_show)
-        cv2.imshow("sandbox", sandbox)
-        # rx,ry = x+int(w/2),y    
-        # for eye_right in eyes_right:
-        #     (x,y,w,h) = eye_right
-        #     image = cv2.rectangle(image, (x,y), (x+w,y+h), (255, 0, 0), 2) 
-    
-    eFrame = tracker.getFrame().addFeaturesToImg(image)
-    cv2.imshow(f'image', image)
-        
-
+        return (left_eye_region,right_eye_region)
 
 def shape_to_np(shape, dtype="int"):
     coords = np.zeros((68, 2), dtype=dtype)
@@ -117,7 +109,14 @@ if __name__ == "__main__":
  
             # frame = frame[int(h/5):int(4/5*h),int(w/5):int(4/5*w)]
             # cv2.imshow(f'frame', frame)
-            getEyes(frame)
+            (left,right) = getCoordinates(frame)
+            (lcX,lcY) = left
+            (rcX,rcY) = right
+
+            print(f"left:{left} right:{right}")
+            cv2.circle(sandbox,(int(rcX*512),int(rcY*512)),2,(255,0,0),1)
+            cv2.circle(sandbox,(int(lcX*512),int(lcY*512)),2,(0,0,255),1)
+            cv2.imshow("sandbox",sandbox)
             
             if cv2.waitKey(1) == ord('q'):
                 run = False
