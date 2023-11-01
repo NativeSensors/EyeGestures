@@ -11,8 +11,6 @@ RIGHT = 1
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 tracker = faceTracker()
-sandbox = np.zeros([512,512,3],dtype=np.uint8)
-sandbox.fill(255)
 
 def getFace(gray):
     # hog_face_detector = dlib.get_frontal_face_detector()
@@ -46,9 +44,8 @@ def getEyes(image):
     
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     for faceSquare, landmarks, (x, y, w, h) in getFace(gray):
-        sandbox.fill(255)
         eFrame = eyeFrame()
-        eFrame.setParams(image,faceSquare, landmarks, (x, y, w, h))
+        eFrame.setParams(gray,faceSquare, landmarks, (x, y, w, h))
         tracker.update(eFrame)
 
         sink = EyeSink()
@@ -56,29 +53,37 @@ def getEyes(image):
         left_eye_region  = eFrame.getLeftEye()
         right_eye_region = eFrame.getRightEye()
 
-        left_eye_show = left_eye_region
-        right_eye_show = right_eye_region
+        left_eye_show = cv2.cvtColor(left_eye_region,cv2.COLOR_GRAY2RGB)
+        right_eye_show = cv2.cvtColor(right_eye_region,cv2.COLOR_GRAY2RGB)
 
-        (w,h,c) = left_eye_region.shape
+        cv2.imshow("left_eye", left_eye_region)
+        
+        (w,h) = left_eye_region.shape
         (cX,cY) = sink.push(left_eye_region)
         if cX != 0 or cY != 0:
             cv2.circle(left_eye_show , (int(cX*w),int(cY*h)) , 1, (0, 0, 255), -1)
-
-        if cX != 0 or cY != 0:
-            cv2.circle(sandbox , (int(cX*256),int(cY*256)) , 2, (0, 0, 255), -1)
-
-        cv2.imshow("left_eye", left_eye_show)
-
-        (w,h,c) = right_eye_region.shape
+        
+        (w,h) = right_eye_region.shape
         (cX,cY) = sink.push(right_eye_region)
         if cX != 0 or cY != 0:
             cv2.circle(right_eye_show , (int(cX*w),int(cY*h)), 1, (255, 0, 0), -1)
             
+        # put text and highlight the center
+
+        cv2.imshow("left_eye", left_eye_show )
+        cv2.imshow("right_eye", right_eye_show)
+
+        sandbox = np.zeros([512,512,3],dtype=np.uint8)
+        sandbox.fill(255)
+
+        (cX,cY) = sink.push(left_eye_region)
+        if cX != 0 or cY != 0:
+            cv2.circle(sandbox , (int(cX*512),int(cY*512)) , 10, (0, 0, 255), -1)
+        
         (cX,cY) = sink.push(right_eye_region)
         if cX != 0 or cY != 0:
-            cv2.circle(sandbox , (int(cX*256),int(cY*256)), 2, (255, 0, 0), -1)
+            cv2.circle(sandbox , (int(cX*512),int(cY*512)), 10, (255, 0, 0), -1)
 
-        cv2.imshow("right_eye", right_eye_show)
         cv2.imshow("sandbox", sandbox)
         # rx,ry = x+int(w/2),y    
         # for eye_right in eyes_right:
@@ -96,31 +101,35 @@ def shape_to_np(shape, dtype="int"):
         coords[i] = (shape.part(i).x, shape.part(i).y)
     return coords
 
-
 if __name__ == "__main__":
+    #print("Before URL")
+    cap = cv2.VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
+    #print("After URL")
+
     frames = []
-    run = True
+    # Get the current time
+    while True:
+        
+        #print('About to start the Read command')
+        ret, frame = cap.read()
+        frames.append(frame)
+        
+        w = frame.shape[0]
+        h = frame.shape[1]
+        frame = frame[int(h/5):int(4/5*h),int(w/5):int(4/5*w)]
+        # cv2.imshow(f'frame', frame)
+        getEyes(frame)
+        
+        if cv2.waitKey(10) == ord('q'):
+            run = False
+            break
 
-    with open('recording/data31-10-2023-17:53:21.pkl', 'rb') as file:
-        frames = pickle.load(file)
 
-    while run:
-        for n, frame in enumerate(frames):
-            w = frame.shape[1]
-            h = frame.shape[0]
+    now = datetime.now()
+    dt_string = now.strftime("%d-%m-%Y-%H:%M:%S")
 
-            scale_percent = 60 # percent of original size
-            width = int(w * scale_percent / 100)
-            height = int(h * scale_percent / 100)
-            dim = (width, height)
-            frame = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)
- 
-            # frame = frame[int(h/5):int(4/5*h),int(w/5):int(4/5*w)]
-            # cv2.imshow(f'frame', frame)
-            getEyes(frame)
-            
-            if cv2.waitKey(1) == ord('q'):
-                run = False
-                break
+    with open(f'recording/data{dt_string}.pkl', 'wb') as file:
+        pickle.dump(frames, file)
 
+    cap.release()
     cv2.destroyAllWindows()

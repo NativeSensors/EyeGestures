@@ -2,13 +2,12 @@ import cv2
 import pickle 
 import numpy as np
 from datetime import datetime
-from utils.eyeframes import eyeFrame, eyeFrameStorage
 import cv2
 import dlib
 
 if __name__ == "__main__":
     #print("Before URL")
-    cap = cv2.VideoCapture('rtsp://192.168.18.14:8080/h264.sdp')
+    cap = cv2.VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
     #print("After URL")
 
     frames = []

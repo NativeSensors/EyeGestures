@@ -23,24 +23,26 @@ class eyeFrame:
         self.rightEye = None
         self.landmarks = []
         self.faceImg = None
-        self.leftEyeBoundingBox = []
-        self.rightEyeBoundingBox = []
+        self.leftEyeBoundingBox = [0,0,0,0]
+        self.rightEyeBoundingBox = [0,0,0,0]
 
     def setParams(self,orgImage,faceImg, landmarks, coors):
         self.faceImg = faceImg
         self.landmarks = landmarks
         self.coors = coors
+        safe_space = 10
         (ox,oy,ow,oh) = coors
+
 
         (x,w,y,h) = self.landmarks[[self.LL_EYE,self.LR_EYE,self.LU_EYE,self.LD_EYE]]
         self.leftEyeBoundingBox = [x[0],y[1],w[0]-x[0],h[1]-y[1]]
         (x,y,w,h) = self.leftEyeBoundingBox
-        self.leftEye = orgImage[y-10:y+h+10,x:x+w]
+        self.leftEye = orgImage[y-safe_space:y+h+safe_space,x-safe_space:x+w+safe_space]
         
         (x,w,y,h) = self.landmarks[[self.RL_EYE,self.RR_EYE,self.RU_EYE,self.RD_EYE]]
         self.rightEyeBoundingBox = [x[0],y[1],w[0]-x[0],h[1]-y[1]]
         (x,y,w,h) = self.rightEyeBoundingBox
-        self.rightEye = orgImage[y-10:y+h+10,x:x+w]
+        self.rightEye = orgImage[y-safe_space:y+h+safe_space,x-safe_space:x+w+safe_space]
         # print(self.leftEye.shape)
 
         (x,y,w,h) = self.coors
@@ -104,9 +106,7 @@ class faceTracker:
             prevRadius = self.prevFrame.getRadius()
 
             dist = math.sqrt((center[0] - prevCenter[0])**2 + (center[1] - prevCenter[1])**2)
-            print(f"{dist} , {prevRadius} : x:{center[0]} y:{center[1]} px:{prevCenter[0]} py:{prevCenter[1]}")
             if dist <= prevRadius:
-                print("update")
                 self.prevFrame = self.nowFrame
                 self.nowFrame = frame
 
