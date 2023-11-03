@@ -67,7 +67,7 @@ class EyeSink:
         
         # frame_show = cv2.cvtColor(frame,cv2.COLOR_GRAY2RGB)
         (height, width, colours) = self.frame_now.shape
-
+        # (x_center,y_center) = (0,0)
         (x_center,y_center) = center
 
         return (x_center/width,y_center/height)

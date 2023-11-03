@@ -57,8 +57,32 @@ class eyeFrame:
     def getLeftEye(self):
         return self.leftEye
 
+    def getLeftEyeLandmarks(self):
+        safe_space = 10
+        (LL,LR,LU,LD) = self.landmarks[[self.LL_EYE,self.LR_EYE,self.LU_EYE,self.LD_EYE]]
+        (x,y,w,h)     = self.leftEyeBoundingBox
+
+        retCoors = np.zeros((4,2))
+        for n,coors in enumerate([LL,LR,LU,LD]):
+            retCoors[n,0] = (coors[0] - x)/w
+            retCoors[n,1] = (coors[1] - y)/h
+
+        return retCoors
+
     def getRightEye(self):
         return self.rightEye
+
+    def getRightEyeLandmarks(self):
+        safe_space = 10
+        (RL,RR,RU,RD) = self.landmarks[[self.RL_EYE,self.RR_EYE,self.RU_EYE,self.RD_EYE]]
+        (x,y,w,h)     = self.rightEyeBoundingBox
+
+        retCoors = np.zeros((4,2))
+        for n,coors in enumerate([RL,RR,RU,RD]):
+            retCoors[n,0] = (coors[0] - x)/w
+            retCoors[n,1] = (coors[1] - y)/h
+            
+        return retCoors
 
     def getRadius(self):
         return self.radius
