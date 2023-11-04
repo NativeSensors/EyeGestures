@@ -1,109 +1,134 @@
 import cv2
 import dlib
+import time
 import pickle
+import random
+from screeninfo import get_monitors
 import numpy as np
+from typing import Callable, Tuple
 from utils.eyeframes import eyeFrame, faceTracker
 from utils.eyetracker import EyeSink
+import numpy as np
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+from utils.utils import detectFace, getEyes, getCoordinates
 
-LEFT  = 0
-RIGHT = 1
+class EyeTracker:
 
-predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-tracker = faceTracker()
+    def __init__(self):
+        # Create a linear regression model
+        self.model = LinearRegression()
+        self.calibrated = False
+        pass
 
-def getFace(gray):
-    # hog_face_detector = dlib.get_frontal_face_detector()
+    def predict(self,points):
+        if self.calibrated:
+            points_reshaped = points.reshape(1, -1)
+            predicted_y = self.model.predict(points_reshaped)
+            return predicted_y[0]
+        else:
+            print("returning 0")
+            return [0.0,0.0]
 
-    for (x, y, w, h) in face_cascade.detectMultiScale(gray, 1.1, 9):
+    def fit(self,calibrationPoints, dataPoints):
+        dataPoints_reshaped = dataPoints.reshape(dataPoints.shape[0], -1)
+        self.model.fit(dataPoints_reshaped, calibrationPoints)
+        self.calibrated = True
+
+
+
+class CalibrationCollector:
+
+    def __init__(self, width, height):
+        self.calibrationTimeLimit = 25 #s
+        self.calibrationPeriod = 1 # s
+        self.start = False
+        self.collectedPoints = []
+        self.calibrationPoints = []
+
+        self.width  = width 
+        self.height = height
+
+        for _ in range(int(self.calibrationTimeLimit/self.calibrationPeriod)):
+            y = random.randint(1, self.width - 1)/self.width
+            x = random.randint(1, self.height - 1)/self.height
+            self.calibrationPoints.append((x, y))
+
+        self.calibrationStart_t = 0
+        self.currentCalibrationPoint = len(self.calibrationPoints) - 1
+        pass
+
+    def collect(self,point):
+        if len(self.collectedPoints) == 0:
+            self.start = True
+            self.calibrationStart_t = time.time()
+
+        if self.start:
+            self.collectedPoints.append((self.calibrationPoints[self.currentCalibrationPoint], point))
+            print(time.time() - self.calibrationStart_t)
+            if (self.calibrationTimeLimit - (time.time() - self.calibrationStart_t)) >= 0:
+                self.currentCalibrationPoint = int((self.calibrationTimeLimit - (time.time() - self.calibrationStart_t)) / self.calibrationPeriod)
+            else:
+                self.start = False
+
+    def getPoint(self):
+        return (self.calibrationPoints[self.currentCalibrationPoint][0],
+                self.calibrationPoints[self.currentCalibrationPoint][1])
+
+    def getCalibrationData(self) -> (np.ndarray,np.ndarray):
         
-        landmarks  = shape_to_np(predictor(gray, dlib.rectangle(x, y, x+w, y+h)))
-        faceSquare = gray[x:x+w,y:y+h]
-        yield (faceSquare ,landmarks, (x, y, w, h))
-  
-    # for (x, y, w, h) in face_cascade.detectMultiScale(gray, 1.1, 4):
-    # face = face_cascade.detectMultiScale(gray, 1.1, 4)[0] 
-    # (x, y, w, h) = face
-    # landmarks  = shape_to_np(predictor(gray, dlib.rectangle(x, y, w, h)))
-    # faceSquare = gray[x:x+w,y:y+h]
-    # return [(faceSquare ,landmarks)]
-   
-    # # cv2.rectangle(gray, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
-def getEye(image,eyeRect):
-    print(f"eyeRect {eyeRect} ")
-    (x,y,w,h) = eyeRect
-    eyeImage = image[x:x+w,y:y+h]
-    return eyeImage
-
-def getEyes(image):
-    LEFT_EYE_KEYPOINTS = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
-    RIGHT_EYE_KEYPOINTS = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
-
-    eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+        __calibrationPoints = []
+        __dataPoints = []
+        for calibrationPoint, points in self.collectedPoints:
+            __calibrationPoints.append(calibrationPoint)
+            __dataPoints.append(points)
+        
+        return (np.array(__calibrationPoints),np.array(__dataPoints))
     
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    for faceSquare, landmarks, (x, y, w, h) in getFace(gray):
-        eFrame = eyeFrame()
-        eFrame.setParams(gray,faceSquare, landmarks, (x, y, w, h))
-        tracker.update(eFrame)
+    def collected(self):
+        return (self.calibrationStart_t > 0) and not self.start
 
-        sink = EyeSink()
+class CalibrationDisplay:
+
+    def __init__(self):
+        monitor = get_monitors()[1]
+        self.width  = int(monitor.width * 0.8)
+        self.height = int(monitor.height * 0.8)
+        self.display = np.zeros((self.width, self.height,3))
+        self.display.fill(255)
+
+        # cv2.namedWindow("display", cv2.WND_PROP_FULLSCREEN)
+        # cv2.setWindowProperty("display",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+
+    def clean(self):
+        self.display.fill(255)
+
+    def drawPoint(self, point, colour):
+        print(f"self display point {point} scaled points: {int(point[1]*self.height),int(point[0]*self.width)} max: {(self.width,self.height)}")
+        cv2.circle(self.display , (int(point[1]*self.height),int(point[0]*self.width)) , 10, colour, -1)
         
-        left_eye_region  = eFrame.getLeftEye()
-        right_eye_region = eFrame.getRightEye()
+    def show(self):
+        cv2.imshow("display",self.display)
 
-        left_eye_show = cv2.cvtColor(left_eye_region,cv2.COLOR_GRAY2RGB)
-        right_eye_show = cv2.cvtColor(right_eye_region,cv2.COLOR_GRAY2RGB)
+def processPoints(calibrator,tracker,points):
 
-        cv2.imshow("left_eye", left_eye_region)
-        
-        (w,h) = left_eye_region.shape
-        (cX,cY) = sink.push(left_eye_region)
-        if cX != 0 or cY != 0:
-            cv2.circle(left_eye_show , (int(cX*w),int(cY*h)) , 1, (0, 0, 255), -1)
-        
-        (w,h) = right_eye_region.shape
-        (cX,cY) = sink.push(right_eye_region)
-        if cX != 0 or cY != 0:
-            cv2.circle(right_eye_show , (int(cX*w),int(cY*h)), 1, (255, 0, 0), -1)
-            
-        # put text and highlight the center
-
-        cv2.imshow("left_eye", left_eye_show )
-        cv2.imshow("right_eye", right_eye_show)
-
-        sandbox = np.zeros([512,512,3],dtype=np.uint8)
-        sandbox.fill(255)
-
-        (cX,cY) = sink.push(left_eye_region)
-        if cX != 0 or cY != 0:
-            cv2.circle(sandbox , (int(cX*512),int(cY*512)) , 10, (0, 0, 255), -1)
-        
-        (cX,cY) = sink.push(right_eye_region)
-        if cX != 0 or cY != 0:
-            cv2.circle(sandbox , (int(cX*512),int(cY*512)), 10, (255, 0, 0), -1)
-
-        cv2.imshow("sandbox", sandbox)
-        # rx,ry = x+int(w/2),y    
-        # for eye_right in eyes_right:
-        #     (x,y,w,h) = eye_right
-        #     image = cv2.rectangle(image, (x,y), (x+w,y+h), (255, 0, 0), 2) 
-    
-    eFrame = tracker.getFrame().addFeaturesToImg(image)
-    cv2.imshow(f'image', image)
-        
-
-
-def shape_to_np(shape, dtype="int"):
-    coords = np.zeros((68, 2), dtype=dtype)
-    for i in range(0, 68):
-        coords[i] = (shape.part(i).x, shape.part(i).y)
-    return coords
+    if not calibrator.collected():
+        calibration.collect(points)
+        return [0.0,0.0]
+    else:
+        display.clean()
+        return tracker.predict(points)
 
 if __name__ == "__main__":
-    #print("Before URL")
-    cap = cv2.VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
+    frames = []
+    run = True
+    display = CalibrationDisplay()
+    calibration = CalibrationCollector(display.width,display.height)
+    etracker = EyeTracker()
+    
+    cap = cv2.VideoCapture('rtsp://192.168.18.14:8080/h264.sdp')
+    cap.set(cv2.CAP_PROP_FPS, 10)
+    fps = int(cap.get(5))
     #print("After URL")
 
     frames = []
@@ -112,24 +137,37 @@ if __name__ == "__main__":
         
         #print('About to start the Read command')
         ret, frame = cap.read()
-        frames.append(frame)
+    
+        w = frame.shape[1]
+        h = frame.shape[0]
+
+        scale_percent = 60 # percent of original size
+        width  = int(w * scale_percent / 100)
+        height = int(h * scale_percent / 100)
+        dim = (width, height)
         
-        w = frame.shape[0]
-        h = frame.shape[1]
-        frame = frame[int(h/5):int(4/5*h),int(w/5):int(4/5*w)]
-        # cv2.imshow(f'frame', frame)
-        getEyes(frame)
+        frame = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)
+        cv2.imshow("frame",frame)
+        detectFace(frame, 
+            lambda faceSquare, landmarks, bounding_box   : getEyes(frame, faceSquare, landmarks, bounding_box,
+                lambda left_eye_region, right_eye_region : getCoordinates(left_eye_region, right_eye_region, 
+                    lambda left_coors, right_coors       : display.drawPoint(processPoints(calibration,etracker,left_coors),(255,0,0))
+                    )
+                )
+            )
         
-        if cv2.waitKey(10) == ord('q'):
+        calibrationPoints, dataPoints = calibration.getCalibrationData()
+        print(f"calibrationPoints:{calibrationPoints.shape} dataPoints:{dataPoints.shape}")
+        if calibration.collected():
+            etracker.fit(calibrationPoints, dataPoints)
+        else:
+            display.clean()
+            display.drawPoint(calibration.getPoint(),(0,0,255))
+        display.show()
+        if cv2.waitKey(1) == ord('q'):
             run = False
-            break
+            break                        
 
-
-    now = datetime.now()
-    dt_string = now.strftime("%d-%m-%Y-%H:%M:%S")
-
-    with open(f'recording/data{dt_string}.pkl', 'wb') as file:
-        pickle.dump(frames, file)
-
-    cap.release()
+            #show point on sandbox
+            
     cv2.destroyAllWindows()
