@@ -16,16 +16,29 @@ from utils.utils import detectFace, getEyes, getCoordinates
 class EyeTracker:
 
     def __init__(self):
+        # Create a linear regression model
+        self.model = LinearRegression()
+        self.calibrated = False
         pass
 
     def predict(self,points):
-        pass
+        if self.calibrated:
+            points_reshaped = points.reshape(1, -1)
+            predicted_y = self.model.predict(points_reshaped)
+            return predicted_y
+
+    def fit(self,calibrationPoints, dataPoints):
+        dataPoints_reshaped = dataPoints.reshape(dataPoints.shape[0], -1)
+        self.model.fit(dataPoints_reshaped, calibrationPoints)
+        self.calibrated = True
+
+
 
 class CalibrationCollector:
 
     def __init__(self, width, height):
         self.calibrationTimeLimit = 25 #s
-        self.calibrationPeriod = 5 # s
+        self.calibrationPeriod = 1 # s
         self.start = False
         self.collectedPoints = []
         self.calibrationPoints = []
@@ -33,7 +46,7 @@ class CalibrationCollector:
         self.width  = width 
         self.height = height
 
-        for _ in range(5):
+        for _ in range(int(self.calibrationTimeLimit/self.calibrationPeriod)):
             y = random.randint(1, self.width - 1)
             x = random.randint(1, self.height - 1)
             self.calibrationPoints.append((x, y))
@@ -59,6 +72,18 @@ class CalibrationCollector:
         return (self.calibrationPoints[self.currentCalibrationPoint][0]/self.width,
                 self.calibrationPoints[self.currentCalibrationPoint][1]/self.height)
 
+    def getCalibrationData(self) -> (np.ndarray,np.ndarray):
+        
+        __calibrationPoints = []
+        __dataPoints = []
+        for calibrationPoint, points in self.collectedPoints:
+            __calibrationPoints.append(calibrationPoint)
+            __dataPoints.append(points)
+        
+        return (np.array(__calibrationPoints),np.array(__dataPoints))
+    
+    def collected(self):
+        return (self.calibrationStart_t > 0) and not self.start
 
 class CalibrationDisplay:
 
@@ -82,11 +107,19 @@ class CalibrationDisplay:
     def show(self):
         cv2.imshow("display",self.display)
 
+def processPoints(calibrator,tracker,points):
+
+    if not calibrator.collected():
+        calibration.collect(points)
+    else:
+        tracker.predict(points)
+
 if __name__ == "__main__":
     frames = []
     run = True
     display = CalibrationDisplay()
     calibration = CalibrationCollector(display.width,display.height)
+    etracker = EyeTracker()
     
     with open('recording/data31-10-2023-17:53:21.pkl', 'rb') as file:
         frames = pickle.load(file)
@@ -106,10 +139,15 @@ if __name__ == "__main__":
             detectFace(frame, 
                 lambda faceSquare, landmarks, bounding_box   : getEyes(frame, faceSquare, landmarks, bounding_box,
                     lambda left_eye_region, right_eye_region : getCoordinates(left_eye_region, right_eye_region, 
-                        lambda left_coors, right_coors       : calibration.collect(left_coors)
+                        lambda left_coors, right_coors       : processPoints(calibration,etracker,left_coors)
                         )
                     )
                 )
+            
+            calibrationPoints, dataPoints = calibration.getCalibrationData()
+            print(f"calibrationPoints:{calibrationPoints.shape} dataPoints:{dataPoints.shape}")
+            if calibration.collected():
+                etracker.fit(calibrationPoints, dataPoints)
 
             display.clean()
             display.drawPoint(calibration.getPoint(),None)

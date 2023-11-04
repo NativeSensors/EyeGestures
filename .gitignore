@@ -1,2 +1,4 @@
 build
 recording/*
+dataSetPreparing/*
+pyYTdownload.py
