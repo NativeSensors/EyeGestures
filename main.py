@@ -25,7 +25,10 @@ class EyeTracker:
         if self.calibrated:
             points_reshaped = points.reshape(1, -1)
             predicted_y = self.model.predict(points_reshaped)
-            return predicted_y
+            return predicted_y[0]
+        else:
+            print("returning 0")
+            return [0.0,0.0]
 
     def fit(self,calibrationPoints, dataPoints):
         dataPoints_reshaped = dataPoints.reshape(dataPoints.shape[0], -1)
@@ -47,8 +50,8 @@ class CalibrationCollector:
         self.height = height
 
         for _ in range(int(self.calibrationTimeLimit/self.calibrationPeriod)):
-            y = random.randint(1, self.width - 1)
-            x = random.randint(1, self.height - 1)
+            y = random.randint(1, self.width - 1)/self.width
+            x = random.randint(1, self.height - 1)/self.height
             self.calibrationPoints.append((x, y))
 
         self.calibrationStart_t = 0
@@ -69,8 +72,8 @@ class CalibrationCollector:
                 self.start = False
 
     def getPoint(self):
-        return (self.calibrationPoints[self.currentCalibrationPoint][0]/self.width,
-                self.calibrationPoints[self.currentCalibrationPoint][1]/self.height)
+        return (self.calibrationPoints[self.currentCalibrationPoint][0],
+                self.calibrationPoints[self.currentCalibrationPoint][1])
 
     def getCalibrationData(self) -> (np.ndarray,np.ndarray):
         
@@ -101,8 +104,8 @@ class CalibrationDisplay:
         self.display.fill(255)
 
     def drawPoint(self, point, colour):
-        # print(f"self display point {point}")
-        cv2.circle(self.display , (int(point[0]*self.width),int(point[1]*self.height)) , 10, (0, 0, 255), -1)
+        print(f"self display point {point} scaled points: {int(point[0]*self.width),int(point[1]*self.height)} max: {(self.width,self.height)}")
+        cv2.circle(self.display , (int(point[0]*self.width),int(point[1]*self.height)) , 10, colour, -1)
         
     def show(self):
         cv2.imshow("display",self.display)
@@ -111,8 +114,10 @@ def processPoints(calibrator,tracker,points):
 
     if not calibrator.collected():
         calibration.collect(points)
+        return [0.0,0.0]
     else:
-        tracker.predict(points)
+        display.clean()
+        return tracker.predict(points)
 
 if __name__ == "__main__":
     frames = []
@@ -139,7 +144,7 @@ if __name__ == "__main__":
             detectFace(frame, 
                 lambda faceSquare, landmarks, bounding_box   : getEyes(frame, faceSquare, landmarks, bounding_box,
                     lambda left_eye_region, right_eye_region : getCoordinates(left_eye_region, right_eye_region, 
-                        lambda left_coors, right_coors       : processPoints(calibration,etracker,left_coors)
+                        lambda left_coors, right_coors       : display.drawPoint(processPoints(calibration,etracker,left_coors),(255,0,0))
                         )
                     )
                 )
@@ -148,9 +153,9 @@ if __name__ == "__main__":
             print(f"calibrationPoints:{calibrationPoints.shape} dataPoints:{dataPoints.shape}")
             if calibration.collected():
                 etracker.fit(calibrationPoints, dataPoints)
-
-            display.clean()
-            display.drawPoint(calibration.getPoint(),None)
+            else:
+                display.clean()
+                display.drawPoint(calibration.getPoint(),(0,0,255))
             display.show()
             if cv2.waitKey(1) == ord('q'):
                 run = False
