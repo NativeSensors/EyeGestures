@@ -1,9 +1,17 @@
+import matplotlib.pyplot as plt
 import numpy as np
+import random
+import pickle
 import math
+import time
 import cv2
+
+from typing import Callable, Tuple
+from screeninfo import get_monitors
+from utils.eyeframes import eyeFrame, faceTracker
+from sklearn.linear_model import LinearRegression
 ## Input:  Face image
 ## Output: eye point
-
 
 # def getFeature():
 
@@ -15,8 +23,10 @@ class pupil_detection():
     def detect_pupil (self):
         inv = cv2.bitwise_not(self._img)
         thresh = cv2.cvtColor(inv, cv2.COLOR_BGR2GRAY)
+        
         kernel = np.ones((2,2),np.uint8)
         erosion = cv2.erode(thresh,kernel,iterations = 1)
+        
         ret,thresh1 = cv2.threshold(erosion,220,255,cv2.THRESH_BINARY)
         cnts, hierarchy = cv2.findContours(thresh1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
@@ -41,34 +51,122 @@ class EyeSink:
 
     def push(self,frame : np.ndarray) -> np.ndarray:
         (cX, cY) = self.getCenter(frame)
-        # (cX, cY) = self.getCenterOpticalFlow(frame)
-        return (cX, cY)
+        return np.array((cX, cY))
 
         pass
 
     def getCenter(self,frame : np.ndarray) -> np.ndarray:
-
-        self.frame_now = frame
         # Convert the frame to grayscale if it's a color image
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # Find the minimum and maximum values in the grayscale frame
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(gray_frame)
 
-        self.frame_now = (self.frame_now / max_val)*200
-        self.frame_now = np.uint8(self.frame_now)
+        frame_scaled = np.uint8((frame / max_val)*200)
         # self.frame_now = cv2.convertScaleAbs(frame, 10, 1)
 
-        id = pupil_detection(self.frame_now)
-        gray_frame = cv2.cvtColor(self.frame_now, cv2.COLOR_BGR2GRAY)
+        id = pupil_detection(frame_scaled)
+        gray_frame = cv2.cvtColor(frame_scaled, cv2.COLOR_BGR2GRAY)
 
         (center,radius) = id.detect_pupil()
 
         
         # frame_show = cv2.cvtColor(frame,cv2.COLOR_GRAY2RGB)
-        (height, width, colours) = self.frame_now.shape
+        (height, width, colours) = frame_scaled.shape
         # (x_center,y_center) = (0,0)
         (x_center,y_center) = center
 
         return (x_center/width,y_center/height)
         pass
+
+class EyeTracker:
+
+    def __init__(self):
+        # Create a linear regression model
+        self.model = LinearRegression()
+        self.calibrated = False
+        pass
+
+    def predict(self,points):
+        if self.calibrated:
+            points_reshaped = points.reshape(1, -1)
+            predicted_y = self.model.predict(points_reshaped)
+            return predicted_y[0]
+        else:
+            print("returning 0")
+            return [0.0,0.0]
+
+    def fit(self,calibrationPoints, dataPoints):
+        dataPoints_reshaped = dataPoints.reshape(dataPoints.shape[0], -1)
+        self.model.fit(dataPoints_reshaped, calibrationPoints)
+        self.calibrated = True
+
+
+class CalibrationCollector:
+
+    def __init__(self, width, height):
+        self.calibrationTimeLimit = 60 #s
+        self.calibrationPeriod = 5 # s
+        self.start = False
+        self.collectedPoints = []
+        self.calibrationPoints = []
+
+        self.width  = width 
+        self.height = height
+
+        for _ in range(int(self.calibrationTimeLimit/self.calibrationPeriod)):
+            y = random.randint(1, self.width - 1)/self.width
+            x = random.randint(1, self.height - 1)/self.height
+            self.calibrationPoints.append((x, y))
+
+        self.calibrationStart_t = 0
+        self.currentCalibrationPoint = len(self.calibrationPoints) - 1
+        pass
+
+    def collect(self,point):
+        if len(self.collectedPoints) == 0:
+            self.start = True
+            self.calibrationStart_t = time.time()
+
+        if self.start:
+            self.collectedPoints.append((self.calibrationPoints[self.currentCalibrationPoint], point))
+            print(time.time() - self.calibrationStart_t)
+            if (self.calibrationTimeLimit - (time.time() - self.calibrationStart_t)) >= 0:
+                self.currentCalibrationPoint = int((self.calibrationTimeLimit - (time.time() - self.calibrationStart_t)) / self.calibrationPeriod)
+            else:
+                self.start = False
+
+    def getPoint(self):
+        return (self.calibrationPoints[self.currentCalibrationPoint][0],
+                self.calibrationPoints[self.currentCalibrationPoint][1])
+
+    def getCalibrationData(self) -> (np.ndarray,np.ndarray):
+        
+        __calibrationPoints = []
+        __dataPoints = []
+        for calibrationPoint, points in self.collectedPoints:
+            __calibrationPoints.append(calibrationPoint)
+            __dataPoints.append(points)
+        
+        return (np.array(__calibrationPoints),np.array(__dataPoints))
+    
+    def collected(self):
+        return (self.calibrationStart_t > 0) and not self.start
+
+class CalibrationDisplay:
+
+    def __init__(self):
+        monitor = get_monitors()[0]
+        self.width  = int(monitor.width * 0.8)
+        self.height = int(monitor.height * 0.8)
+        self.display = np.zeros((self.height, self.width,3))
+        self.display.fill(255)
+
+    def clean(self):
+        self.display.fill(255)
+
+    def drawPoint(self, point, colour):
+        cv2.circle(self.display , (int(point[0]*self.width),int(point[1]*self.height)) , 10, colour, -1)
+        
+    def show(self):
+        cv2.imshow("display",self.display)

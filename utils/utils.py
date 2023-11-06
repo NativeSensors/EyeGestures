@@ -33,17 +33,17 @@ def detectFace(gray : np.ndarray, onFace : Callable[[np.ndarray, np.ndarray, np.
         
         onFace(faceSquare ,landmarks, (x, y, w, h))
 
+sink = EyeSink()
 def getCoordinates(left_eye : np.ndarray, right_eye : np.ndarray, onCoordinates : Callable[[(int,int),(int,int)], None]): 
 
     (left_eye_region, left_eye_landmarks) = left_eye
     (right_eye_region, right_eye_landmarks) = right_eye
-    sink = EyeSink()
+    
+    left  = sink.push(left_eye_region).reshape(1, 2)
+    right = sink.push(right_eye_region).reshape(1, 2)
 
-    left  = sink.push(left_eye_region)
-    right = sink.push(right_eye_region)
-
-    left = np.array(left).reshape(1, 2)
-    right = np.array(right).reshape(1, 2)
+    # left = np.array(left)
+    # right = np.array(right)
 
     left_eye_show = left_eye_region
     right_eye_show = right_eye_region
