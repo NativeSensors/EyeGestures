@@ -15,7 +15,7 @@ from sklearn.linear_model import LinearRegression
 
 # def getFeature():
 
-class pupil_detection():
+class pupilDetector():
     def __init__(self, _img):
         self._img = _img
         self._pupil = None
@@ -65,7 +65,7 @@ class EyeSink:
         frame_scaled = np.uint8((frame / max_val)*200)
         # self.frame_now = cv2.convertScaleAbs(frame, 10, 1)
 
-        id = pupil_detection(frame_scaled)
+        id = pupilDetector(frame_scaled)
         gray_frame = cv2.cvtColor(frame_scaled, cv2.COLOR_BGR2GRAY)
 
         (center,radius) = id.detect_pupil()
@@ -107,7 +107,7 @@ class CalibrationCollector:
     def __init__(self, width, height):
         self.calibrationTimeLimit = 60 #s
         self.calibrationPeriod = 5 # s
-        self.start = False
+        self.__start = False
         self.collectedPoints = []
         self.calibrationPoints = []
 
@@ -121,37 +121,24 @@ class CalibrationCollector:
 
         self.calibrationStart_t = 0
         self.currentCalibrationPoint = len(self.calibrationPoints) - 1
-        pass
+        self.onFinish = None
 
-    def collect(self,point):
-        if len(self.collectedPoints) == 0:
-            self.start = True
-            self.calibrationStart_t = time.time()
+    def start(self, onFinish):
+        self.onFinish = onFinish
+        self.__start = True
+        self.calibrationStart_t = time.time()
 
-        if self.start:
-            self.collectedPoints.append((self.calibrationPoints[self.currentCalibrationPoint], point))
-            print(time.time() - self.calibrationStart_t)
-            if (self.calibrationTimeLimit - (time.time() - self.calibrationStart_t)) >= 0:
-                self.currentCalibrationPoint = int((self.calibrationTimeLimit - (time.time() - self.calibrationStart_t)) / self.calibrationPeriod)
-            else:
-                self.start = False
-
-    def getPoint(self):
-        return (self.calibrationPoints[self.currentCalibrationPoint][0],
-                self.calibrationPoints[self.currentCalibrationPoint][1])
-
-    def getCalibrationData(self) -> (np.ndarray,np.ndarray):
-        
-        __calibrationPoints = []
-        __dataPoints = []
-        for calibrationPoint, points in self.collectedPoints:
-            __calibrationPoints.append(calibrationPoint)
-            __dataPoints.append(points)
-        
-        return (np.array(__calibrationPoints),np.array(__dataPoints))
-    
-    def collected(self):
-        return (self.calibrationStart_t > 0) and not self.start
+    def getCalibrationPoint(self) -> (float,float):
+        index = 0
+        if self.__start:
+            index = int((self.calibrationTimeLimit - (time.time() - self.calibrationStart_t)) / self.calibrationPeriod)
+            if( index < 0):
+                if self.onFinish: 
+                    self.onFinish()
+                self.__start = False
+                return self.calibrationPoints[0]
+        print(index,len(self.calibrationPoints))
+        return self.calibrationPoints[index]
 
 class CalibrationDisplay:
 
