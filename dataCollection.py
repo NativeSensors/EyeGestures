@@ -2,6 +2,7 @@ import cv2
 import dlib
 import time
 import queue
+import pickle
 import random
 import threading
 import numpy as np
@@ -18,6 +19,7 @@ class VideoCapture:
         self.t = threading.Thread(target=self.__reader).start()
 
     def __reader(self):
+        self.run = True
         while True:
             ret, frame = self.cap.read()
             if not ret:
@@ -28,6 +30,9 @@ class VideoCapture:
                 except queue.Empty:
                     pass
             self.q.put(frame)
+
+    def stop(self):
+        self.run = False
 
     def read(self):
         return (not self.q.empty(), self.q.get())
@@ -47,9 +52,10 @@ if __name__ == "__main__":
     frames = []
     run = True
     display = CalibrationDisplay()
-    calibration = CalibrationCollector(display.width,display.height)
+    calibration = CalibrationCollector(display.width,display.height,30,10)
     etracker = EyeTracker()
     
+    print("videocapture")
     cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
     #print("After URL")
 
@@ -57,8 +63,8 @@ if __name__ == "__main__":
     start = var(True)
     calibration.start(lambda : start.set(False))
     
-    while start:
-        
+    print("starting")
+    while start.get():
         #print('About to start the Read command')
         ret, frame = cap.read()
     
@@ -79,5 +85,8 @@ if __name__ == "__main__":
             #show point on sandbox
     cv2.destroyAllWindows()
 
-    with open(f'recording/calibrationData.pkl', 'wb') as file:
+    print(f"saving data to calibrationData1.pkl")
+    with open(f'recording/calibrationData1.pkl', 'wb') as file:
         pickle.dump(frames, file)
+    print(f"saved data to calibrationData1.pkl")
+    cap.stop()
