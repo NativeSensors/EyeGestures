@@ -7,58 +7,32 @@ import random
 import threading
 import numpy as np
 from typing import Callable, Tuple
-from utils.eyetracker import EyeSink, EyeTracker, CalibrationCollector, CalibrationDisplay
-from utils.utils import detectFace, getEyes, getCoordinates, var, VideoCapture
+from eyeGestures.utils import VideoCapture
+from eyeGestures.face import FaceFinder
 
 if __name__ == "__main__":
     run = True
-    display = CalibrationDisplay()
+    display  = CalibrationDisplay()
     etracker = EyeTracker()
     
-    frames = []
-    with open('recording/calibrationData1.pkl', 'rb') as file:
-        frames = pickle.load(file)
+    vid = VideoCapture('recording/calibrationData1.pkl', 'rb')
     #print("After URL")
 
-    fPoints = []
-    calPoitns = []
-    
-    division = 480
-    training = frames[:division]
-    test     = frames[division:]
-    # use half of the data for fitting
-    for cPoint, frame in training:
+    finder = FaceFinder()
+
+    ret = True
+    while ret:
         
-        detectFace(frame, 
-            lambda faceSquare, landmarks, bounding_box   : getEyes(frame, faceSquare, landmarks, bounding_box,
-                lambda left_eye_region, right_eye_region : getCoordinates(left_eye_region, right_eye_region, 
-                    lambda left_coors, right_coors       : fPoints.append(np.array((left_coors,right_coors)))
-                    )
-                )
-            )
+        ret, frame = vid.read()
 
-        calPoitns.append(cPoint)
+        face = finder.find(frame)
+
+        llandmards = face.getLeftEye()
+        lpupil = face.getLeftPupil()
         
-    # fPoints = fPoints[:-1]
-    print(f"calPoitns: {np.array(calPoitns).shape}, fPoints: {np.array(fPoints).shape}")
-    etracker.fit(np.array(calPoitns), np.array(fPoints))
-
-    # Get the current time
-    for cPoint, frame in training:
-        cv2.imshow("frame",frame)
-
-        display.clean()
-        detectFace(frame, 
-            lambda faceSquare, landmarks, bounding_box   : getEyes(frame, faceSquare, landmarks, bounding_box,
-                lambda left_eye_region, right_eye_region : getCoordinates(left_eye_region, right_eye_region, 
-                    lambda left_coors, right_coors       : (print(f"point: {np.array((left_coors,right_coors))}"),display.drawPoint(etracker.predict(np.array((left_coors,right_coors))),(255,0,0),"estimatedPoint"))
-                    )
-                )
-            )
-        display.drawPoint(cPoint,(0,0,255),"callibrationPoint")
-        display.show()
-
-        if cv2.waitKey(1000) == ord('q'):
+        # ToDo: write code for detecting eyes positions
+        
+        if cv2.waitKey(10) == ord('q'):
             run = False
             break                        
 

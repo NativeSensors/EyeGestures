@@ -10,7 +10,7 @@ from typing import Callable, Tuple
 from eyeGestures.utils import VideoCapture
 from eyeGestures.face import FaceFinder
 
-def showEyes(image):
+def showEyes(image,face):
 
     if face is not None:
         cv2.circle(frame,face.getLeftPupil(),2,(0,0,255),1)
@@ -38,12 +38,13 @@ if __name__ == "__main__":
     while ret:
         
         ret, frame = vid.read()
-        
         gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
+        # detect face 
         face = faceFinder.find(gray)
         
-        showEyes(frame)
+        #display face
+        showEyes(frame,face)
         cv2.imshow("frame",frame)
     
         if cv2.waitKey(10) == ord('q'):
