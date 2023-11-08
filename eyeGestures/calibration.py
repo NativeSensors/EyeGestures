@@ -87,3 +87,6 @@ class Calibration:
                     return self.points[0]
                 
             return self.points[index]
+
+    def inProgress(self):
+        return self.run 
