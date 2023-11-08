@@ -53,15 +53,15 @@ class Calibration:
 
     def __calibrationPoints(self):
 
-        return np.array([(0.8,0.8),
-                             (0.2,0.2),
-                             (0.8,0.2),
-                             (0.2,0.8),
+        return np.array([(0.95,0.95),
+                             (0.05,0.05),
+                             (0.95,0.05),
+                             (0.05,0.95),
                              (0.5,0.5),
-                             (0.5,0.8),
-                             (0.8,0.5),
-                             (0.5,0.2),
-                             (0.2,0.5)])
+                             (0.5,0.95),
+                             (0.95,0.5),
+                             (0.5,0.05),
+                             (0.05,0.5)])
 
     def start(self,onFinish):
         self.t_start = time.time()

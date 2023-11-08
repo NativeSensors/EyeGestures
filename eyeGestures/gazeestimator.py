@@ -89,6 +89,6 @@ class Gaze:
         trainingMeasurementPoints,trainingCalibrationPoints = self.calibrationData.get()
         self.predictor.train(trainingCalibrationPoints,trainingMeasurementPoints)
 
-    def getcalibration(self):
+    def getCalibration(self):
         return self.calibrationData.get()
 

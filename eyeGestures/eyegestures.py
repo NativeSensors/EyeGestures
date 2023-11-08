@@ -9,6 +9,7 @@ import threading
 import numpy as np
 from typing import Callable, Tuple
 from eyeGestures.gazeestimator import Gaze
+from eyeGestures.calibration import Calibration
 
 
 class EyeGestures:
@@ -32,15 +33,19 @@ class EyeGestures:
             self.calibration.start(self.__onCalibrated)
 
         point = self.calibration.getTrainingPoint()
-        self.gaze.estiamte(point,image)
+        self.gaze.calibrate(point,image)
+        
+        if len(self.gaze.getCalibration()[0]) > 10:
+            self.gaze.fit()
+            self.calibrated = True
 
         return point 
 
     def isCalibrated(self):
-        return self.calibrated
+        return self.calibrated and not self.calibration.inProgress()
 
-    def gaze(self,image):
+    def estimate(self,image):
         if not self.calibrated:
             return np.full((1,2),np.NAN)
         else:
-            return self.gaze.estiamte(image)
+            return self.gaze.estimate(image)

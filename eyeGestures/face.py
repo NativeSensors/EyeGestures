@@ -20,9 +20,8 @@ class FaceFinder:
             face = self.facePredictor(image, dlib.rectangle(x, y, x+w, y+h))
         
             return Face(image,face)
-        except IOError:
-            type, value, traceback = sys.exc_info()
-            print('Error opening %s: %s' % (value.filename, value.strerror))
+        except Exception as e:
+            print(f"Exception: {e}")
             return None
 
 class Face:
