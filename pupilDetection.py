@@ -7,7 +7,7 @@ import random
 import threading
 import numpy as np
 from typing import Callable, Tuple
-from eyeGestures.eyeframes import Eye 
+from eyeGestures.eye import Eye
 from eyeGestures.utils import VideoCapture
 
 if __name__ == "__main__":    
@@ -26,7 +26,6 @@ if __name__ == "__main__":
     while ret:
         
         ret, frame = vid.read()
-        print(f"ret: {ret}")
         
         gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
         try:
@@ -40,11 +39,22 @@ if __name__ == "__main__":
             for i in range(0, face.num_parts):
                 landmarks[i] = (face.part(i).x, face.part(i).y)
 
-            Eye(gray,landmarks,0)
-        except:
+            eyeLeft  = Eye(gray,landmarks,0)
+            eyeRight = Eye(gray,landmarks,1)
+
+            cv2.circle(frame,eyeLeft.getPupil(),2,(0,0,255),1)
+            for point in eyeLeft.getLandmarks():
+                cv2.circle(frame,point,2,(0,255,0),1)
+
+            cv2.circle(frame,eyeRight.getPupil(),2,(0,0,255),1)
+            for point in eyeRight.getLandmarks():
+                cv2.circle(frame,point,2,(0,255,0),1)
+
+            cv2.rectangle(frame,lt_corner,rb_corner,(0,0,255),1)
+        except Exception as e:
+            print(f"Caught exception: {e}")
             pass
 
-        cv2.rectangle(frame,lt_corner,rb_corner,(0,0,255),1)
         cv2.imshow("frame",frame)
         if cv2.waitKey(10) == ord('q'):
             run = False
