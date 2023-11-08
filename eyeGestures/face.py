@@ -12,13 +12,17 @@ class FaceFinder:
         self.faceDetector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
         
     def find(self,image):
+        if len(image.shape) > 2:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
         try:
             (x, y, w, h) = self.faceDetector.detectMultiScale(image, 1.1, 9)[0]
             face = self.facePredictor(image, dlib.rectangle(x, y, x+w, y+h))
         
             return Face(image,face)
-        except Exception as e:
-            print(f"Exception: {e}")
+        except IOError:
+            type, value, traceback = sys.exc_info()
+            print('Error opening %s: %s' % (value.filename, value.strerror))
             return None
 
 class Face:

@@ -107,7 +107,7 @@ class VideoCapture:
         if self.stream:
             return self.q.get()
         else:
-            _, frame = self.frames.pop(0)
+            frame = self.frames.pop(0)
             self.frames.pop(0)
-            return ((len(self.frames) > 0), frame)
+            return ((len(self.frames) > 1), frame)
 

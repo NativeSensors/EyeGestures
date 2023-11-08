@@ -1,6 +1,41 @@
 
 import time 
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+class GazePredictor:
+
+    def __init__(self):
+        self.model = LinearRegression()
+        pass
+
+    def train(self,eyes,calibrations):
+        print(eyes.shape,calibrations.shape)
+        eyes = eyes.reshape(eyes.shape[0], -1)
+        self.model.fit(eyes, calibrations)
+
+    def predict(self,eye):
+        print(eye)
+        eye = eye.reshape(1,eye.shape[0]*eye.shape[1])
+        point = self.model.predict(eye)
+        
+        return point[0]
+
+class CalibrationData:
+
+    def __init__(self):
+        self.calibrationPoints = []
+        self.measuredPoints = []
+
+    def add(self,calibrationPoint,measuredPoint):
+        if not np.isnan(calibrationPoint).any() and not np.isnan(measuredPoint).any():
+            self.calibrationPoints.append(calibrationPoint)
+            self.measuredPoints.append(measuredPoint)
+    
+    def get(self):
+        return np.array(self.calibrationPoints), np.array(self.measuredPoints)
 
 class Calibration:
 

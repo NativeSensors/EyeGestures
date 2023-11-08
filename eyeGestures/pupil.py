@@ -62,6 +62,7 @@ class Pupil:
             x = int(moments['m10'] / moments['m00']) 
             y = int(moments['m01'] / moments['m00'])
 
-            self.pupil = (x + self.ref_x,y + self.ref_y)
+            self.pupil = np.array([(x + self.ref_x,y + self.ref_y)])
         except (IndexError, ZeroDivisionError):
+            self.pupil = np.array([(np.NAN,np.NAN)])
             pass
