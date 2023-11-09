@@ -17,6 +17,10 @@ class Gaze:
 
         self.buffor = []
         self.bufforLength = 10
+
+        # those are used for analysis
+        self.__debugBuffer = []
+        self.__debugCalibBuffer = []
         
     def __getFeatures(self,image):
         
@@ -84,6 +88,9 @@ class Gaze:
         if np.isnan(features).any():
             pass
         else:
+            self.__debugBuffer.append(features)
+            self.__debugCalibBuffer.append(calibrationPoint)
+
             self.calibrationData.add(calibrationPoint,features)
 
     def fit(self):
@@ -93,3 +100,5 @@ class Gaze:
     def getCalibration(self):
         return self.calibrationData.get()
 
+    def getDebugBuffers(self):
+        return (self.__debugBuffer,self.__debugCalibBuffer)

@@ -1,8 +1,10 @@
+import cv2
 import sys
 import math
 import random
-from PySide2.QtWidgets import QApplication, QWidget, QMainWindow
-from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen
+import numpy as np
+from PySide2.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QVBoxLayout
+from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QImage, QPixmap
 from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
 import keyboard
 
@@ -13,41 +15,35 @@ from screeninfo import get_monitors
 
 from appUtils.dot import DotWidget
 
-# def main_thread(blue_dot,red_dot,eyeGestures):
-#     app = QApplication(sys.argv)
+from pynput import keyboard
 
-#     cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
-#     monitors = get_monitors()
+class MoviePlayer(QWidget):
+    def __init__(self, parent=None):
+        super(MoviePlayer, self).__init__(parent)
+        self.label = QLabel(self)
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+
+        self.listener = keyboard.Listener(on_press=self.on_quit)
+        self.listener.start()
+
+    def imshow(self, q_image):
+        # Update the label's pixmap with the new frame
+        self.label.setPixmap(QPixmap.fromImage(q_image))
     
-#     (width,height) = (int(monitors[0].width),int(monitors[0].height))
-    
-#     ret = True
-#     while ret:    
-#         ret, frame = cap.read()
-        
-#         if not gestures.isCalibrated():
-#             cPoint = gestures.calibrate(frame)
-#             ePoint = gestures.estimate(frame)     
-        
-#             x = int(cPoint[0]*width)
-#             y = int(cPoint[1]*height)
-#             red_dot.move(x,y,(255,0,0))
-            
-#         else:
-#             ePoint = gestures.estimate(frame)     
+    def on_quit(self,key):
+        print(dir(key))
+        if key.char == 'q':
+            # Stop listening to the keyboard input and close the application
+            self.close()
+            self.listener.join()
 
-
-#         if not np.isnan(ePoint).any():
-#             x = int(ePoint[0]*width)
-#             y = int(ePoint[1]*height)
-#             blue_dot.move(x,y,(255,0,0))
-        
-#         if cv2.waitKey(1) == ord('q'):
-#             pass
-
-
-#     #show point on sandbox
-#     cv2.destroyAllWindows()
+    def closeEvent(self, event):
+        # Stop the frame processor when closing the widget
+        self.frame_processor.stop()
+        self.frame_processor.wait()
+        super(MoviePlayer, self).closeEvent(event)
 
 
 class Worker(QObject):
@@ -61,71 +57,89 @@ class Worker(QObject):
 
         self.red_dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.blue_dot_widget = DotWidget(diameter=100,color = (120,120,255))
-
-        self.red_dot_widget.move(2432,1368)
+        self.display = MoviePlayer()
+        self.pupilLab = MoviePlayer()
 
         self.red_dot_widget.show()
         self.blue_dot_widget.show()
+        self.display.show()
+        self.pupilLab.show()
         
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
 
+        self.__run = True
+        self.listener = keyboard.Listener(on_press=self.on_quit)
+        self.listener.start()
+
+    def on_quit(self,key):
+        print(dir(key))
+        if key.char == 'q':
+            # Stop listening to the keyboard input and close the application
+            self.__run = False
+            self.close()
+            self.listener.join()
+
+    def __convertFrame(self,frame):
+        h, w, ch = frame.shape
+        bytes_per_line = ch * w
+        convert_to_Qt_format = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        p = convert_to_Qt_format.rgbSwapped()
+        return p
         
     def run(self):
         monitors = get_monitors()
         (width,height) = (int(monitors[0].width),int(monitors[0].height))
-        print("starting thread")
         ret = True
-        while ret:
+        while ret and self.__run:
 
-            print(f"looping {ret}")
             ret, frame = self.cap.read()
 
-            print("received frame")
             if not self.gestures.isCalibrated():
                 cPoint = self.gestures.calibrate(frame)
-                print(f"cPoint: {cPoint}")
                 ePoint = self.gestures.estimate(frame)     
-                print(f"ePoint: {ePoint}")
                 
-                x = int(cPoint[0]*width)
-                y = int(cPoint[1]*height)
-                print(x,y)
-                self.red_dot_widget.move(x,y)
-                
-            else:
-                ePoint = self.gestures.estimate(frame)     
+            #     x = int(cPoint[0]*width)
+            #     y = int(cPoint[1]*height)
 
-
-            if not np.isnan(ePoint).any():
-                x = int(ePoint[0]*width)
-                y = int(ePoint[1]*height)
-                self.blue_dot_widget.move(x,y)
+            #     self.red_dot_widget.move(x,y)                
+            # else:
+            #     ePoint = self.gestures.estimate(frame)     
             
-            if cv2.waitKey(1) == ord('q'):
-                pass
+            # if not np.isnan(ePoint).any():
+            #     x = int(ePoint[0]*width)
+            #     y = int(ePoint[1]*height)
+            #     self.blue_dot_widget.move(x,y)
+            
+            # self.display.imshow(
+            #     self.__convertFrame(frame))
 
+            try:
+                # display debug data:
+                debugEyes , _ = self.gestures.getDebugBuffers()
+                whiteboard = np.full((250,250,3),255.0,dtype = np.uint8)
+                points = debugEyes[-1]
+                points = points
 
+                print(len(points))
+                left = points[:7]
+                right = points[7:-2]
+
+                for n,point in enumerate(left):
+                    x = int((point[0]-points[-2,0])/(points[-1,0]-points[-2,0])*250)
+                    y = int((point[1]-points[-2,1])/(points[-1,1]-points[-2,1])*250)
+                    cv2.circle(whiteboard,(x,y),2,(255,0,0),1)
+
+                for n,point in enumerate(right):
+                    x = int((point[0]-points[-2,0])/(points[-1,0]-points[-2,0])*250)
+                    y = int((point[1]-points[-2,1])/(points[-1,1]-points[-2,1])*250)
+                    cv2.circle(whiteboard,(x,y),2,(0,0,255),1)
+
+                self.pupilLab.imshow(
+                    self.__convertFrame(whiteboard))
+            except Exception as e:
+                print(f"crashed in debug {e}")
         #show point on sandbox
-        cv2.destroyAllWindows()
-
-# class MainWindow(QMainWindow):
-#     def __init__(self):
-#         super().__init__()
-#         self.thread = QThread()
-#         self.worker = Worker()
-#         self.worker.moveToThread(self.thread)
-
-#         # Connect signals
-#         # self.worker.finished.connect(self.thread.quit)
-#         # self.worker.progress.connect(self.update_progress)  # If you want to update the GUI
-#         # self.thread.started.connect(self.worker.run)
-
-#         # # Clean up
-#         # self.thread.finished.connect(self.thread.deleteLater)
-
-#         # # Start the thread
-#         # self.thread.start()
-
+        # cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

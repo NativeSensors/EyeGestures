@@ -1,3 +1,5 @@
+# if it does not work uninstall opencv-python-headless and install opencv-python with --upgrade
+
 import cv2
 import dlib
 import math

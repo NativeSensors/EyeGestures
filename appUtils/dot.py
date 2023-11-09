@@ -4,7 +4,6 @@ import random
 from PySide2.QtWidgets import QApplication, QWidget
 from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen
 from PySide2.QtCore import Qt, QTimer, QPointF
-import keyboard
 
 from pynput import keyboard
 
@@ -66,15 +65,13 @@ class DotWidget(QWidget):
             
         painter.drawPath(path)
 
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Q:  # Close the widget if the 'q' key is pressed
-            self.close()
 
     def on_quit(self,key):
-        print(key)
-        # Stop listening to the keyboard input and close the application
-        self.close()
-        self.listener.join()
+        print(dir(key))
+        if key.char == 'q':
+            # Stop listening to the keyboard input and close the application
+            self.close()
+            self.listener.join()
 
     def closeEvent(self, event):
         # Ensure the application quits completely

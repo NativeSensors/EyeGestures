@@ -1,5 +1,6 @@
 
 import time 
+import math
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -51,7 +52,8 @@ class Calibration:
 
     def __calibrationPoints(self):
 
-        return np.array([(0.95,0.95),
+        return self.__interpolatePoints(
+                        np.array([(0.95,0.95),
                              (0.05,0.05),
                              (0.95,0.05),
                              (0.05,0.95),
@@ -59,7 +61,32 @@ class Calibration:
                              (0.5,0.95),
                              (0.95,0.5),
                              (0.5,0.05),
-                             (0.05,0.5)])
+                             (0.05,0.5)]))
+
+    def __interpolatePoints(self,points):
+        interpolated = []
+        step = 0.005
+        for n,point in enumerate(points):
+            if n+1 >= len(points):
+                break
+            
+            next_point = points[n+1].copy()
+            
+            dir_x = math.ceil((next_point[0] - point[0])/abs(next_point[0] - point[0]+0.000001))
+            dir_y = math.ceil((next_point[1] - point[1])/abs(next_point[1] - point[1]+0.000001))
+            
+            interpolated.append(point)
+            
+            new_point = point.copy()
+            while np.linalg.norm(new_point-next_point) > 0.01 and 1.0 > new_point[0] > 0 and 1.0 > new_point[1] > 0:
+                new_point[0] = new_point[0] + dir_x * step
+                new_point[1] = new_point[1] + dir_y * step
+                
+                interpolated.append(new_point.copy())
+
+        return np.array(interpolated)
+
+
 
     def start(self,onFinish):
         self.t_start = time.time()
