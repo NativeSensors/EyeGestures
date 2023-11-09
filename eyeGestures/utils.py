@@ -104,10 +104,12 @@ class VideoCapture:
         self.run = False
 
     def read(self):
+        print(f"stream: {self.stream}")
         if self.stream:
+            print("returning q.get")
             return self.q.get()
         else:
             frame = self.frames.pop(0)
             self.frames.pop(0)
-            return ((len(self.frames) > 1), frame)
+            return ((len(self.frames) >= 1), frame)
 

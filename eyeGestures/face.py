@@ -2,7 +2,6 @@ import cv2
 import dlib
 import math
 import numpy as np
-import eyeGestures.utils as utils
 import eyeGestures.eye as eye
 
 class FaceFinder:

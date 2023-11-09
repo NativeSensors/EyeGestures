@@ -1,7 +1,6 @@
 import cv2
 import math
 import numpy as np
-import eyeGestures.utils as utils
 import eyeGestures.pupil as pupil
 
 class Eye:    
@@ -24,7 +23,7 @@ class Eye:
         return self.pupil.getCoords()
 
     def getLandmarks(self):
-        return self.region
+        return self.region 
 
     def _process(self,image,region):
         points = np.array([[100, 50], [200, 150], [300, 50]], dtype=np.int32)

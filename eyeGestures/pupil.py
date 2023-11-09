@@ -1,7 +1,6 @@
 import cv2
 import math
 import numpy as np
-import eyeGestures.utils as utils
 
 class Pupil:
 

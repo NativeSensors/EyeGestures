@@ -5,7 +5,6 @@ import time
 import queue
 import pickle
 import random
-import threading
 import numpy as np
 from typing import Callable, Tuple
 from eyeGestures.gazeestimator import Gaze
