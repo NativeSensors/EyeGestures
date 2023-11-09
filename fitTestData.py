@@ -16,7 +16,6 @@ from eyeGestures.gazeestimator import Gaze
 def unison_shuffled_copies(a, b):
     assert len(a) == len(b)
     p = np.random.permutation(len(a))
-    print(b.shape)
     return a[p], b[p]
 
 def unison_sort_array(a,b):

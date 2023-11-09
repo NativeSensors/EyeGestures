@@ -35,7 +35,6 @@ if __name__ == "__main__":
             y = int(cPoint[1]*height)
             cv2.circle(whiteboard,(x,y),4,(0,0,255),4)
             
-            print(f"ePoint: {ePoint}")
         else:
             ePoint = gestures.estimate(frame)     
 

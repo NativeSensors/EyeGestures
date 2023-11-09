@@ -12,12 +12,10 @@ class GazePredictor:
         pass
 
     def train(self,eyes,calibrations):
-        print(eyes.shape,calibrations.shape)
         eyes = eyes.reshape(eyes.shape[0], -1)
         self.model.fit(eyes, calibrations)
 
     def predict(self,eye):
-        print(eye)
         eye = eye.reshape(1,eye.shape[0]*eye.shape[1])
         point = self.model.predict(eye)
         
@@ -78,7 +76,6 @@ class Calibration:
             time_step = self.time/len(self.points)
             index = int((time.time() - self.t_start)/time_step) * ((time.time() - self.t_start) > 0)
             
-            print(f"index: {index}")
             if(index < 0 or index >= len(self.points)):
                 self.run = False
 

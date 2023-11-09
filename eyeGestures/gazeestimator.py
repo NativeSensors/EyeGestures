@@ -7,7 +7,7 @@ from eyeGestures.calibration import GazePredictor, CalibrationData
 
 class Gaze:
 
-    N_FEATURES = 14
+    N_FEATURES = 16
 
     def __init__(self):
         self.predictor = GazePredictor()
@@ -20,7 +20,7 @@ class Gaze:
         
     def __getFeatures(self,image):
         
-        eyes = tuple(np.NAN for _ in range(self.N_FEATURES))
+        eyes = np.full((self.N_FEATURES,2),np.NAN)
         face = self.finder.find(image)
         
         if not face is None:
@@ -29,10 +29,11 @@ class Gaze:
             lpupil     = face.getLeftPupil()
             rlandmards = face.getRightEye()
             rpupil     = face.getRightPupil()
+            faceBox    = face.getBoundingBox()
 
-            eyes = np.concatenate((llandmards,lpupil,rlandmards,rpupil))
+            eyes = np.concatenate((llandmards,lpupil,rlandmards,rpupil,faceBox))
             if np.isnan(eyes).any():
-                eyes = tuple(np.NAN for _ in range(self.N_FEATURES))
+                eyes = np.full((self.N_FEATURES,2),np.NAN)
 
         return np.array(eyes) 
 
@@ -58,7 +59,6 @@ class Gaze:
 
         # Calculate the weighted centroid
         weighted_centroid = np.sum(points.T * sum_weights, axis=1) / np.sum(sum_weights)
-        print(f"weighted_centroid {weighted_centroid}")
         if np.isnan(weighted_centroid).any():
             return points[0]
         return weighted_centroid
@@ -67,9 +67,10 @@ class Gaze:
     def estimate(self,image):
 
         features = self.__getFeatures(image)
+        if np.isnan(features).any():
+            return np.full((1,2),np.NAN)
+
         point = self.predictor.predict(features)
-        
-        print(f"predicted point: {point}")
         if len(self.buffor) > self.bufforLength:
             self.buffor.pop(0)
         self.buffor.append(point)

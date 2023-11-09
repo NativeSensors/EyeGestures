@@ -21,7 +21,6 @@ class FaceFinder:
         
             return Face(image,face)
         except Exception as e:
-            print(f"Exception: {e}")
             return None
 
 class Face:
@@ -31,6 +30,35 @@ class Face:
 
         self.landmarks = self._landmarks(self.face)
         self._process(image,self.face)
+
+    # Relative postions to face bounding box  
+    def __relativePos(self,positions):
+        left, top = self.rect.left(), self.rect.top()
+        relPositions = positions
+        relPositions[:,0] = relPositions[:,0] - left
+        relPositions[:,1] = relPositions[:,1] - top
+        return relPositions
+
+    def getRelLeftEye(self):
+        return self.__relativePos(
+            self.eyeLeft.getLandmarks())
+        
+    def getRelRightEye(self):
+        return self.__relativePos(
+            self.eyeRight.getLandmarks())
+
+    def getRelLeftPupil(self):
+        return self.__relativePos(
+            self.eyeLeft.getPupil())
+
+    def getRelRightPupil(self):
+        return self.__relativePos(
+            self.eyeRight.getPupil())
+
+    # Absolute postions to image
+    def getBoundingBox(self):
+        return np.array([[self.rect.left(),self.rect.top()],
+                        [self.rect.right(),self.rect.bottom()]])
 
     def getLeftEye(self):
         return self.eyeLeft.getLandmarks()
@@ -55,10 +83,10 @@ class Face:
         return landmarks
 
     def _process(self,image,face):
-        rect = face.rect
+        self.rect = face.rect
         
-        lt_corner = (rect.left(),rect.top())
-        rb_corner = (rect.right(),rect.bottom())
+        self.lt_corner = (self.rect.left(),self.rect.top())
+        self.rb_corner = (self.rect.right(),self.rect.bottom())
 
         self.eyeLeft  = eye.Eye(image,self.landmarks,0)
         self.eyeRight = eye.Eye(image,self.landmarks,1)
