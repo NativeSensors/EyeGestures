@@ -100,5 +100,6 @@ class Gaze:
     def getCalibration(self):
         return self.calibrationData.get()
 
-    def getDebugBuffers(self):
-        return (self.__debugBuffer,self.__debugCalibBuffer)
+    def getFeatures(self,image):
+        return self.finder.find(image)
+        

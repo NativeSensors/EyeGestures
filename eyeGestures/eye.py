@@ -3,15 +3,14 @@ import math
 import numpy as np
 import eyeGestures.pupil as pupil
 
-
 class PolarEye:
 
     REFERENCE_KEYPOINT = 0
 
     def __init__(self,pupil,landmarks, keypoints):
         self.keypoints = keypoints
-        self._abs_pupil = pupil 
-        self._abs_landmarks = landmarks
+        self.pupil     = pupil[0] 
+        self.landmarks = landmarks
 
         self.__process(pupil,landmarks)
         pass
@@ -24,9 +23,7 @@ class PolarEye:
 
         return (r,angle)
 
-    def __convert2cartesian(self,point):
-        (r,angle) = point
-
+    def __convert2cartesian(self,r,angle):
         x = r*math.sin(angle)
         y = r*math.cos(angle)
         
@@ -43,24 +40,29 @@ class PolarEye:
 
 
     def getPupil(self):
-        return self.__convert2polar(self.pupil) 
+        return np.array(
+            self.__convert2polar(self.pupil)) 
 
     def getCorrectedPupil(self):
         (r, angle) = self.__convert2polar(self.pupil) 
-        return (r, angle - self.correction_angle)
+        return np.array(
+            self.__convert2cartesian(r, angle - self.correction_angle))
 
     def getLandmarks(self):
         landmarks_polar = []
         for point in self.landmarks:
             landmarks_polar.append(self.__convert2polar(point))
-        return landmarks_polar
+        return np.array(landmarks_polar)
 
     def getCorrectedLandmarks(self):
         landmarks_polar = []
         for point in self.landmarks:
             (r, angle) = self.__convert2polar(self.pupil) 
-            landmarks_polar.append((r, angle - self.correction_angle))
-        return landmarks_polar
+            landmarks_polar.append(
+                self.__convert2cartesian(r, angle - self.correction_angle))
+        return np.array(landmarks_polar)
+
+        
 
 
 class Eye:    
@@ -73,17 +75,26 @@ class Eye:
 
         # check if eye is left or right
         if side == 1:
-           self.region = np.array(landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
+            self.region = np.array(landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
         elif side == 0:
-           self.region = np.array(landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
+            self.region = np.array(landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
         
         self._process(self.image,self.region)
+
+        #getting polar coordinates
+        if side == 1:
+            self.polar = PolarEye(self.pupil.getCoords(),self.landmarks,self.RIGHT_EYE_KEYPOINTS)
+        elif side == 0:
+            self.polar = PolarEye(self.pupil.getCoords(),self.landmarks,self.LEFT_EYE_KEYPOINTS)
 
     def getPupil(self):
         return self.pupil.getCoords()
 
     def getLandmarks(self):
         return self.region 
+
+    def getPolar(self):
+        return self.polar
 
     def _process(self,image,region):
         points = np.array([[100, 50], [200, 150], [300, 50]], dtype=np.int32)

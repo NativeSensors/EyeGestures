@@ -74,6 +74,12 @@ class Face:
     def getLandmarks(self):
         return self.landmarks
 
+    def getLeftPolar(self):
+        return self.eyeLeft.getPolar()
+
+    def getRightPolar(self):
+        return self.eyeRight.getPolar()
+        
     def _landmarks(self,face):
         landmarks = np.zeros((face.num_parts, 2), dtype=np.dtype)
         for i in range(0, face.num_parts):

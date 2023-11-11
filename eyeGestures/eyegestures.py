@@ -40,8 +40,8 @@ class EyeGestures:
 
         return point 
 
-    def getDebugBuffers(self):
-        return self.gaze.getDebugBuffers()
+    def getFeatures(self,image):
+        return self.gaze.getFeatures(image)
 
     def isCalibrated(self):
         return self.calibrated and not self.calibration.inProgress()
