@@ -3,6 +3,66 @@ import math
 import numpy as np
 import eyeGestures.pupil as pupil
 
+
+class PolarEye:
+
+    REFERENCE_KEYPOINT = 0
+
+    def __init__(self,pupil,landmarks, keypoints):
+        self.keypoints = keypoints
+        self._abs_pupil = pupil 
+        self._abs_landmarks = landmarks
+
+        self.__process(pupil,landmarks)
+        pass
+
+    def __convert2polar(self,point):
+        (x,y) = point
+
+        angle = math.atan2(x,y)
+        r = math.dist([x,y],[0.0,0.0])
+
+        return (r,angle)
+
+    def __convert2cartesian(self,point):
+        (r,angle) = point
+
+        x = r*math.sin(angle)
+        y = r*math.cos(angle)
+        
+        return (x,y)
+
+
+    def __process(self,pupil,landmarks):      
+        desired_angle = 180
+        _,ref_angle = self.__convert2polar(landmarks[
+                self.keypoints[
+                    self.REFERENCE_KEYPOINT]
+            ])
+        self.correction_angle = ref_angle - desired_angle 
+
+
+    def getPupil(self):
+        return self.__convert2polar(self.pupil) 
+
+    def getCorrectedPupil(self):
+        (r, angle) = self.__convert2polar(self.pupil) 
+        return (r, angle - self.correction_angle)
+
+    def getLandmarks(self):
+        landmarks_polar = []
+        for point in self.landmarks:
+            landmarks_polar.append(self.__convert2polar(point))
+        return landmarks_polar
+
+    def getCorrectedLandmarks(self):
+        landmarks_polar = []
+        for point in self.landmarks:
+            (r, angle) = self.__convert2polar(self.pupil) 
+            landmarks_polar.append((r, angle - self.correction_angle))
+        return landmarks_polar
+
+
 class Eye:    
     LEFT_EYE_KEYPOINTS = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     RIGHT_EYE_KEYPOINTS = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
