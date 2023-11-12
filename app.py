@@ -98,46 +98,21 @@ class Worker(QObject):
                 cPoint = self.gestures.calibrate(frame)
                 ePoint = self.gestures.estimate(frame)     
                 
-            #     x = int(cPoint[0]*width)
-            #     y = int(cPoint[1]*height)
+                x = int(cPoint[0]*width)
+                y = int(cPoint[1]*height)
 
-            #     self.red_dot_widget.move(x,y)                
-            # else:
-            #     ePoint = self.gestures.estimate(frame)     
+                self.red_dot_widget.move(x,y)                
+            else:
+                ePoint = self.gestures.estimate(frame)     
             
-            # if not np.isnan(ePoint).any():
-            #     x = int(ePoint[0]*width)
-            #     y = int(ePoint[1]*height)
-            #     self.blue_dot_widget.move(x,y)
+            if not np.isnan(ePoint).any():
+                x = int(ePoint[0]*width)
+                y = int(ePoint[1]*height)
+                self.blue_dot_widget.move(x,y)
             
-            # self.display.imshow(
-            #     self.__convertFrame(frame))
+            self.display.imshow(
+                self.__convertFrame(frame))
 
-            try:
-                # display debug data:
-                debugEyes , _ = self.gestures.getDebugBuffers()
-                whiteboard = np.full((250,250,3),255.0,dtype = np.uint8)
-                points = debugEyes[-1]
-                points = points
-
-                print(len(points))
-                left = points[:7]
-                right = points[7:-2]
-
-                for n,point in enumerate(left):
-                    x = int((point[0]-points[-2,0])/(points[-1,0]-points[-2,0])*250)
-                    y = int((point[1]-points[-2,1])/(points[-1,1]-points[-2,1])*250)
-                    cv2.circle(whiteboard,(x,y),2,(255,0,0),1)
-
-                for n,point in enumerate(right):
-                    x = int((point[0]-points[-2,0])/(points[-1,0]-points[-2,0])*250)
-                    y = int((point[1]-points[-2,1])/(points[-1,1]-points[-2,1])*250)
-                    cv2.circle(whiteboard,(x,y),2,(0,0,255),1)
-
-                self.pupilLab.imshow(
-                    self.__convertFrame(whiteboard))
-            except Exception as e:
-                print(f"crashed in debug {e}")
         #show point on sandbox
         # cv2.destroyAllWindows()
 

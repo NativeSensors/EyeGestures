@@ -20,6 +20,7 @@ class FaceFinder:
         
             return Face(image,face)
         except Exception as e:
+            print(f"Exception in FaceFinder: {e}")
             return None
 
 class Face:
@@ -28,6 +29,7 @@ class Face:
         self.face = face
 
         self.landmarks = self._landmarks(self.face)
+        print(f"processing face self.landmarks:{self.landmarks.shape}")
         self._process(image,self.face)
 
     # Relative postions to face bounding box  

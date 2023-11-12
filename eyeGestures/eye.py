@@ -7,19 +7,23 @@ class PolarEye:
 
     REFERENCE_KEYPOINT = 0
 
-    def __init__(self,pupil,landmarks, keypoints):
-        self.keypoints = keypoints
+    def __init__(self,pupil,landmarks, center):
         self.pupil     = pupil[0] 
         self.landmarks = landmarks
+        self.center    = center
 
         self.__process(pupil,landmarks)
         pass
 
     def __convert2polar(self,point):
         (x,y) = point
+        (cx,cy) = self.center
+        (x,y) = (x - cx,y - cy)
 
-        angle = math.atan2(x,y)
-        r = math.dist([x,y],[0.0,0.0])
+        angle = math.atan2(y,x)*180/np.pi
+        if angle < 0:
+            angle += 360
+        r = math.dist([0,0],[x,y])
 
         return (r,angle)
 
@@ -30,12 +34,9 @@ class PolarEye:
         return (x,y)
 
 
-    def __process(self,pupil,landmarks):      
+    def __process(self,pupil,landmarks):
         desired_angle = 180
-        _,ref_angle = self.__convert2polar(landmarks[
-                self.keypoints[
-                    self.REFERENCE_KEYPOINT]
-            ])
+        _,ref_angle = self.__convert2polar(landmarks[self.REFERENCE_KEYPOINT])
         self.correction_angle = ref_angle - desired_angle 
 
 
@@ -57,7 +58,7 @@ class PolarEye:
     def getCorrectedLandmarks(self):
         landmarks_polar = []
         for point in self.landmarks:
-            (r, angle) = self.__convert2polar(self.pupil) 
+            (r, angle) = self.__convert2polar(point) 
             landmarks_polar.append(
                 self.__convert2cartesian(r, angle - self.correction_angle))
         return np.array(landmarks_polar)
@@ -82,10 +83,7 @@ class Eye:
         self._process(self.image,self.region)
 
         #getting polar coordinates
-        if side == 1:
-            self.polar = PolarEye(self.pupil.getCoords(),self.landmarks,self.RIGHT_EYE_KEYPOINTS)
-        elif side == 0:
-            self.polar = PolarEye(self.pupil.getCoords(),self.landmarks,self.LEFT_EYE_KEYPOINTS)
+        self.polar = PolarEye(self.pupil.getCoords(),self.region,(self.center_x,self.center_y))
 
     def getPupil(self):
         return self.pupil.getCoords()
@@ -111,6 +109,9 @@ class Eye:
         max_x = np.max(region[:,0]) + margin
         min_y = np.min(region[:,1]) - margin
         max_y = np.max(region[:,1]) + margin
+
+        self.center_x = (min_x + max_x)/2
+        self.center_y = (min_y + max_y)/2
 
         cut_image = masked_image[min_y:max_y,min_x:max_x] 
   

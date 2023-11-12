@@ -30,11 +30,14 @@ class Display(QWidget):
         self.label.setPixmap(QPixmap.fromImage(q_image))
     
     def on_quit(self,key):
-        print(dir(key))
+        if not hasattr(key,'char'):
+            return
+
         if key.char == 'q':
             # Stop listening to the keyboard input and close the application
-            self.close()
+            self.__run = False
             self.listener.join()
+            self.close()
 
     def closeEvent(self, event):
         # Stop the frame processor when closing the widget
@@ -52,7 +55,9 @@ class Worker(QObject):
         (width,height) = (int(monitors[0].width),int(monitors[0].height))
         self.gestures = EyeGestures(height,width)
 
-        self.pupilLab = Display()
+        self.frameDisplay = Display()  
+        self.pupilLab     = Display()
+        self.frameDisplay.show()
         self.pupilLab.show()
         
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
@@ -63,11 +68,14 @@ class Worker(QObject):
 
     def on_quit(self,key):
         print(dir(key))
+        if not hasattr(key,'char'):
+            return
+
         if key.char == 'q':
             # Stop listening to the keyboard input and close the application
             self.__run = False
-            self.close()
             self.listener.join()
+            self.close()
 
     def __convertFrame(self,frame):
         h, w, ch = frame.shape
@@ -86,33 +94,47 @@ class Worker(QObject):
             
             try:
                 face = self.gestures.getFeatures(frame)
-            
+
+                print(face)
+                self.frameDisplay.imshow(
+                    self.__convertFrame(frame))
+
                 if not face is None:
-                    eyePolar = face.getLeftPolar()
-                    print(eyePolar)
-                    pupil  = eyePolar.getCorrectedPupil()
-                    region = eyePolar.getCorrectedLandmarks()
-                    print(pupil,region)
-
-                    min_x = np.min(region[:,0])
-                    max_x = np.max(region[:,0])
-                    min_y = np.min(region[:,1])
-                    max_y = np.max(region[:,1])
-
-                    width = max_x - min_x
-                    height = max_y - min_y
-
+                    pupil = face.getLeftPupil()
+                    landmarks = face.getLeftEye()
+                    
                     # display debug data:
                     whiteboard = np.full((250,250,3),255.0,dtype = np.uint8)
                     
-                    point = pupil
-                    x = int((point[0]/width)*250)
-                    y = int((point[1]/height)*250)
-                    cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(255,0,0),1)
+                    # get center: 
+                    min_x = np.min(landmarks[:,0])
+                    max_x = np.max(landmarks[:,0])
+                    min_y = np.min(landmarks[:,1])
+                    max_y = np.max(landmarks[:,1])
 
-                    for point in region:
-                        x = ((point[0]/width)*250)
-                        y = ((point[1]/height)*250)
+                    center_x = (min_x + max_x)/2
+                    center_y = (min_y + max_y)/2
+
+                    width = max_x - min_x 
+                    height = max_y - min_y 
+
+                    x = int(((center_x-min_x)/width)*250)
+                    y = int(((center_y-min_y)/height)*250)
+                    cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(0,255,0),1)
+                    
+
+                    print(f"width,height {width,height}")
+                    print(f"pupil {pupil}")
+                    point = pupil[0]
+                    x = int(((point[0]-min_x)/width)*250)
+                    y = int(((point[1]-min_y)/height)*250)
+                    cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(255,0,0),1)
+                    print(f"x,y: {x,y}")
+
+                    for point in landmarks:
+                        x = int(((point[0]-min_x)/width) * 250)
+                        y = int(((point[1]-min_y)/height) * 250)
+                        print(f"x,y: {x,y}")
                         cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(0,0,255),1)
 
                     self.pupilLab.imshow(
