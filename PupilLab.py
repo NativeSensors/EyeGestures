@@ -125,9 +125,10 @@ class Worker(QObject):
 
         self.frameDisplay = Display()  
         self.pupilLab     = Display()  
-        self.eyeDisplay   = Display()
+        self.pupilAdjLab   = Display()
         self.frameDisplay.show()
         self.pupilLab.show()
+        self.pupilAdjLab.show()
         
         self.dirNose = NoseDirection()
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
@@ -203,6 +204,46 @@ class Worker(QObject):
 
             self.pupilLab.imshow(
                 self.__convertFrame(whiteboard))
+
+            
+            ###################################################################################3
+            # get center: 
+            whiteboardAdj = np.full((250,250,3),255.0,dtype = np.uint8)
+            min_x = np.min(landmarks[:,0])
+            max_x = np.max(landmarks[:,0])
+            min_y = np.min(landmarks[:,1])
+            max_y = np.max(landmarks[:,1])
+
+            center_x = (min_x + max_x)/2
+            center_y = (min_y + max_y)/2
+
+            width = max_x - min_x 
+            height = max_y - min_y 
+            
+            x = int(((center_x-min_x)/width)*250)
+            y = int(((center_y-min_y)/height)*250)
+            cv2.circle(whiteboardAdj,np.array([x,y],dtype= np.uint8),3,(0,255,0),1)
+        
+            point = self.PupilBuffor.getAvg()
+            x = int(((point[0]-min_x)/width)*250)
+            y = int(((point[1]-min_y)/height)*250)
+            cv2.circle(whiteboardAdj,np.array(point,dtype= np.uint8),3,(255,0,0),1)
+            
+            vision_map_start = np.array((((landmarks[1,0]-min_x)/width)*250 + 15,0), dtype = np.uint8)
+            vision_map_wh  = np.array((50,30), dtype = np.uint8)
+            vision_map_end = vision_map_start+vision_map_wh
+
+            # openness need to be calculated relatively to 250x250 frame
+            print(f"openness of the eyes: {height} width: {width} scale: {height/width - 0.25}")
+            # 0.40 > wide open
+            # 0.30 > normally open - looking up or so
+            # 0.20 > sligthly closed - looking down
+            
+            print(f"vision map: {vision_map_start} {vision_map_wh} {vision_map_end}")
+            cv2.rectangle(whiteboardAdj,vision_map_start,vision_map_end,(255,0,0),1)
+
+            self.pupilAdjLab.imshow(
+                self.__convertFrame(whiteboardAdj))
 
             showEyes(frame,face)            
             self.frameDisplay.imshow(
