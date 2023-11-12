@@ -14,6 +14,18 @@ from screeninfo import get_monitors
 from appUtils.dot import DotWidget
 from pynput import keyboard
 
+
+def showEyes(image,face):
+
+    if face is not None:
+        cv2.circle(image,face.getLeftPupil()[0],2,(0,0,255),1)
+        for point in face.getLeftEye():
+            cv2.circle(image,point,2,(0,255,0),1)
+
+        cv2.circle(image,face.getRightPupil()[0],2,(0,0,255),1)
+        for point in face.getRightEye():
+            cv2.circle(image,point,2,(0,255,0),1)
+
 class Display(QWidget):
     def __init__(self, parent=None):
         super(Display, self).__init__(parent)
@@ -36,13 +48,11 @@ class Display(QWidget):
         if key.char == 'q':
             # Stop listening to the keyboard input and close the application
             self.__run = False
-            self.listener.join()
+            # self.listener.join()
             self.close()
 
     def closeEvent(self, event):
         # Stop the frame processor when closing the widget
-        self.frame_processor.stop()
-        self.frame_processor.wait()
         super(Display, self).closeEvent(event)
 
 
@@ -56,7 +66,8 @@ class Worker(QObject):
         self.gestures = EyeGestures(height,width)
 
         self.frameDisplay = Display()  
-        self.pupilLab     = Display()
+        self.pupilLab     = Display()  
+        self.eyeDisplay   = Display()
         self.frameDisplay.show()
         self.pupilLab.show()
         
@@ -74,7 +85,7 @@ class Worker(QObject):
         if key.char == 'q':
             # Stop listening to the keyboard input and close the application
             self.__run = False
-            self.listener.join()
+            # self.listener.join()
             self.close()
 
     def __convertFrame(self,frame):
@@ -84,6 +95,57 @@ class Worker(QObject):
         p = convert_to_Qt_format.rgbSwapped()
         return p
         
+    def __display_left_eye(self,frame):
+        frame = frame
+        face = self.gestures.getFeatures(frame)
+    
+        if not face is None:
+            pupil = face.getLeftPupil()
+            landmarks = face.getLeftEye()
+            
+            # display debug data:
+            whiteboard = np.full((250,250,3),255.0,dtype = np.uint8)
+            
+            # get center: 
+            min_x = np.min(landmarks[:,0])
+            max_x = np.max(landmarks[:,0])
+            min_y = np.min(landmarks[:,1])
+            max_y = np.max(landmarks[:,1])
+
+            center_x = (min_x + max_x)/2
+            center_y = (min_y + max_y)/2
+
+            width = max_x - min_x 
+            height = max_y - min_y 
+
+            x = int(((center_x-min_x)/width)*250)
+            y = int(((center_y-min_y)/height)*250)
+            cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(0,255,0),1)
+            
+
+            print(f"width,height {width,height}")
+            print(f"pupil {pupil}")
+            point = pupil[0]
+            x = int(((point[0]-min_x)/width)*250)
+            y = int(((point[1]-min_y)/height)*250)
+            cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(255,0,0),1)
+            print(f"x,y: {x,y}")
+
+            for point in landmarks:
+                x = int(((point[0]-min_x)/width) * 250)
+                y = int(((point[1]-min_y)/height) * 250)
+                print(f"x,y: {x,y}")
+                cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(0,0,255),1)
+
+            self.pupilLab.imshow(
+                self.__convertFrame(whiteboard))
+
+            showEyes(frame,face)            
+            self.frameDisplay.imshow(
+                self.__convertFrame(frame))
+
+
+    
     def run(self):
         monitors = get_monitors()
         (width,height) = (int(monitors[0].width),int(monitors[0].height))
@@ -93,54 +155,10 @@ class Worker(QObject):
             ret, frame = self.cap.read()     
             
             try:
-                face = self.gestures.getFeatures(frame)
-
-                print(face)
-                self.frameDisplay.imshow(
-                    self.__convertFrame(frame))
-
-                if not face is None:
-                    pupil = face.getLeftPupil()
-                    landmarks = face.getLeftEye()
-                    
-                    # display debug data:
-                    whiteboard = np.full((250,250,3),255.0,dtype = np.uint8)
-                    
-                    # get center: 
-                    min_x = np.min(landmarks[:,0])
-                    max_x = np.max(landmarks[:,0])
-                    min_y = np.min(landmarks[:,1])
-                    max_y = np.max(landmarks[:,1])
-
-                    center_x = (min_x + max_x)/2
-                    center_y = (min_y + max_y)/2
-
-                    width = max_x - min_x 
-                    height = max_y - min_y 
-
-                    x = int(((center_x-min_x)/width)*250)
-                    y = int(((center_y-min_y)/height)*250)
-                    cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(0,255,0),1)
-                    
-
-                    print(f"width,height {width,height}")
-                    print(f"pupil {pupil}")
-                    point = pupil[0]
-                    x = int(((point[0]-min_x)/width)*250)
-                    y = int(((point[1]-min_y)/height)*250)
-                    cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(255,0,0),1)
-                    print(f"x,y: {x,y}")
-
-                    for point in landmarks:
-                        x = int(((point[0]-min_x)/width) * 250)
-                        y = int(((point[1]-min_y)/height) * 250)
-                        print(f"x,y: {x,y}")
-                        cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(0,0,255),1)
-
-                    self.pupilLab.imshow(
-                        self.__convertFrame(whiteboard))
+                self.__display_left_eye(frame)
             except Exception as e:
                 print(f"crashed in debug {e}")
+
         #show point on sandbox
         # cv2.destroyAllWindows()
 
