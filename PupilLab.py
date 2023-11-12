@@ -80,7 +80,7 @@ class Worker(QObject):
 
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
 
-        self.PupilBuffor = Buffor(10)
+        self.PupilBuffor = Buffor(20)
 
         self.__run = True
         self.listener = keyboard.Listener(on_press=self.on_quit)
