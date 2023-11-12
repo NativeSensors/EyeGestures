@@ -27,62 +27,7 @@ def showEyes(image,face):
             cv2.circle(image,point,2,(0,255,0),1)
 
         for point in face.getLandmarks():
-            cv2.circle(image,point,2,(255,0,0),1)
-
-
-class NoseDirection:
-
-    def __init__(self):
-        self.__tmp__buffor = Buffor(5)
-        self.__tmp__mapped_nose_buffor = Buffor(20)
-        self.min_nose_x = 1.0
-        self.min_nose_y = 1.0
-        self.max_nose_x = 0.0
-        self.max_nose_y = 0.0
-        self.min_mapped_nose_x = 1.0
-        self.min_mapped_nose_y = 1.0
-        self.max_mapped_nose_x = 0.0
-        self.max_mapped_nose_y = 0.0
-        
-    def __set_lim_nose(self,avg):
-        (avg_nose_x,avg_nose_y) = avg
-        self.min_nose_x = avg_nose_x if avg_nose_x < self.min_nose_x else self.min_nose_x
-        self.min_nose_y = avg_nose_y if avg_nose_y < self.min_nose_y else self.min_nose_y
-        self.max_nose_x = avg_nose_x if avg_nose_x > self.max_nose_x else self.max_nose_x
-        self.max_nose_y = avg_nose_y if avg_nose_y > self.max_nose_y else self.max_nose_y
-        print(f"nose: max: {self.max_nose_x,self.max_nose_y} min: {self.min_nose_x,self.min_nose_y}")        
-    
-    def __get_mapped_nose(self,avg_nose):
-        (avg_nose_x,avg_nose_y) = avg_nose
-        return (avg_nose_x/(self.max_nose_x - self.min_nose_x),
-                    avg_nose_y/(self.max_nose_y - self.min_nose_y))
-
-    def __set_lim_mapped(self,mapped_nose):
-        self.min_mapped_nose_x = mapped_nose[0] if mapped_nose[0] < self.min_mapped_nose_x else self.min_mapped_nose_x
-        self.min_mapped_nose_y = mapped_nose[1] if mapped_nose[1] < self.min_mapped_nose_y else self.min_mapped_nose_y
-        self.max_mapped_nose_x = mapped_nose[0] if (mapped_nose[0] > self.max_mapped_nose_x) and (mapped_nose[0] < 1.2) else self.max_mapped_nose_x
-        self.max_mapped_nose_y = mapped_nose[1] if (mapped_nose[1] > self.max_mapped_nose_y) and (mapped_nose[1] < 1.2) else self.max_mapped_nose_y
-        
-
-    def getPos(self,nose):
-        nose_center = nose.getcenterDist()
-            
-        self.__tmp__buffor.add(nose_center)
-
-        avg_nose = self.__tmp__buffor.getAvg()
-        if self.__tmp__buffor.getLen() >= 5:
-            self.__set_lim_nose(avg_nose)
-            
-            mapped_nose = self.__get_mapped_nose(avg_nose)
-            self.__tmp__mapped_nose_buffor.add(mapped_nose)
-            if self.__tmp__mapped_nose_buffor.getLen() >= 20:
-                self.__set_lim_mapped(mapped_nose)
-                print(f"dnose: {mapped_nose[0]-self.min_mapped_nose_x,mapped_nose[1]-self.min_mapped_nose_y}")
-                return np.array([mapped_nose[0] - self.min_mapped_nose_x, mapped_nose[1]-self.min_mapped_nose_y])
-                
-                # print(f"dnose: max: {self.max_dnose_x,self.max_dnose_y} min: {self.min_dnose_x,self.min_dnose_y}")
-        return np.full((1,2),np.NAN)
-            
+            cv2.circle(image,point,2,(255,0,0),1)            
 
 class Display(QWidget):
     def __init__(self, parent=None):
@@ -130,7 +75,9 @@ class Worker(QObject):
         self.pupilLab.show()
         self.pupilAdjLab.show()
         
-        self.dirNose = NoseDirection()
+        self.red_dot_widget = DotWidget(diameter=100,color = (255,120,0))
+        self.red_dot_widget.show()
+
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
 
         self.PupilBuffor = Buffor(10)
@@ -191,8 +138,9 @@ class Worker(QObject):
             point = pupil[0]
             x = int(((point[0]-min_x)/width)*250)
             y = int(((point[1]-min_y)/height)*250)
-            self.PupilBuffor.add((x,y))
-            print(self.PupilBuffor)
+            self.PupilBuffor.add([x,y])
+            
+            
             cv2.circle(whiteboard,np.array(self.PupilBuffor.getAvg(),dtype= np.uint8),3,(255,0,0),1)
             print(f"x,y: {self.PupilBuffor.getAvg()}")
 
@@ -224,10 +172,14 @@ class Worker(QObject):
             y = int(((center_y-min_y)/height)*250)
             cv2.circle(whiteboardAdj,np.array([x,y],dtype= np.uint8),3,(0,255,0),1)
         
+            cv2.circle(whiteboardAdj,np.array(self.PupilBuffor.getAvg(),dtype= np.uint8),3,(255,0,0),1)
+            
+
             point = self.PupilBuffor.getAvg()
-            x = int(((point[0]-min_x)/width)*250)
-            y = int(((point[1]-min_y)/height)*250)
-            cv2.circle(whiteboardAdj,np.array(point,dtype= np.uint8),3,(255,0,0),1)
+            x = int(((point[0])/30 - 3.5)*1920)
+            y = int(((point[1])/30)*1080)
+            self.red_dot_widget.move(x,y)
+            print(f"move: {x,y} offset: {min_x,width}")
             
             vision_map_start = np.array((((landmarks[1,0]-min_x)/width)*250 + 15,0), dtype = np.uint8)
             vision_map_wh  = np.array((50,30), dtype = np.uint8)
@@ -249,7 +201,7 @@ class Worker(QObject):
             self.frameDisplay.imshow(
                 self.__convertFrame(frame))
 
-            self.dirNose.getPos(face.getNoseFeatures())
+            print(f"HeadDirection: {self.gestures.getHeadDirection()}")
             
             
     def run(self):

@@ -43,8 +43,8 @@ class EyeGestures:
     def getFeatures(self,image):
         return self.gaze.getFeatures(image)
 
-    def getNoseFeatures(self,image):
-        return self.gaze.getNoseFeatures(image)
+    def getHeadDirection(self):
+        return self.gaze.getHeadDirection()
 
     def isCalibrated(self):
         return self.calibrated and not self.calibration.inProgress()

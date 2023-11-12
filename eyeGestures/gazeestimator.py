@@ -2,6 +2,7 @@
 import cv2
 import math
 import numpy as np
+from eyeGestures.nose import NoseDirection
 from eyeGestures.face import FaceFinder
 from eyeGestures.calibration import GazePredictor, CalibrationData
 
@@ -10,6 +11,7 @@ class Gaze:
     N_FEATURES = 16
 
     def __init__(self):
+        self.noseDirection = NoseDirection()
         self.predictor = GazePredictor()
         self.finder = FaceFinder()
 
@@ -21,14 +23,16 @@ class Gaze:
         # those are used for analysis
         self.__debugBuffer = []
         self.__debugCalibBuffer = []
-        
+        self.__headDir = [0.5,0.5]
+
     def __getFeatures(self,image):
         
         eyes = np.full((self.N_FEATURES,2),np.NAN)
         face = self.finder.find(image)
         
         if not face is None:
-
+            self.__headDir = self.noseDirection.getPos(face.getNose())
+        
             llandmards = face.getLeftEye()
             lpupil     = face.getLeftPupil()
             rlandmards = face.getRightEye()
@@ -101,10 +105,9 @@ class Gaze:
         return self.calibrationData.get()
 
     def getFeatures(self,image):
-        features = self.finder.find(image)
-        return features
+        face = self.finder.find(image)
+        self.__headDir = self.noseDirection.getPos(face.getNose())
+        return face
         
-    def getNoseFeatures(self,image):
-        features = self.finder.find(image)
-        return features.getNose()
-        
+    def getHeadDirection(self):
+        return self.__headDir        
