@@ -66,6 +66,29 @@ class var:
     def get(self):
         return self.__var
 
+class Buffor:
+
+    def __init__(self, length):
+        self.length = length
+        self.__buffor = []
+
+    def add(self,var):
+        if len(self.__buffor) >= self.length:
+            self.__buffor.pop(0)
+
+        self.__buffor.append(var)
+
+    def getAvg(self):
+        return np.sum(self.__buffor, axis=0) / self.length
+
+    def getBuffor(self):
+        return self.__buffor
+
+    def getLast(self):
+        return self.__buffor[0]
+
+    def getLen(self):
+        return len(self.__buffor)
 
 # Bufforless
 class VideoCapture:

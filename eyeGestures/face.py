@@ -3,6 +3,7 @@ import dlib
 import math
 import numpy as np
 import eyeGestures.eye as eye
+import eyeGestures.nose as nose
 
 class FaceFinder:
 
@@ -81,6 +82,12 @@ class Face:
 
     def getRightPolar(self):
         return self.eyeRight.getPolar()
+
+    def getNoseFeatures(self):
+        return self.nose
+
+    def getLandmarks(self):
+        return self.landmarks
         
     def _landmarks(self,face):
         landmarks = np.zeros((face.num_parts, 2), dtype=np.dtype)
@@ -97,4 +104,5 @@ class Face:
 
         self.eyeLeft  = eye.Eye(image,self.landmarks,0)
         self.eyeRight = eye.Eye(image,self.landmarks,1)
+        self.nose     = nose.Nose(image,self.landmarks)
         

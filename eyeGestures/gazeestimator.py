@@ -101,8 +101,10 @@ class Gaze:
         return self.calibrationData.get()
 
     def getFeatures(self,image):
-        print(f"getFeatures: image {image.shape}")
         features = self.finder.find(image)
-        print(f"getFeatures: image {image.shape} features: {features}")
         return features
+        
+    def getNoseFeatures(self,image):
+        features = self.finder.find(image)
+        return features.getNose()
         
