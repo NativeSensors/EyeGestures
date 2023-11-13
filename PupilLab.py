@@ -58,6 +58,61 @@ class Display(QWidget):
         # Stop the frame processor when closing the widget
         super(Display, self).closeEvent(event)
 
+class EyeDisplay:
+
+    def __init__(self):
+        self.PupilBuffor = Buffor(20)
+        pass
+
+    def update(self,face,sWidth,sHeigh)
+        self.pupil = face.getLeftPupil()[0]
+        self.landmarks = face.getLeftEye()
+
+        self.PupilBuffor.add(self.pupil)
+        # self.PupilBuffor.add(self.__adjPoint(
+        #     self.pupil,sWidth,sHeigh
+        # ))
+
+        # get center: 
+        self.min_x = np.min(landmarks[:,0])
+        self.max_x = np.max(landmarks[:,0])
+        self.min_y = np.min(landmarks[:,1])
+        self.max_y = np.max(landmarks[:,1])
+
+        self.center = ((min_x + max_x)/2,
+                        (min_y + max_y)/2)
+
+        self.width = max_x - min_x 
+        self.height = 20
+
+    def __adjPoint(self,point,width,height):
+        x = int(((point-min_x)/self.width)*width)
+        y = int(((point-min_y)/self.height)*height)
+        return (x,y)
+
+    def draw(self,image,width,height):
+        cv2.circle(image,
+            np.array(
+                self.__adjPoint(self.center,width,height),
+                dtype= np.uint8),
+            3,(0,255,0),1)
+            
+        cv2.circle(image,
+            np.array(
+                self.__adjPoint(self.PupilBuffor.getAvg(),width,height),
+                dtype= np.uint8),
+            3,(0,255,0),1)
+
+        for point in self.landmarks:
+            cv2.circle(image,
+                np.array(
+                    self.__adjPoint(point,width,height)
+                ,dtype= np.uint8),
+                3,(0,0,255),1)
+
+        return image
+
+
 
 class Worker(QObject):
 
@@ -74,14 +129,13 @@ class Worker(QObject):
         self.frameDisplay.show()
         self.pupilLab.show()
         self.pupilAdjLab.show()
+
+        self.eyeDisplay = EyeDisplay()
         
         self.red_dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.red_dot_widget.show()
 
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
-
-        self.PupilBuffor = Buffor(20)
-
         self.__run = True
         self.listener = keyboard.Listener(on_press=self.on_quit)
         self.listener.start()
@@ -109,51 +163,13 @@ class Worker(QObject):
         face = self.gestures.getFeatures(frame)
     
         if not face is None:
-            pupil = face.getLeftPupil()
-            landmarks = face.getLeftEye()
-            
-            # display debug data:
             whiteboard = np.full((250,250,3),255.0,dtype = np.uint8)
             
-            # get center: 
-            min_x = np.min(landmarks[:,0])
-            max_x = np.max(landmarks[:,0])
-            min_y = np.min(landmarks[:,1])
-            max_y = np.max(landmarks[:,1])
-
-            center_x = (min_x + max_x)/2
-            center_y = (min_y + max_y)/2
-
-            width = max_x - min_x 
-            # height = max_y - min_y 
-            height = 20
-
-            x = int(((center_x-min_x)/width)*250)
-            y = int(((center_y-min_y)/height)*250)
-            cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(0,255,0),1)
-            
-
-            print(f"width,height {width,height}")
-            print(f"pupil {pupil}")
-            point = pupil[0]
-            x = int(((point[0]-min_x)/width)*250)
-            y = int(((point[1]-min_y)/height)*250)
-            self.PupilBuffor.add([x,y])
-            
-            
-            cv2.circle(whiteboard,np.array(self.PupilBuffor.getAvg(),dtype= np.uint8),3,(255,0,0),1)
-            print(f"x,y: {self.PupilBuffor.getAvg()}")
-
-            for point in landmarks:
-                x = int(((point[0]-min_x)/width) * 250)
-                y = int(((point[1]-min_y)/height) * 250)
-                print(f"x,y: {x,y}")
-                cv2.circle(whiteboard,np.array([x,y],dtype= np.uint8),3,(0,0,255),1)
-
+            self.eyeDisplay.update(face,250,250)
+            self.eyeDisplay.draw(whiteboard,image,250,250)
             self.pupilLab.imshow(
                 self.__convertFrame(whiteboard))
 
-            
             ###################################################################################3
             # get center: 
             whiteboardAdj = np.full((250,250,3),255.0,dtype = np.uint8)
