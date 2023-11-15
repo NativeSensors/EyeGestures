@@ -55,12 +55,14 @@ class NoseDirection:
         return np.full((1,2),np.NAN)
 
 class Nose:    
-    NOSE_KEYPOINTS = [28, 29, 30, 31, 32, 33 ,34, 35, 36] # keypoint indices for left eye
-    NOSE_CENTER = [31]
-    LEFT_EDGE   = [3]
+    # Indecies are one smaller than the landmarks documentation due to indexing starting from 1
+    NOSE_KEYPOINTS = [27, 28, 29, 30, 31, 32 ,33, 34, 35] # keypoint indices for nose
+    NOSE_CENTER = [30]
+    NOSE_LEFT_RIGHT = [31,35]
+    LEFT_EDGE   = [2]
     RIGHT_EDGE  = [15]
-    BOTTOM_EDGE = [9]
-    TOP_EDGE    = [28]
+    BOTTOM_EDGE = [8]
+    TOP_EDGE    = [27]
     
     def __init__(self,image : np.ndarray, landmarks : list):
         self.image = image
@@ -72,13 +74,25 @@ class Nose:
         return self.center
 
     def getLandmarks(self):
-        return self.landmarks 
+        return self.landmarks
 
     def getcenterDist(self):
         return self.centerDist
 
     def getLeftRightDists(self):
         return np.array([self.dist2left,self.dist2right])
+
+    def getHeadTilt(self):
+        return self.headTilt
+
+    def __headTilt(self,landmarks):
+        leftPoint  = landmarks[self.NOSE_LEFT_RIGHT[0]]
+        rightPoint = landmarks[self.NOSE_LEFT_RIGHT[1]]
+        x = (rightPoint[0] - leftPoint[0])  
+        y = (rightPoint[1] - leftPoint[1])  
+        print(f"x,y : {x},{y} point l: {leftPoint} point r: {rightPoint}")
+
+        return math.atan2(y,x) * 180/math.pi
 
     def _process(self,image,landmarks):
         self.left   = np.array(landmarks[self.LEFT_EDGE], dtype=np.int32)
@@ -93,6 +107,8 @@ class Nose:
         self.dist2right = np.linalg.norm(self.right-self.center)
         self.dist2bottom  = np.linalg.norm(self.bottom-self.center)
         self.dist2top     = np.linalg.norm(self.top-self.center)
+
+        self.headTilt = self.__headTilt(landmarks)
 
         self.centerDist = (self.dist2left/(self.dist2left + self.dist2right),
                            self.dist2bottom/(self.dist2bottom + self.dist2top))

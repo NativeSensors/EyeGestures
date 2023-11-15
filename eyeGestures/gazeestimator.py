@@ -6,6 +6,7 @@ from eyeGestures.nose import NoseDirection
 from eyeGestures.face import FaceFinder
 from eyeGestures.calibration import GazePredictor, CalibrationData
 
+# TODO: this slowly changing into head tracker
 class Gaze:
 
     N_FEATURES = 16
@@ -106,7 +107,8 @@ class Gaze:
 
     def getFeatures(self,image):
         face = self.finder.find(image)
-        self.__headDir = self.noseDirection.getPos(face.getNose())
+        if not face is None:
+            self.__headDir = self.noseDirection.getPos(face.getNose())
         return face
         
     def getHeadDirection(self):

@@ -83,6 +83,9 @@ class Face:
     def getRightPolar(self):
         return self.eyeRight.getPolar()
 
+    def getHeadTilt(self):
+        return self.nose.getHeadTilt()
+
     def getNose(self):
         return self.nose
 
