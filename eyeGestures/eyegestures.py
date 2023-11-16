@@ -7,7 +7,7 @@ import pickle
 import random
 import numpy as np
 from typing import Callable, Tuple
-from eyeGestures.gazeestimator import Gaze
+from eyeGestures.gazeestimator import GazeTracker
 from eyeGestures.calibration import Calibration
 
 
@@ -17,7 +17,7 @@ class EyeGestures:
         self.width  = width
         self.height = height
 
-        self.gaze = Gaze()
+        self.gaze = GazeTracker()
         self.calibrated = False
 
         self.calibration = Calibration(self.height, self.width, 60)

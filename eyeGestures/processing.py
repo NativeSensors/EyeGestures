@@ -3,13 +3,13 @@ import cv2
 import dlib
 import math
 import numpy as np
-from eyeGestures.gazeestimator import Gaze
 from eyeGestures.utils import Buffor
 
-class EyeProcess:
+class EyeProcessor:
 
     def __init__(self,scale_w=250,scale_h=250):
-        self.PupilBuffor = Buffor(15)
+        self.pupilBuffor = Buffor(30)
+        self.avgRetBuffor = Buffor(30)
         self.scale_w = scale_w
         self.scale_h = scale_h
 
@@ -37,7 +37,7 @@ class EyeProcess:
                         offset = (self.min_x, self.min_y))
         
         print("save pupil")
-        self.PupilBuffor.add(
+        self.pupilBuffor.add(
             self.__convertPoint(self.pupil,
                             width = self.scale_w, height = self.scale_h,
                             scale_w = self.width, scale_h = self.height,
@@ -82,12 +82,15 @@ class EyeProcess:
     def getAvgPupil(self,width = None, height = None):
         print("getAvgPupil")
         if not width is None and not height is None:
-            return self.__convertPoint(self.PupilBuffor.getAvg(),
+            _retPupil = self.__convertPoint(self.pupilBuffor.getAvg(),
                             width = width,height = height,
                             scale_w = self.scale_w, scale_h = self.scale_h)
         else:
-            return self.PupilBuffor.getAvg()
+            _retPupil = self.pupilBuffor.getAvg()
 
+        self.avgRetBuffor.add(_retPupil,self.getWidth())
+
+        return (_retPupil,self.getWidth())
 
 ## main code:
 
@@ -101,7 +104,7 @@ class EyeProcess:
 # whiteboardAdj = np.full((250,250,3),255.0,dtype = np.uint8)
 
 
-# point = self.PupilBuffor.getAvg()
+# point = self.pupilBuffor.getAvg()
 # x = int(((point[0])/30 - 3.5)*1920)
 # y = int(((point[1])/30)*1080)
 # self.red_dot_widget.move(x,y)

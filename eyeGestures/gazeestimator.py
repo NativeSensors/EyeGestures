@@ -5,9 +5,10 @@ import numpy as np
 from eyeGestures.nose import NoseDirection
 from eyeGestures.face import FaceFinder
 from eyeGestures.calibration import GazePredictor, CalibrationData
+from eyeGestures.processing  import EyeProcessor
 
 # TODO: this slowly changing into head tracker
-class Gaze:
+class GazeTracker:
 
     N_FEATURES = 16
 

@@ -10,7 +10,7 @@ import keyboard
 
 from eyeGestures.utils import VideoCapture, Buffor
 from eyeGestures.eyegestures import EyeGestures
-from eyeGestures.processing import EyeProcess
+from eyeGestures.processing import EyeProcessor
 from screeninfo import get_monitors
 from appUtils.dot import DotWidget
 from pynput import keyboard
@@ -22,7 +22,9 @@ def rotate(point,face):
     r = math.dist(point,(0,0))
     angle = math.atan2(y,x) * 180/np.pi
     tiltAngle = face.getNose().getHeadTilt()
-    new_angle = angle - tiltAngle
+    if abs(tiltAngle) < 5:
+        tiltAngle = 0
+    new_angle = angle + tiltAngle
     new_angle = np.pi * new_angle / 180 
 
     new_point = (
@@ -80,7 +82,7 @@ class ScreenHist:
 
     def __init__(self,width,height,step):
 
-        self.inc_step = 50
+        self.inc_step = 20
 
         self.step = step
         self.width = width
@@ -174,7 +176,7 @@ class Worker(QObject):
         self.eyeScreen  = Screen()
         self.step = 10 
         self.eyeHist    = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
-        self.eyeProcessor = EyeProcess(self.eye_screen_w,self.eye_screen_h)
+        self.eyeProcessor = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
         
         self.red_dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.red_dot_widget.show()
@@ -184,7 +186,7 @@ class Worker(QObject):
         self.listener = keyboard.Listener(on_press=self.on_quit)
         self.listener.start()
 
-        self.pointsBuffor = Buffor(10)
+        self.pointsBuffor = Buffor(100)
 
     def on_quit(self,key):
         print(dir(key))
@@ -238,8 +240,12 @@ class Worker(QObject):
 
             # print(f"point:{point}")
             # cv2.circle(whiteboardPupil,point,3,(255,0,0),1)
+
+            closeness = self.eyeProcessor.getHeight() * 20
+            print(f"eye closeness {closeness}")
+
             new_point = rotate(point,face)
-            self.pointsBuffor.add(new_point)
+            self.pointsBuffor.add((new_point,closeness))
             self.eyeHist.addPoint(new_point)
             x_axis,y_axis = self.eyeHist.getHist()
 
@@ -255,7 +261,7 @@ class Worker(QObject):
 
             # self.eyeScreen.setSize(screen_x,screen_y,width ,width * 9/16)
             
-            print(f"Screen rect: {self.eyeHist.getLims()} eye closeness {self.eyeProcessor.getHeight()}")
+            print(f"Screen rect: {self.eyeHist.getLims()}")
             (x_min,x_max,y_min,y_max) = self.eyeHist.getLims()
             (x,y) = (x_min, y_min)
             (w,h) = (x_max - x_min), (y_max - y_min)
@@ -264,11 +270,11 @@ class Worker(QObject):
             # self.histDisplay.imshow(
             #     self.__convertFrame(whiteboardHist))
 
-            for _point in self.pointsBuffor.getBuffor():
-                cv2.circle(whiteboardPupil,_point,3,(255,0,0),1)
+            for _point,_closeness in self.pointsBuffor.getBuffor():
+                cv2.circle(whiteboardPupil,_point,3,(int(_closeness),0,255-int(_closeness)),-1)
 
-            print(f"new_point:{new_point}")
-            cv2.circle(whiteboardPupil,new_point,3,(0,0,255),1)
+            print(f"new_point: {new_point}")
+            cv2.circle(whiteboardPupil,new_point,5,(int(closeness),0,255 - int(closeness)),-1)
     
             self.pupilLab.imshow(
                 self.__convertFrame(whiteboardPupil))
@@ -280,8 +286,8 @@ class Worker(QObject):
             #     self.__convertFrame(whiteboardNose))
     
             # showEyes(frame,face)            
-            # self.frameDisplay.imshow(
-            #     self.__convertFrame(frame))
+            self.frameDisplay.imshow(
+                self.__convertFrame(frame))
 
             # print(f"HeadDirection: {self.gestures.getHeadDirection()}")
             

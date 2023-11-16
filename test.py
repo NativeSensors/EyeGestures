@@ -1,49 +1,60 @@
-import matplotlib.pyplot  as plt
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use("TkAgg")
 import numpy as np
-import time 
-import math
+import matplotlib.pyplot as plt
+from scipy.optimize import fsolve
 
-points = np.array([(0.95,0.95),
-                             (0.05,0.05),
-                             (0.95,0.05),
-                             (0.05,0.95),
-                             (0.5,0.95),
-                             (0.5,0.05),
-                             (0.95,0.5),
-                             (0.5,0.5),
-                             (0.05,0.5)])
+# Provided points
+points = np.array([
+    [1, 2], [2, 4], [4, 3], [5, 1], [4, -1], [2, -2]
+])
 
-interpolated = []
-step = 0.01
-for n,point in enumerate(points):
-    if n+1 >= len(points):
-        break
+# Function to fit a quadratic curve and find intersections
+def fit_curve(p1, p2):
+    # Fit a quadratic curve (ax^2 + bx + c) through the points
+    coefficients = np.polyfit([p1[0], p2[0]], [p1[1], p2[1]], 2)
+    curve = np.poly1d(coefficients)
+
+    return curve
+
+# Function to find intersections with y = 0
+def find_intersections(curve, points):
+    def intersection(x):
+        return curve(x)
+
+    intersection_points = fsolve(intersection, 0)
+    return (intersection_points,0)
+
+def getCurves(points, reference_point):
+    segments = []
+    intersection_points = []
+    for i in range(len(points)):
+        p1, p2 = points[i], points[(i + 1 ) % len(points)]
+        if (p1[1] - reference_point[1]) * (p2[1] - reference_point[1]) < 0:
+            curve = fit_curve(p1, p2)
+            
+            segment_x_range = np.linspace(p1[0], p2[0], 100)
+            segments.append((curve,segment_x_range))
+            x = find_intersections(curve,np.array([p1, p2]))
+            intersection_points.append(x)
+
+    return segments,intersection_points
+
+segments, intersections = getCurves(points,[0,0])
+# Plotting the pseudo-elliptic shape
+x_range = np.linspace(min(points[:, 0]), max(points[:, 0]), 400)
+plt.scatter(points[:, 0], points[:, 1], color='red', label="Points")
+plt.axhline(0, color='green', linestyle='--', label="y=0 Line")
+
+# Fit curves and find intersections
+for n,(segment,intersection) in enumerate(zip(segments, intersections)):
     
-    print("==============================================================================================")
-    next_point = points[n+1].copy()
-    print(f"{next_point[0] - point[0]}, {next_point}, {point}")
+    curve, segment_x_range = segment
+    plt.plot(segment_x_range, curve(segment_x_range), label=f"Segment {n+1}")
+    plt.scatter(intersection[0], intersection[1], color='blue', label=f"Intersection {n+1}")
 
-    dir_x = math.ceil((next_point[0] - point[0])/abs(next_point[0] - point[0]+0.000001))
-    dir_y = math.ceil((next_point[1] - point[1])/abs(next_point[1] - point[1]+0.000001))
-    
-    print(f"int: {dir_x} float: {(next_point[1] - point[1])/abs(next_point[1] - point[1]+0.000001)}")
-    print(f"int: {dir_y} float: {(next_point[1] - point[1])/abs(next_point[1] - point[1]+0.000001)}")
-    interpolated.append(point)
-    
-    new_point = point.copy()
-    while np.linalg.norm(new_point-next_point) > 0.01 and 1.0 > new_point[0] > 0 and 1.0 > new_point[1] > 0:
-        new_point[0] = new_point[0] + dir_x * step
-        new_point[1] = new_point[1] + dir_y * step
-        
-        interpolated.append(new_point.copy())
 
-    
-print(point,next_point,dir_x,dir_y)
-
-interpolated = np.array(interpolated)
-
-plt.scatter(interpolated[:,0],interpolated[:,1])
+# plt.scatter(all_intersections)
+plt.legend()
 plt.show()
 
