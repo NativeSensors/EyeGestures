@@ -18,7 +18,6 @@ class EyeProcess:
         self.pupil = face.getLeftPupil()[0]
         self.landmarks = face.getLeftEye()
 
-
         print("get min and max")
         # get center: 
         self.min_x = np.min(self.landmarks[:,0])
@@ -26,13 +25,16 @@ class EyeProcess:
         self.min_y = np.min(self.landmarks[:,1])
         self.max_y = np.max(self.landmarks[:,1])
 
-        print("center")
-        self.center = ((self.min_x + self.max_x)/2,
-                        (self.min_y + self.max_y)/2)
-
         print("get width and heigh")
         self.width  = self.max_x - self.min_x 
         self.height = self.max_y - self.min_y
+        
+        print("center")
+        self.center = self.__convertPoint(((self.min_x + self.max_x)/2,
+                        (self.min_y + self.max_y)/2),
+                        width = self.scale_w, height = self.scale_h,
+                        scale_w = self.width, scale_h = self.height,
+                        offset = (self.min_x, self.min_y))
         
         print("save pupil")
         self.PupilBuffor.add(
@@ -44,8 +46,32 @@ class EyeProcess:
         # do I need that?
         self.height_1 = 20
 
-    def getCenter(self):
-        return self.center
+    def getLeftEyeCorner(self,width = None, height = None):
+        newCorner = self.__convertPoint((self.landmarks[1,0],self.landmarks[1,1]),
+                        width = self.scale_w, height = self.scale_h,
+                        scale_w = self.width, scale_h = self.height,
+                        offset = (self.min_x, self.min_y))
+
+        if not width is None and not height is None:
+            return self.__convertPoint(newCorner,
+                        width = width,height = height,
+                        scale_w = self.scale_w, scale_h = self.scale_h)
+        else:
+            return newCorner
+
+    def getWidth(self):
+        return self.width
+
+    def getHeight(self):
+        return self.height
+
+    def getCenter(self,width = None, height = None):
+        if not width is None and not height is None:
+            return self.__convertPoint(self.center,
+                        width = width,height = height,
+                        scale_w = self.scale_w, scale_h = self.scale_h)
+        else:
+            return self.center
 
     def __convertPoint(self,point,width=1.0,height=1.0,scale_w = 1.0,scale_h = 1.0,offset = (0.0,0.0)):
         (min_x, min_y) = offset
