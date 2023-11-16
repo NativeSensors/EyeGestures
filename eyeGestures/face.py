@@ -77,12 +77,6 @@ class Face:
     def getLandmarks(self):
         return self.landmarks
 
-    def getLeftPolar(self):
-        return self.eyeLeft.getPolar()
-
-    def getRightPolar(self):
-        return self.eyeRight.getPolar()
-
     def getHeadTilt(self):
         return self.nose.getHeadTilt()
 

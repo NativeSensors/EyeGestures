@@ -2,70 +2,44 @@ import cv2
 import math
 import numpy as np
 import eyeGestures.pupil as pupil
+from scipy.optimize import fsolve
 
-class PolarEye:
+# Function to fit a quadratic curve and find intersections
+def fit_curve(p1, p2):
+    # Fit a quadratic curve (ax^2 + bx + c) through the points
+    coefficients = np.polyfit([p1[0], p2[0]], [p1[1], p2[1]], 2)
+    curve = np.poly1d(coefficients)
 
-    REFERENCE_KEYPOINT = 0
+    return curve
 
-    def __init__(self,pupil,landmarks, center):
-        self.pupil     = pupil[0] 
-        self.landmarks = landmarks
-        self.center    = center
+# Function to find intersections with y = 0
+def find_intersections(curve, points):
+    def intersection(x):
+        return curve(x)
 
-        self.__process(pupil,landmarks)
-        pass
+    intersection_points = fsolve(intersection, 0)
+    return (intersection_points,0)
 
-    def __convert2polar(self,point):
-        (x,y) = point
-        (cx,cy) = self.center
-        (x,y) = (x - cx,y - cy)
+def getCurves(points, reference_point):
+    segments = []
+    intersection_points = []
+    for i in range(len(points)):
+        p1, p2 = points[i], points[(i + 1 ) % len(points)]
+        if (p1[1] - reference_point) * (p2[1] - reference_point) < 0:
+            curve = fit_curve(p1, p2)
+            
+            segment_x_range = np.linspace(p1[0], p2[0], 100)
+            segments.append((curve,segment_x_range))
+            x = find_intersections(curve,np.array([p1, p2]))
+            intersection_points.append(x)
 
-        angle = math.atan2(y,x)*180/np.pi
-        if angle < 0:
-            angle += 360
-        r = math.dist([0,0],[x,y])
+    return segments,intersection_points
 
-        return (r,angle)
+def getIntersections(points, reference_point):
+    _, intersetions = getCurves(points, reference_point)
+    return np.array(intersetions)
 
-    def __convert2cartesian(self,r,angle):
-        x = r*math.sin(angle)
-        y = r*math.cos(angle)
-        
-        return (x,y)
-
-
-    def __process(self,pupil,landmarks):
-        desired_angle = 180
-        _,ref_angle = self.__convert2polar(landmarks[self.REFERENCE_KEYPOINT])
-        self.correction_angle = ref_angle - desired_angle 
-
-
-    def getPupil(self):
-        return np.array(
-            self.__convert2polar(self.pupil)) 
-
-    def getCorrectedPupil(self):
-        (r, angle) = self.__convert2polar(self.pupil) 
-        return np.array(
-            self.__convert2cartesian(r, angle - self.correction_angle))
-
-    def getLandmarks(self):
-        landmarks_polar = []
-        for point in self.landmarks:
-            landmarks_polar.append(self.__convert2polar(point))
-        return np.array(landmarks_polar)
-
-    def getCorrectedLandmarks(self):
-        landmarks_polar = []
-        for point in self.landmarks:
-            (r, angle) = self.__convert2polar(point) 
-            landmarks_polar.append(
-                self.__convert2cartesian(r, angle - self.correction_angle))
-        return np.array(landmarks_polar)
-
-        
-
-
+    
 class Eye:    
     LEFT_EYE_KEYPOINTS = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     RIGHT_EYE_KEYPOINTS = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
@@ -83,19 +57,18 @@ class Eye:
         self._process(self.image,self.region)
 
         #getting polar coordinates
-        self.polar = PolarEye(self.pupil.getCoords(),self.region,(self.center_x,self.center_y))
+        # self.polar = PolarEye(self.pupil.getCoords(),self.region,(self.center_x,self.center_y))
 
     def getPupil(self):
         return self.pupil.getCoords()
 
+    # def getIntersection(self):
+    #     return self.pupil.getCoords()
+
     def getLandmarks(self):
         return self.region 
 
-    def getPolar(self):
-        return self.polar
-
     def _process(self,image,region):
-        points = np.array([[100, 50], [200, 150], [300, 50]], dtype=np.int32)
 
         h, w = image.shape
         mask = np.full((h, w), 255, dtype=np.uint8) 
@@ -113,8 +86,10 @@ class Eye:
         self.center_x = (min_x + max_x)/2
         self.center_y = (min_y + max_y)/2
 
+        # self.intersection = getIntersections(region,self.center_y)
+
         cut_image = masked_image[min_y:max_y,min_x:max_x] 
-  
+
         self.pupil = pupil.Pupil(cut_image,min_x,min_y)
 
 

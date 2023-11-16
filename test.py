@@ -1,12 +1,12 @@
 import matplotlib
 matplotlib.use("TkAgg")
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.optimize import fsolve
 
 # Provided points
 points = np.array([
-    [1, 2], [2, 4], [4, 3], [5, 1], [4, -1], [2, -2]
+    [1, -0.1], [2, 2], [4, 1.5], [5, 1], [4, -1], [2, -2]
 ])
 
 # Function to fit a quadratic curve and find intersections
@@ -39,6 +39,10 @@ def getCurves(points, reference_point):
             intersection_points.append(x)
 
     return segments,intersection_points
+
+def getIntersections(points, reference_point):
+    _, intersetions = getCurves(points, reference_point)
+    return intersetions
 
 segments, intersections = getCurves(points,[0,0])
 # Plotting the pseudo-elliptic shape

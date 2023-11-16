@@ -8,8 +8,8 @@ from eyeGestures.utils import Buffor
 class EyeProcessor:
 
     def __init__(self,scale_w=250,scale_h=250):
-        self.pupilBuffor = Buffor(30)
-        self.avgRetBuffor = Buffor(30)
+        self.pupilBuffor = Buffor(20)
+        self.avgRetBuffor = Buffor(20)
         self.scale_w = scale_w
         self.scale_h = scale_h
 
@@ -88,9 +88,10 @@ class EyeProcessor:
         else:
             _retPupil = self.pupilBuffor.getAvg()
 
-        self.avgRetBuffor.add(_retPupil,self.getWidth())
-
-        return (_retPupil,self.getWidth())
+        # THIS BUFFOR HAS _retPupil and Width
+        self.avgRetBuffor.add((_retPupil,self.getHeight()))
+        
+        return (_retPupil,self.getHeight())
 
 ## main code:
 
