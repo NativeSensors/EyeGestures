@@ -194,17 +194,22 @@ class Worker(QObject):
         self.eyeScreen  = Screen(1920,1080,190,60,100,80)
         self.step = 10 
         self.eyeHist    = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
-        self.eyeProcessor = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
+        self.eyeProcessorLeft = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
+        self.eyeProcessorRight = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
         
         self.red_dot_widget = DotWidget(diameter=50,color = (255,120,0))
         self.red_dot_widget.show()
+
+        self.blue_dot_widget = DotWidget(diameter=50,color = (0,120,255))
+        self.blue_dot_widget.show()
 
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
         self.__run = True
         self.listener = keyboard.Listener(on_press=self.on_quit)
         self.listener.start()
 
-        self.pointsBuffor = Buffor(50)
+        self.pointsBufforLeft = Buffor(50)
+        self.pointsBufforRight = Buffor(50)
 
     def on_quit(self,key):
         print(dir(key))
@@ -250,19 +255,29 @@ class Worker(QObject):
         (w,h) = self.eyeScreen.getWH()  
         cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(255,0,0),2)
     
-    def __display_eyeTracker(self,whiteboardPupil,point):
-        for _point,_closeness in self.pointsBuffor.getBuffor():
+    def __display_eyeTracker(self,whiteboardPupil,pointLeft,pointRight):
+
+        for _point,_closeness in self.pointsBufforLeft.getBuffor():
             p = (_point[0],100)
             cv2.circle(whiteboardPupil,p,3,(int(_closeness),0,255-int(_closeness)),-1)
 
-        p = (point[0][0],100)
-        cv2.circle(whiteboardPupil,p,5,(int(point[1]),0,255 - int(point[1])),-1)
-            
+        for _point,_closeness in self.pointsBufforRight.getBuffor():
+            p = (_point[0],100)
+            cv2.circle(whiteboardPupil,p,3,(int(_closeness),255-int(_closeness),0),-1)
+
+        p = (pointLeft[0][0],100)
+        cv2.circle(whiteboardPupil,p,5,(int(pointLeft[1]),0,255 - int(pointLeft[1])),-1)            
         screen_point = self.eyeScreen.convertToScreen(p)     
         (w,h) = (self.red_dot_widget.size().width(),self.red_dot_widget.size().height()) 
-        print(f" (w,h): {(w,h)}")
         self.red_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
-     
+
+        p = (pointRight[0][0],100)
+        cv2.circle(whiteboardPupil,p,5,(int(pointRight[1]),0,255 - int(pointRight[1])),-1)            
+        screen_point = self.eyeScreen.convertToScreen(p)     
+        (w,h) = (self.blue_dot_widget.size().width(),self.blue_dot_widget.size().height()) 
+        self.blue_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
+
+
     def __display_left_eye(self,frame):
         frame = frame
         face = self.gestures.getFeatures(frame)
@@ -270,15 +285,25 @@ class Worker(QObject):
         if not face is None:
             whiteboardPupil = np.full((self.eye_screen_h,self.eye_screen_w,3),255.0,dtype = np.uint8)
             
-            self.eyeProcessor.append(face)
-            point = self.eyeProcessor.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            new_point = (rotate(point[0],face),point[1]*20)
+            self.eyeProcessorLeft.append(face.getLeftPupil()[0],face.getLeftEye())
+            self.eyeProcessorRight.append(face.getRightPupil()[0],face.getRightEye())
 
-            self.pointsBuffor.add(new_point)
+            print(f"pupils distance: {face.getRightPupil()[0][0] - face.getLeftPupil()[0][0]}")
+            point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
+            pointLeft = (rotate(point[0],face),point[1]*20)
 
-            self.__display_hist(whiteboardPupil,new_point)
+            point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
+            pointRight = (rotate(point[0],face),point[1]*20)  
+
+            self.pointsBufforLeft.add(pointLeft)
+            self.pointsBufforRight.add(pointRight)
+
+            print("displaying")
+            self.__display_hist(whiteboardPupil,pointLeft)
+            print("screen")
             self.__display_screen(whiteboardPupil)
-            self.__display_eyeTracker(whiteboardPupil,new_point)
+            print("eyeTracker")
+            self.__display_eyeTracker(whiteboardPupil,pointLeft,pointRight)
 
             self.pupilLab.imshow(
                 self.__convertFrame(whiteboardPupil))

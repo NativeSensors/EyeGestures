@@ -13,10 +13,12 @@ class EyeProcessor:
         self.scale_w = scale_w
         self.scale_h = scale_h
 
-    def append(self,face):
+    def append(self,pupil : (int,int) ,landmarks : np.ndarray):
         print("convert")
-        self.pupil = face.getLeftPupil()[0]
-        self.landmarks = face.getLeftEye()
+        # self.pupil = face.getLeftPupil()[0]
+        # self.landmarks = face.getLeftEye()
+        self.pupil = pupil
+        self.landmarks = landmarks
 
         print("get min and max")
         # get center: 
