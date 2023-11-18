@@ -78,7 +78,6 @@ class Display(QWidget):
         # Stop the frame processor when closing the widget
         super(Display, self).closeEvent(event)
 
-
 class ScreenHist:
 
     def __init__(self,width,height,step):
@@ -159,7 +158,6 @@ class Screen:
         self.height = height
 
     def convertToScreen(self, point):
-        print(f"point: {point[0]} x: {self.x} (point[0] - self.x) < 0: {(point[0] - self.x)}")
         x = (point[0] - self.x) * ((point[0] - self.x) > 0)
         x = int((x/self.width) * self.screen_width)
 
@@ -167,7 +165,6 @@ class Screen:
         y = int((y/self.height) * self.screen_height)
         self.screen_buffor.add((x,y))
 
-        print(f"point: {point[0]} x: {self.x} (point[0] - self.x) < 0: {(point[0] - self.x)}")
         return self.screen_buffor.getAvg()
 
     def getRect(self):
@@ -182,10 +179,12 @@ class Worker(QObject):
         (width,height) = (int(monitors[0].width),int(monitors[0].height))
         self.gestures = EyeGestures(height,width)
 
-        self.frameDisplay = Display()  
-        self.pupilLab     = Display()  
-        self.noseTilt     = Display()
-        # self.frameDisplay.show()
+        self.pupilLab        = Display()  
+        self.noseTilt        = Display()
+        self.leftEyeDisplay  = Display()  
+        self.rightEyeDisplay = Display()  
+        self.leftEyeDisplay.show()
+        self.rightEyeDisplay.show()
         self.pupilLab.show()
         # self.noseTilt.show()
 
@@ -193,8 +192,9 @@ class Worker(QObject):
         self.eye_screen_h = 500
         self.eyeScreen  = Screen(1920,1080,190,60,100,80)
         self.step = 10 
-        self.eyeHist    = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
-        self.eyeProcessorLeft = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
+        self.eyeHist           = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
+
+        self.eyeProcessorLeft  = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
         self.eyeProcessorRight = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
         
         self.red_dot_widget = DotWidget(diameter=50,color = (255,120,0))
@@ -285,6 +285,11 @@ class Worker(QObject):
         if not face is None:
             whiteboardPupil = np.full((self.eye_screen_h,self.eye_screen_w,3),255.0,dtype = np.uint8)
             
+            faceBox = face.getBoundingBox()
+            (x,y,w,h) = (faceBox[0][0],faceBox[0][1],faceBox[1][0],faceBox[1][1])
+            print(f"facebox shape: {faceBox.shape}")
+            print(f"{x} {y} {w} {h} {w/h}")
+
             self.eyeProcessorLeft.append(face.getLeftPupil()[0],face.getLeftEye())
             self.eyeProcessorRight.append(face.getRightPupil()[0],face.getRightEye())
 
@@ -307,6 +312,12 @@ class Worker(QObject):
 
             self.pupilLab.imshow(
                 self.__convertFrame(whiteboardPupil))
+
+            self.leftEyeDisplay.imshow(
+                self.__convertFrame(cv2.resize(face.getLeftEyeImage(),(360,240))))
+
+            self.rightEyeDisplay.imshow(
+                self.__convertFrame(cv2.resize(face.getRightEyeImage(),(360,240))))
 
 
             # display camera feed

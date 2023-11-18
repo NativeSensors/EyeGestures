@@ -38,7 +38,7 @@ class EyeProcessor:
                         scale_w = self.width, scale_h = self.height,
                         offset = (self.min_x, self.min_y))
         
-        print("save pupil")
+        print(f"save pupil: {self.pupil}")
         self.pupilBuffor.add(
             self.__convertPoint(self.pupil,
                             width = self.scale_w, height = self.scale_h,

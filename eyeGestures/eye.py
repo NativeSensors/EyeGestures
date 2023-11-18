@@ -62,6 +62,9 @@ class Eye:
     def getPupil(self):
         return self.pupil.getCoords()
 
+    def getImage(self):
+        return cv2.cvtColor(self.cut_image,cv2.COLOR_GRAY2BGR)
+
     # def getIntersection(self):
     #     return self.pupil.getCoords()
 
@@ -88,9 +91,9 @@ class Eye:
 
         # self.intersection = getIntersections(region,self.center_y)
 
-        cut_image = masked_image[min_y:max_y,min_x:max_x] 
+        self.cut_image = masked_image[min_y:max_y,min_x:max_x] 
 
-        self.pupil = pupil.Pupil(cut_image,min_x,min_y)
+        self.pupil = pupil.Pupil(self.cut_image,min_x,min_y)
 
 
             

@@ -41,22 +41,6 @@ class Face:
         relPositions[:,1] = relPositions[:,1] - top
         return relPositions
 
-    def getRelLeftEye(self):
-        return self.__relativePos(
-            self.eyeLeft.getLandmarks())
-        
-    def getRelRightEye(self):
-        return self.__relativePos(
-            self.eyeRight.getLandmarks())
-
-    def getRelLeftPupil(self):
-        return self.__relativePos(
-            self.eyeLeft.getPupil())
-
-    def getRelRightPupil(self):
-        return self.__relativePos(
-            self.eyeRight.getPupil())
-
     # Absolute postions to image
     def getBoundingBox(self):
         return np.array([[self.rect.left(),self.rect.top()],
@@ -73,6 +57,12 @@ class Face:
 
     def getRightPupil(self):
         return self.eyeRight.getPupil()
+
+    def getLeftEyeImage(self):
+        return self.eyeLeft.getImage()
+
+    def getRightEyeImage(self):
+        return self.eyeRight.getImage()
 
     def getLandmarks(self):
         return self.landmarks
