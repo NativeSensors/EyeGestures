@@ -11,15 +11,23 @@ class FaceFinder:
         self.facePredictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
         self.faceDetector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
         
+
     def find(self,image):
+
         if len(image.shape) > 2:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         try:
             (x, y, w, h) = self.faceDetector.detectMultiScale(image, 1.1, 9)[0]
-            face = self.facePredictor(image, dlib.rectangle(x, y, x+w, y+h))
+            __face_landmarks = self.facePredictor(image, dlib.rectangle(x, y, x+w, y+h))
         
-            return Face(image,face)
+            # if attrirbute do not exist then create it
+            if not hasattr(self,"face"):
+                self.face = Face(image,__face_landmarks)
+            else:
+                self.face.update(image,__face_landmarks)
+
+            return self.face
         except Exception as e:
             print(f"Exception in FaceFinder: {e}")
             return None
@@ -30,7 +38,12 @@ class Face:
         self.face = face
 
         self.landmarks = self._landmarks(self.face)
-        print(f"processing face self.landmarks:{self.landmarks.shape}")
+        self._process(image,self.face)
+
+    def update(self,image,face):
+        self.face = face
+
+        self.landmarks = self._landmarks(self.face)
         self._process(image,self.face)
 
     # Relative postions to face bounding box  
@@ -89,7 +102,15 @@ class Face:
         self.lt_corner = (self.rect.left(),self.rect.top())
         self.rb_corner = (self.rect.right(),self.rect.bottom())
 
-        self.eyeLeft  = eye.Eye(image,self.landmarks,0)
-        self.eyeRight = eye.Eye(image,self.landmarks,1)
-        self.nose     = nose.Nose(image,self.landmarks)
+        if not hasattr(self,"eyeLeft"):
+            self.eyeLeft  = eye.Eye(image,self.landmarks,0)
+        else:
+            self.eyeLeft.update(image,self.landmarks)
+
+        if not hasattr(self,"eyeRight"):
+            self.eyeRight  = eye.Eye(image,self.landmarks,1)
+        else:
+            self.eyeRight.update(image,self.landmarks)
+
+        self.nose = nose.Nose(image,self.landmarks)
         

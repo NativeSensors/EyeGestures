@@ -4,11 +4,13 @@ import numpy as np
 
 class Pupil:
 
-    def __init__(self,eye_frame,ref_x, ref_y):
+    def __init__(self,eye_frame,ref_x,ref_y,img_scale,org_scale):
         self.thersh = 35
         self.eye_frame = eye_frame
         self.ref_x = ref_x
         self.ref_y = ref_y
+        self.img_scale = img_scale 
+        self.org_scale = org_scale
 
         self.__process(eye_frame)
 
@@ -61,7 +63,9 @@ class Pupil:
             x = int(moments['m10'] / moments['m00']) 
             y = int(moments['m01'] / moments['m00'])
 
-            self.pupil = np.array([(x + self.ref_x,y + self.ref_y)])
+            self.pupil = np.array((
+                (x/self.img_scale[0] * self.org_scale[0]) + self.ref_x,
+                (y/self.img_scale[1] * self.org_scale[1]) + self.ref_y))
         except (IndexError, ZeroDivisionError):
             self.pupil = np.array([(np.NAN,np.NAN)])
             pass

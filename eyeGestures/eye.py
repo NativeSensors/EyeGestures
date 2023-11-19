@@ -3,6 +3,7 @@ import math
 import numpy as np
 import eyeGestures.pupil as pupil
 from scipy.optimize import fsolve
+from eyeGestures.utils import Buffor
 
 # Function to fit a quadratic curve and find intersections
 def fit_curve(p1, p2):
@@ -44,26 +45,41 @@ class Eye:
     LEFT_EYE_KEYPOINTS = [36, 37, 38, 39, 40, 41] # keypoint indices for left eye
     RIGHT_EYE_KEYPOINTS = [42, 43, 44, 45, 46, 47] # keypoint indices for right eye
 
+    scale = (150,100)
+
     def __init__(self,image : np.ndarray, landmarks : list, side : int):
+        self.eyeBuffer = Buffor(2)
+        
         self.image = image
         self.landmarks = landmarks
 
         # check if eye is left or right
         if side == 1:
+            self.side = "right"
             self.region = np.array(landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
         elif side == 0:
+            self.side = "left"
             self.region = np.array(landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
         
         self._process(self.image,self.region)
 
-        #getting polar coordinates
-        # self.polar = PolarEye(self.pupil.getCoords(),self.region,(self.center_x,self.center_y))
+    def update(self,image : np.ndarray, landmarks : list):
+        self.image = image
+        self.landmarks = landmarks
+        # check if eye is left or right
+        if self.side == "right":
+            self.region = np.array(landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
+        elif self.side == "left":
+            self.region = np.array(landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
+        
+        self._process(self.image,self.region)
+
 
     def getPupil(self):
         return self.pupil.getCoords()
 
     def getImage(self):
-        return cv2.cvtColor(self.cut_image,cv2.COLOR_GRAY2BGR)
+        return self.cut_image
 
     # def getIntersection(self):
     #     return self.pupil.getCoords()
@@ -86,14 +102,22 @@ class Eye:
         min_y = np.min(region[:,1]) - margin
         max_y = np.max(region[:,1]) + margin
 
+        width  = max_x - min_x
+        height = max_y - min_y
+
         self.center_x = (min_x + max_x)/2
         self.center_y = (min_y + max_y)/2
 
         # self.intersection = getIntersections(region,self.center_y)
-
         self.cut_image = masked_image[min_y:max_y,min_x:max_x] 
-
-        self.pupil = pupil.Pupil(self.cut_image,min_x,min_y)
-
+        self.cut_image = cv2.resize(self.cut_image,self.scale)
+        
+        # save cut_image to buffor and get avg from previous buffors 
+        self.eyeBuffer.add(self.cut_image)
+        self.cut_image = np.array(self.eyeBuffer.getAvg(), dtype=np.uint8) 
+            
+        org_scale = (width,height)
+        self.pupil = pupil.Pupil(self.cut_image, min_x, min_y, self.scale, org_scale)
+        
 
             
