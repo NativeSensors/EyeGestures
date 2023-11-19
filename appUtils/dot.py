@@ -82,7 +82,6 @@ class DotWidget(QWidget):
         if key.char == 'q':
             # Stop listening to the keyboard input and close the application
             self.close()
-            self.listener.join()
 
     def closeEvent(self, event):
         # Ensure the application quits completely

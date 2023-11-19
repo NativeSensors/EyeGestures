@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from pynput import keyboard
 
 from eyeGestures.utils import VideoCapture, Buffor
 

@@ -15,8 +15,6 @@ class EyeProcessor:
 
     def append(self,pupil : (int,int) ,landmarks : np.ndarray):
         print("convert")
-        # self.pupil = face.getLeftPupil()
-        # self.landmarks = face.getLeftEye()
         self.pupil = pupil
         self.landmarks = landmarks
 

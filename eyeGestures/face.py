@@ -60,22 +60,10 @@ class Face:
                         [self.rect.right(),self.rect.bottom()]])
 
     def getLeftEye(self):
-        return self.eyeLeft.getLandmarks()
+        return self.eyeLeft
 
     def getRightEye(self):
-        return self.eyeRight.getLandmarks()
-
-    def getLeftPupil(self):
-        return self.eyeLeft.getPupil()
-
-    def getRightPupil(self):
-        return self.eyeRight.getPupil()
-
-    def getLeftEyeImage(self):
-        return self.eyeLeft.getImage()
-
-    def getRightEyeImage(self):
-        return self.eyeRight.getImage()
+        return self.eyeRight
 
     def getLandmarks(self):
         return self.landmarks

@@ -34,11 +34,13 @@ class GazeTracker:
         
         if not face is None:
             self.__headDir = self.noseDirection.getPos(face.getNose())
-        
-            llandmards = face.getLeftEye()
-            lpupil     = face.getLeftPupil()
-            rlandmards = face.getRightEye()
-            rpupil     = face.getRightPupil()
+            l_eye = face.getLeftEye()
+            r_eye = face.getRightEye()
+            
+            llandmards = l_eye.getLandmarks()
+            lpupil     = l_eye.getPupil()
+            rlandmards = r_eye.getLandmarks()
+            rpupil     = r_eye.getPupil()
             faceBox    = face.getBoundingBox()
 
             eyes = np.concatenate((llandmards,lpupil,rlandmards,rpupil,faceBox))

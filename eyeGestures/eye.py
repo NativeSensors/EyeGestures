@@ -48,6 +48,7 @@ class Eye:
     scale = (150,100)
 
     def __init__(self,image : np.ndarray, landmarks : list, side : int):
+        self.gaze_buff = Buffor(10)
         self.eyeBuffer = Buffor(2)
         
         self.image = image
@@ -81,6 +82,25 @@ class Eye:
     def getImage(self):
         return self.cut_image
 
+    def getGaze(self):
+        pupilCoords = self.pupil.getCoords()
+        
+        sumY = 0
+        sumX = 0
+
+        __region = self.region
+
+        for point in __region:
+            (x,y) = (point[0] - pupilCoords[0],point[1] - pupilCoords[1])
+
+            sumY += y
+            sumX += x
+
+        ret_point = (-sumX*self.height/self.width,sumY)
+        self.gaze_buff.add(ret_point)
+        
+        return self.gaze_buff.getAvg()
+        
     # def getIntersection(self):
     #     return self.pupil.getCoords()
 
@@ -102,8 +122,9 @@ class Eye:
         min_y = np.min(region[:,1]) - margin
         max_y = np.max(region[:,1]) + margin
 
-        width  = max_x - min_x
-        height = max_y - min_y
+        self.width  = max_x - min_x
+        self.height = max_y - min_y
+        print(f"eye openness: {self.height}")
 
         self.center_x = (min_x + max_x)/2
         self.center_y = (min_y + max_y)/2
@@ -116,7 +137,7 @@ class Eye:
         self.eyeBuffer.add(self.cut_image)
         self.cut_image = np.array(self.eyeBuffer.getAvg(), dtype=np.uint8) 
             
-        org_scale = (width,height)
+        org_scale = (self.width,self.height)
         self.pupil = pupil.Pupil(self.cut_image, min_x, min_y, self.scale, org_scale)
         
 

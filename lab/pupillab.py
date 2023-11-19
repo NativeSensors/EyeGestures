@@ -1,18 +1,25 @@
-from PySide2.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QVBoxLayout
-from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QImage, QPixmap
+import numpy as np
+from pynput import keyboard
+
+from PySide2.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QVBoxLayout, QSizePolicy
+from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QImage, QPixmap 
 from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
 
 class Display(QWidget):
     def __init__(self, parent=None):
         super(Display, self).__init__(parent)
         self.label = QLabel(self)
-        layout = QVBoxLayout()
-        layout.addWidget(self.label)
-        self.setLayout(layout)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.label)
+        self.setLayout(self.layout)
+        self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
 
     def imshow(self, q_image):
         # Update the label's pixmap with the new frame
-        self.label.setPixmap(QPixmap.fromImage(q_image))
+        pixmap = QPixmap.fromImage(q_image)
+        self.label.setPixmap(pixmap )
+        self.label.repaint()
     
     def on_quit(self):
         self.close()
@@ -28,18 +35,27 @@ class Worker(QObject):
 
         self.__displayPool = dict()
         self.__thread = thread
-
+        
         self.listener = keyboard.Listener(on_press=self.on_quit)
         self.listener.start()
+
+        self.__run = True
+
+        self.thread = QThread()
+        self.moveToThread(self.thread)
+
+        self.thread.started.connect(self.run)
+        self.thread.start()
+
 
     def imshow(self, name : str, frame: np.ndarray):
         if not name in self.__displayPool.keys():
             self.__displayPool[name] = Display()
-        self.__displayPool.imshow(self.__convertFrame(frame))
+            self.__displayPool[name].show()
+        self.__displayPool[name].imshow(self.__convertFrame(frame))
 
 
     def on_quit(self,key):
-        print(dir(key))
         if not hasattr(key,'char'):
             return
 
@@ -48,6 +64,9 @@ class Worker(QObject):
 
             for key in self.__displayPool.keys():
                 self.__displayPool[key].on_quit()
+
+            self.thread.quit()
+            self.thread.wait()
             
     def __convertFrame(self,frame):
         h, w, ch = frame.shape

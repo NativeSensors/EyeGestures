@@ -9,8 +9,7 @@ from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
 import keyboard
 
 from lab.pupillab import Worker
-
-
+from lab.components import Screen, ScreenHist
 
 from eyeGestures.utils import VideoCapture, Buffor
 from eyeGestures.eyegestures import EyeGestures
@@ -42,40 +41,35 @@ def rotate(point,face):
 def showEyes(image,face):
 
     if face is not None:
-        cv2.circle(image,face.getLeftPupil(),2,(0,0,255),1)
-        for point in face.getLeftEye():
+        l_eye = face.getLeftEye()
+        r_eye = face.getRightEye()
+
+        cv2.circle(image,l_eye.getPupil(),2,(0,0,255),1)
+        for point in l_eye.getLandmarks():
             cv2.circle(image,point,2,(0,255,0),1)
 
-        cv2.circle(image,face.getRightPupil(),2,(0,0,255),1)
-        for point in face.getRightEye():
+        cv2.circle(image,r_eye.getPupil(),2,(0,0,255),1)
+        for point in r_eye.getLandmarks():
             cv2.circle(image,point,2,(0,255,0),1)
 
         for point in face.getLandmarks():
             cv2.circle(image,point,2,(255,0,0),1)            
 
-class Worker(QObject):
+class Lab:
 
     def __init__(self):
-        super().__init__()
-
+        
         monitors = get_monitors()
         (width,height) = (int(monitors[0].width),int(monitors[0].height))
         self.gestures = EyeGestures(height,width)
-
-        self.pupilLab        = Display()  
-        self.noseTilt        = Display()
-        self.leftEyeDisplay  = Display()  
-        self.rightEyeDisplay = Display()  
-        self.leftEyeDisplay.show()
-        self.rightEyeDisplay.show()
-        self.pupilLab.show()
         # self.noseTilt.show()
 
         self.eye_screen_w = 500
         self.eye_screen_h = 500
-        self.eyeScreen  = Screen(1920,1080,190,60,100,80)
+        self.eyeScreen    = Screen(1920,1080,190,60,100,80)
         self.step = 10 
-        self.eyeHist           = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
+        self.eyeHist      = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
+
 
         self.eyeProcessorLeft  = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
         self.eyeProcessorRight = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
@@ -86,16 +80,19 @@ class Worker(QObject):
         self.blue_dot_widget = DotWidget(diameter=50,color = (0,120,255))
         self.blue_dot_widget.show()
 
-        self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
+        self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')        
         self.__run = True
+
         self.listener = keyboard.Listener(on_press=self.on_quit)
         self.listener.start()
 
-        self.pointsBufforLeft = Buffor(50)
+        self.pointsBufforLeft  = Buffor(50)
         self.pointsBufforRight = Buffor(50)
 
         self.eyeImageBuffer_L = Buffor(5)
         self.eyeImageBuffer_R = Buffor(5)
+
+        self.worker = Worker(self.run)
 
     def on_quit(self,key):
         print(dir(key))
@@ -144,6 +141,7 @@ class Worker(QObject):
         (w,h) = self.eyeScreen.getWH()  
         cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(255,0,0),2)
     
+
     def __display_eyeTracker(self,whiteboardPupil,pointLeft,pointRight):
 
         for _point,_closeness in self.pointsBufforLeft.getBuffor():
@@ -166,6 +164,25 @@ class Worker(QObject):
         (w,h) = (self.blue_dot_widget.size().width(),self.blue_dot_widget.size().height()) 
         self.blue_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
 
+    def __display_extended_gaze(self,display,pupil,gaze):
+        start_point = (int(pupil[0]),int(pupil[1]))
+        (x,y) = (int(gaze[0]),int(gaze[1]))
+
+        angle = math.atan2(y,x) * 180 / np.pi
+        r = math.dist(gaze,(0,0))
+        
+        new_point = (
+            int(r*math.cos(np.pi * angle / 180)) + int(pupil[0]), # x
+            int(r*math.sin(np.pi * angle / 180)) + int(pupil[1]) # y
+        )
+
+        cv2.line(display,start_point,new_point,(255,255,0),1)
+
+    def __display_gaze(self,display,pupil,gaze):
+        start_point = (int(pupil[0]),int(pupil[1]))
+        end_point = (int(pupil[0] + gaze[0]),int(pupil[1] + gaze[1]))
+        cv2.line(display,start_point,end_point,(255,255,0),1)
+
 
     def __display_left_eye(self,frame):
         frame = frame
@@ -177,12 +194,12 @@ class Worker(QObject):
             faceBox = face.getBoundingBox()
             (x,y,w,h) = (faceBox[0][0],faceBox[0][1],faceBox[1][0],faceBox[1][1])
             print(f"facebox shape: {faceBox.shape}")
-            print(f"{x} {y} {w} {h} {w/h}")
 
-            self.eyeProcessorLeft.append(face.getLeftPupil(),face.getLeftEye())
-            self.eyeProcessorRight.append(face.getRightPupil(),face.getRightEye())
+            l_eye = face.getLeftEye()
+            r_eye = face.getRightEye()
+            self.eyeProcessorLeft.append(l_eye.getPupil(),l_eye.getLandmarks())
+            self.eyeProcessorRight.append(r_eye.getPupil(),r_eye.getLandmarks())
 
-            print(f"pupils distance: {face.getRightPupil()[0] - face.getLeftPupil()[0]}")
             point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
             pointLeft = (rotate(point[0],face),point[1]*20)
 
@@ -199,17 +216,20 @@ class Worker(QObject):
             print("eyeTracker")
             self.__display_eyeTracker(whiteboardPupil,pointLeft,pointRight)
 
-            self.pupilLab.imshow(
-                self.__convertFrame(whiteboardPupil))
 
-            colour_frame = cv2.cvtColor(face.getLeftEyeImage(), cv2.COLOR_GRAY2BGR)
-            self.leftEyeDisplay.imshow(
-                self.__convertFrame(colour_frame))
+            self.__display_gaze(frame,l_eye.getPupil(),l_eye.getGaze())
+            self.__display_gaze(frame,r_eye.getPupil(),r_eye.getGaze())
+            self.__display_extended_gaze(frame,l_eye.getPupil(),l_eye.getGaze())
+            self.__display_extended_gaze(frame,r_eye.getPupil(),r_eye.getGaze())
+            self.worker.imshow("frame",frame)
 
+            self.worker.imshow("whitebaord",whiteboardPupil)
 
-            colour_frame = cv2.cvtColor(face.getRightEyeImage(), cv2.COLOR_GRAY2BGR)
-            self.rightEyeDisplay.imshow(
-                self.__convertFrame(colour_frame))
+            colour_frame = cv2.cvtColor(l_eye.getImage(), cv2.COLOR_GRAY2BGR)
+            self.worker.imshow("left eye",colour_frame)
+
+            colour_frame = cv2.cvtColor(r_eye.getImage(), cv2.COLOR_GRAY2BGR)
+            self.worker.imshow("right eye",colour_frame)
 
 
             # display camera feed
@@ -224,26 +244,20 @@ class Worker(QObject):
         monitors = get_monitors()
         (width,height) = (int(monitors[0].width),int(monitors[0].height))
         ret = True
+        print("start")
         while ret and self.__run:
 
             ret, frame = self.cap.read()     
             
+            print("run")
             try:
                 self.__display_left_eye(frame)
             except Exception as e:
                 print(f"crashed in debug {e}")
 
-        #show point on sandbox
-        # cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    thread = QThread()
-    worker = Worker()
-    worker.moveToThread(thread)
-
-    thread.started.connect(worker.run)
-    thread.start()
-
+    Lab()
     sys.exit(app.exec_())
     
