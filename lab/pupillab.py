@@ -2,8 +2,35 @@ import numpy as np
 from pynput import keyboard
 
 from PySide2.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QVBoxLayout, QSizePolicy
-from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QImage, QPixmap 
+from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QImage, QPixmap, QBrush
 from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
+
+class DisplayWithMask(QWidget):
+    def __init__(self, parent=None):
+        super(Display, self).__init__(parent)
+        self.label = QLabel(self)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.label)
+        self.setLayout(self.layout)
+        self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+    def imshow(self, q_image):
+        painter = QPainter(q_image)
+        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        painter.setBrush(QBrush(Qt.green, Qt.DiagCrossPattern))
+        painter.drawRect(100, 15, 400, 200)
+        # Update the label's pixmap with the new frame
+        pixmap = QPixmap.fromImage(q_image)
+        self.label.setPixmap(pixmap )
+        self.label.repaint()
+    
+    def on_quit(self):
+        self.close()
+
+    def closeEvent(self, event):
+        # Stop the frame processor when closing the widget
+        super(Display, self).closeEvent(event)
+
 
 class Display(QWidget):
     def __init__(self, parent=None):
@@ -16,11 +43,17 @@ class Display(QWidget):
 
 
     def imshow(self, q_image):
-        # Update the label's pixmap with the new frame
         pixmap = QPixmap.fromImage(q_image)
-        self.label.setPixmap(pixmap )
+        painter = QPainter(pixmap)
+        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        # painter.setBrush(QBrush(Qt.green, Qt.DiagCrossPattern))
+        painter.drawRect(100, 15, 400, 200)
+        # Update the label's pixmap with the new frame
+        self.label.setPixmap(pixmap)
+        painter.end()
+        
         self.label.repaint()
-    
+  
     def on_quit(self):
         self.close()
 

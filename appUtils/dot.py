@@ -83,10 +83,5 @@ class DotWidget(QWidget):
             # Stop listening to the keyboard input and close the application
             self.close()
 
-    def closeEvent(self, event):
-        # Ensure the application quits completely
-        QApplication.quit()
-
-
     def showEvent(self, event):
         self.setFocus()  # Set focus to the widget when it is shown

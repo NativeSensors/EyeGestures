@@ -105,13 +105,6 @@ class Lab:
             # self.listener.join()
             # self.close()
 
-    def __convertFrame(self,frame):
-        h, w, ch = frame.shape
-        bytes_per_line = ch * w
-        convert_to_Qt_format = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
-        p = convert_to_Qt_format.rgbSwapped()
-        return p
-
     def __display_hist(self,whiteboardPupil,point):
         print("process histogram")
         self.eyeHist.addPoint(point[0])
@@ -164,21 +157,27 @@ class Lab:
         (w,h) = (self.blue_dot_widget.size().width(),self.blue_dot_widget.size().height()) 
         self.blue_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
 
-    def __display_extended_gaze(self,display,pupil,gaze):
+    def __display_extended_gaze(self,display,eye,multiplier):
+        pupil = eye.getPupil()
+        gaze = eye.getGaze()
+        
         start_point = (int(pupil[0]),int(pupil[1]))
         (x,y) = (int(gaze[0]),int(gaze[1]))
 
         angle = math.atan2(y,x) * 180 / np.pi
-        r = math.dist(gaze,(0,0))
+        r = math.dist(gaze,(0,0)) * multiplier
         
         new_point = (
             int(r*math.cos(np.pi * angle / 180)) + int(pupil[0]), # x
-            int(r*math.sin(np.pi * angle / 180)) + int(pupil[1]) # y
+            int(r*math.sin(np.pi * angle / 180)) + int(pupil[1])  # y
         )
 
         cv2.line(display,start_point,new_point,(255,255,0),1)
 
-    def __display_gaze(self,display,pupil,gaze):
+    def __display_gaze(self,display,eye):
+        pupil = eye.getPupil()
+        gaze = eye.getGaze()
+        
         start_point = (int(pupil[0]),int(pupil[1]))
         end_point = (int(pupil[0] + gaze[0]),int(pupil[1] + gaze[1]))
         cv2.line(display,start_point,end_point,(255,255,0),1)
@@ -191,9 +190,9 @@ class Lab:
         if not face is None:
             whiteboardPupil = np.full((self.eye_screen_h,self.eye_screen_w,3),255.0,dtype = np.uint8)
             
-            faceBox = face.getBoundingBox()
-            (x,y,w,h) = (faceBox[0][0],faceBox[0][1],faceBox[1][0],faceBox[1][1])
-            print(f"facebox shape: {faceBox.shape}")
+            # faceBox = face.getBoundingBox()
+            # (x,y,w,h) = (faceBox[0][0],faceBox[0][1],faceBox[1][0],faceBox[1][1])
+            # print(f"facebox shape: {faceBox.shape}")
 
             l_eye = face.getLeftEye()
             r_eye = face.getRightEye()
@@ -201,14 +200,15 @@ class Lab:
             self.eyeProcessorRight.append(r_eye.getPupil(),r_eye.getLandmarks())
 
             point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            pointLeft = (rotate(point[0],face),point[1]*20)
+            pointLeft = (point[0],point[1]*20)
 
             point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            pointRight = (rotate(point[0],face),point[1]*20)  
+            pointRight = (point[0],point[1]*20)  
 
             self.pointsBufforLeft.add(pointLeft)
             self.pointsBufforRight.add(pointRight)
 
+            print(f"data: {pointLeft}")
             print("displaying hist")
             self.__display_hist(whiteboardPupil,pointLeft)
             print("screen")
@@ -216,11 +216,8 @@ class Lab:
             print("eyeTracker")
             self.__display_eyeTracker(whiteboardPupil,pointLeft,pointRight)
 
-
-            self.__display_gaze(frame,l_eye.getPupil(),l_eye.getGaze())
-            self.__display_gaze(frame,r_eye.getPupil(),r_eye.getGaze())
-            self.__display_extended_gaze(frame,l_eye.getPupil(),l_eye.getGaze())
-            self.__display_extended_gaze(frame,r_eye.getPupil(),r_eye.getGaze())
+            self.__display_extended_gaze(frame,l_eye,math.dist(pointLeft[0],pointRight[0])/4)
+            self.__display_extended_gaze(frame,r_eye,math.dist(pointLeft[0],pointRight[0])/4)
             self.worker.imshow("frame",frame)
 
             self.worker.imshow("whitebaord",whiteboardPupil)

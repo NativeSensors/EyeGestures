@@ -33,7 +33,7 @@ class GazeTracker:
         face = self.finder.find(image)
         
         if not face is None:
-            self.__headDir = self.noseDirection.getPos(face.getNose())
+            # self.__headDir = self.noseDirection.getPos(face.getNose())
             l_eye = face.getLeftEye()
             r_eye = face.getRightEye()
             
@@ -41,9 +41,9 @@ class GazeTracker:
             lpupil     = l_eye.getPupil()
             rlandmards = r_eye.getLandmarks()
             rpupil     = r_eye.getPupil()
-            faceBox    = face.getBoundingBox()
+            # faceBox    = face.getBoundingBox()
 
-            eyes = np.concatenate((llandmards,lpupil,rlandmards,rpupil,faceBox))
+            eyes = np.concatenate((llandmards,lpupil,rlandmards,rpupil))
             if np.isnan(eyes).any():
                 eyes = np.full((self.N_FEATURES,2),np.NAN)
 
@@ -110,8 +110,8 @@ class GazeTracker:
 
     def getFeatures(self,image):
         face = self.finder.find(image)
-        if not face is None:
-            self.__headDir = self.noseDirection.getPos(face.getNose())
+        # if not face is None:
+        #     self.__headDir = self.noseDirection.getPos(face.getNose())
         return face
         
     def getHeadDirection(self):
