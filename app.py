@@ -33,7 +33,6 @@ class MoviePlayer(QWidget):
         self.label.setPixmap(QPixmap.fromImage(q_image))
     
     def on_quit(self,key):
-        print(dir(key))
         if key.char == 'q':
             # Stop listening to the keyboard input and close the application
             self.close()
@@ -72,7 +71,6 @@ class Worker(QObject):
         self.listener.start()
 
     def on_quit(self,key):
-        print(dir(key))
         if key.char == 'q':
             # Stop listening to the keyboard input and close the application
             self.__run = False

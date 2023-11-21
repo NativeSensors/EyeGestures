@@ -29,10 +29,6 @@ class DotWidget(QWidget):
         self.position_label = QLabel(self)
         
         self.move(500,500)
-        
-        # Start listening for the 'q' key press in the background
-        self.listener = keyboard.Listener(on_press=self.on_quit)
-        self.listener.start()
 
     def moveEvent(self, event):
         self.update_position_label()  # Update the position label when the widget is moved
@@ -78,10 +74,12 @@ class DotWidget(QWidget):
 
 
     def on_quit(self,key):
-        print(dir(key))
-        if key.char == 'q':
-            # Stop listening to the keyboard input and close the application
-            self.close()
+        # Stop listening to the keyboard input and close the application
+        self.close()
+
+    def closeEvent(self, event):
+        # Stop the frame processor when closing the widget
+        super(DotWidget, self).closeEvent(event)
 
     def showEvent(self, event):
         self.setFocus()  # Set focus to the widget when it is shown

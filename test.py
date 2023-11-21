@@ -1,80 +1,128 @@
-import cv2
-import math
 import numpy as np
-import mediapipe as mp
-import pyautogui
-
-cam = cv2.VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
-face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
-screen_w, screen_h = pyautogui.size()
-
-def find_normal_vector(points):
-    # Assuming points are 3D
-    # Calculate two vectors that lie on the plane
-    vec1 = points[1] - points[0]
-    vec2 = points[2] - points[0]
-
-    # Calculate the normal vector (cross product)
-    normal = np.cross(vec1, vec2)
-    return normal / np.linalg.norm(normal)  # Normalize the vector
+import matplotlib
+matplotlib.use('TkAgg')  # Set the backend to TkAgg
+import matplotlib.pyplot as plt
 
 
-def find_center(points):
-    print(points)
-    return np.mean(points, axis=0)
+points = np.array([[222, 133],
+                   [200, 130],
+                   [201, 129],
+                   [210, 127],
+                   [207, 134],
+                   [225, 131],
+                   [216, 127],
+                   [204, 133],
+                   [217, 134],
+                   [202, 131],
+                   [203, 128],
+                   [221, 129],
+                   [200, 130],
+                   [206, 128],
+                   [212, 135],
+                   [225, 133]])
 
-def project_to_2d(point, focal_length=1):
-    # Simple perspective projection
-    x, y, z = point
-    return np.array([focal_length * (x / z), focal_length * (y / z)])
+min_x = np.min(points[:,0]) 
+max_x = np.max(points[:,0]) 
+min_y = np.min(points[:,1]) 
+max_y = np.max(points[:,1]) 
+
+center = np.array(((max_x+min_x)/2,(max_y+min_y)/2))
+print(min_x,max_x,center)
+
+points = points - center
+center = center - center
+
+# Function to generate random points on an ellipse
+def generate_ellipse_points(center, a, b, n=20):
+    angles = np.linspace(0, 2 * np.pi, n)
+    return np.array([[center[0] + a * np.cos(angle), center[1] + b * np.sin(angle)] for angle in angles])
+
+# Function to calculate the corrected gaze vector
+def calculate_corrected_gaze_vector(random_point, points):
+    vectors = points - random_point
+    # print(vectors)
+    distances = np.linalg.norm(vectors, axis=1)
+    # print(distances)
+    weights = np.exp(-distances)  # Exponential weighting based on distance
+    # print(weights)
+    weighted_vectors = vectors * weights[:, None]
+    gaze_vector = np.sum(weighted_vectors, axis=0) 
+    # print(gaze_vector/1000)
+    return gaze_vector * 100
+
+# Function to check if a point is inside the ellipse
+def is_point_inside_ellipse(point, center, a, b):
+    # Adjust point based on the center of ellipse
+    px, py = point[0] - center[0], point[1] - center[1]
+    # Check the ellipse equation (x^2/a^2 + y^2/b^2 <= 1)
+    return (px**2) / (a**2) + (py**2) / (b**2) <= 1
+
+def calculate_vector(random_point, a, b):
+
+    # Example ellipse parameters
+    # center = np.array([0, 0])
+
+    # Generate points on the ellipse
+    # points = generate_ellipse_points(center, a, b)
+
+    # Generate a random point inside the ellipse
 
 
-while True:
-    _, frame = cam.read()
+    # Calculate the gaze vector
+    gaze_vector = calculate_corrected_gaze_vector(random_point, points)
 
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    output = face_mesh.process(rgb_frame)
-    landmark_points = output.multi_face_landmarks
-    frame_h, frame_w, _ = frame.shape
-    if landmark_points:
-        landmarks = landmark_points[0].landmark
-        (pupil,p1,p2,p3,p4) = landmarks[473:478]
-        
-
-        eyeIndicies = [263, 249, 390, 373, 374, 380, 381, 382, 362, 466, 388, 387, 386, 385, 384, 398]
-        eyeLandmarks = [landmarks[i] for i in eyeIndicies]
-        points = np.array([(pupil.x,pupil.y,pupil.z),(p1.x,p1.y,p1.z),(p2.x,p2.y,p1.z),(p3.x,p3.y,p1.z),(p4.x,p4.y,p1.z)])
-        center_3d = np.array((pupil.x,pupil.y,pupil.z))
-        center_2d = np.array([center_3d[0],center_3d[1]])
-        center_2d[0] = center_2d[0] * frame_w
-        center_2d[1] = center_2d[1] * frame_h
-
-        SumX = 0
-        SumY = 0
-
-        for id, landmark in enumerate(eyeLandmarks):
-            x = int(landmark.x * frame_w)
-            y = int(landmark.y * frame_h) 
-            cv2.circle(frame, (x, y), 1, (0, 255, 0),-1)
-
-            SumX += (x - center_2d[0])
-            SumY += (y - center_2d[1])
-
-        for id, landmark in enumerate(landmarks[473:478]):
-            x = int(landmark.x * frame_w)
-            y = int(landmark.y * frame_h) 
-            cv2.circle(frame, (x, y), 1, (0, 0, 255),-1)
-
-        gaze_vector = np.array([-SumX,SumY])
-
-        print(center_2d,gaze_vector)
     
-        # Draw the gaze vector
-        cv2.arrowedLine(frame, tuple(center_2d.astype(int)), tuple((center_2d + gaze_vector).astype(int)), (0, 255, 0), 2)
-        
-        cv2.circle(frame,tuple(center_2d.astype(int)), 1, (0, 0, 255),-1)
+    print(points)
+    print(random_point)
+    print(gaze_vector)
+    # Normalize and extend the gaze vector for better visibility
+    gaze_vector_normalized = gaze_vector / np.linalg.norm(gaze_vector)
+    gaze_vector_extended = gaze_vector_normalized
+
+    return gaze_vector_extended
+
+# Plotting
+fig, ax = plt.subplots()
+
+a, b = 5, 3  # Semi-major and semi-minor axes of the ellipse
+# Example ellipse parameters
+# center = np.array([0, 0])
+
+# Generate points on the ellipse
+# points = generate_ellipse_points(center, a, b)
+random_point = center
 
 
-    cv2.imshow('frame', frame)
-    if cv2.waitKey(1) == ord('q'):
-        break
+plt.scatter(points[:, 0], points[:, 1], color='blue', label='Elliptic Points')
+point, = ax.plot(random_point[0], random_point[1], color='orange', label='Random Point')
+r_vector, = ax.plot([0], [0], 'g-')
+
+# Event handler to update the point position
+def on_move(event):
+    if event.inaxes == ax:
+
+        a, b = 5, 3  # Semi-major and semi-minor axes of the ellipse
+        random_point = np.array([event.xdata,event.ydata])
+
+        gaze_vector_extended = calculate_vector(random_point,a,b)
+
+        point.set_data(random_point[0], random_point[1])
+        r_vector.set_data([random_point[0], random_point[0] + gaze_vector_extended[0]], 
+                                  [random_point[1], random_point[1] + gaze_vector_extended[1]])
+
+
+        fig.canvas.draw()
+
+
+# Connect the event handler to the figure
+fig.canvas.mpl_connect('motion_notify_event', on_move)
+
+plt.axhline(0, color='black', linewidth=0.5)
+plt.axvline(0, color='black', linewidth=0.5)
+plt.gca().set_aspect('equal', adjustable='box')
+plt.title("Corrected Gaze Vector Calculation")
+plt.xlabel("X-axis")
+plt.ylabel("Y-axis")
+plt.legend()
+plt.grid(True)
+plt.show()

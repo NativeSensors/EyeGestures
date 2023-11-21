@@ -90,8 +90,7 @@ class Nose:
         rightPoint = landmarks[self.NOSE_LEFT_RIGHT[1]]
         x = (rightPoint[0] - leftPoint[0])  
         y = (rightPoint[1] - leftPoint[1])  
-        print(f"x,y : {x},{y} point l: {leftPoint} point r: {rightPoint}")
-
+        
         return math.atan2(y,x) * 180/math.pi
 
     def _process(self,image,landmarks):

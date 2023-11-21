@@ -23,18 +23,15 @@ def showEyes(image,face):
 
 
 if __name__ == "__main__":    
-    print("opening stream")
     vid = VideoCapture('recording/calibrationData1.pkl')
     # vid = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
     
     faceFinder = FaceFinder()
 
-    print("loading detectors")
     # use half of the data for fitting
     pFrame = None
     flow = None
     ret = True
-    print("starting reading")
     while ret:
         
         ret, frame = vid.read()

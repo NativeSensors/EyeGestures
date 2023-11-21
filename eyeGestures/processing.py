@@ -14,29 +14,28 @@ class EyeProcessor:
         self.scale_h = scale_h
 
     def append(self,pupil : (int,int) ,landmarks : np.ndarray):
-        print("convert")
         self.pupil = pupil
         self.landmarks = landmarks
 
-        print("get min and max")
         # get center: 
-        self.min_x = np.min(self.landmarks[:,0])
-        self.max_x = np.max(self.landmarks[:,0])
-        self.min_y = np.min(self.landmarks[:,1])
-        self.max_y = np.max(self.landmarks[:,1])
+        margin = 5
+        self.min_x = np.min(self.landmarks[:,0]) - margin
+        self.max_x = np.max(self.landmarks[:,0]) + margin
+        self.min_y = np.min(self.landmarks[:,1]) - margin
+        self.max_y = np.max(self.landmarks[:,1]) + margin
 
-        print("get width and heigh")
-        self.width  = self.max_x - self.min_x 
-        self.height = self.max_y - self.min_y
+        assert(self.pupil[0] > self.min_x)
+        assert(self.pupil[1] > self.min_y)
+
+        self.width  = self.max_x - self.min_x
+        self.height = (self.max_y - self.min_y)/2
         
-        print("center")
         self.center = self.__convertPoint(((self.min_x + self.max_x)/2,
                         (self.min_y + self.max_y)/2),
                         width = self.scale_w, height = self.scale_h,
                         scale_w = self.width, scale_h = self.height,
                         offset = (self.min_x, self.min_y))
         
-        print(f"save pupil: {self.pupil}")
         self.pupilBuffor.add(
             self.__convertPoint(self.pupil,
                             width = self.scale_w, height = self.scale_h,
@@ -80,7 +79,6 @@ class EyeProcessor:
         return (x,y)
 
     def getAvgPupil(self,width = None, height = None):
-        print("getAvgPupil")
         if not width is None and not height is None:
             _retPupil = self.__convertPoint(self.pupilBuffor.getAvg(),
                             width = width,height = height,

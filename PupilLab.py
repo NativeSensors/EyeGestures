@@ -74,10 +74,10 @@ class Lab:
         self.eyeProcessorLeft  = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
         self.eyeProcessorRight = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
         
-        self.red_dot_widget = DotWidget(diameter=50,color = (255,120,0))
+        self.red_dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.red_dot_widget.show()
 
-        self.blue_dot_widget = DotWidget(diameter=50,color = (0,120,255))
+        self.blue_dot_widget = DotWidget(diameter=100,color = (0,120,255))
         self.blue_dot_widget.show()
 
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')        
@@ -95,7 +95,6 @@ class Lab:
         self.worker = Worker(self.run)
 
     def on_quit(self,key):
-        print(dir(key))
         if not hasattr(key,'char'):
             return
 
@@ -106,11 +105,9 @@ class Lab:
             # self.close()
 
     def __display_hist(self,whiteboardPupil,point):
-        print("process histogram")
         self.eyeHist.addPoint(point[0])
         x_axis,y_axis = self.eyeHist.getHist()
 
-        print("print histogram")
         bars = int(self.eye_screen_w / self.step)
         for n in range(bars):
             x_val = min(x_axis[n],255)
@@ -119,12 +116,15 @@ class Lab:
                 y_val = min(y_axis[m],255)
                 cv2.rectangle(whiteboardPupil,(self.step*n,self.step*m),(self.step*n + self.step,self.step*m + self.step),(255,255-x_val,255-y_val,50),1)
 
-    def __display_screen(self,whiteboardPupil):
-
-        print(f"Screen rect: {self.eyeHist.getLims()}")
+    def __display_screen(self,whiteboardPupil, l_eye, r_eye):
 
         (x,y) = self.eyeHist.getCenter()
-        self.eyeScreen.setCenter(x,100)
+        self.eyeScreen.setCenter(x,y)
+        scale_w = (l_eye.width + r_eye.width)/2
+        scale_h = (l_eye.height + r_eye.height)/2
+        print(scale_w, scale_h)
+        self.eyeScreen.scale(scale_w, scale_h)
+
         (x_min,x_max,y_min,y_max) = self.eyeHist.getLims()
         (x,y) = (x_min, y_min)
         (w,h) = (x_max - x_min), (y_max - y_min)
@@ -138,24 +138,47 @@ class Lab:
     def __display_eyeTracker(self,whiteboardPupil,pointLeft,pointRight):
 
         for _point,_closeness in self.pointsBufforLeft.getBuffor():
-            p = (_point[0],100)
+            p = (_point[0],_point[1])
             cv2.circle(whiteboardPupil,p,3,(int(_closeness),0,255-int(_closeness)),-1)
 
         for _point,_closeness in self.pointsBufforRight.getBuffor():
-            p = (_point[0],100)
+            p = (_point[0],_point[1])
             cv2.circle(whiteboardPupil,p,3,(int(_closeness),255-int(_closeness),0),-1)
 
-        p = (pointLeft[0][0],100)
+        p = (pointLeft[0][0],pointLeft[0][1])
         cv2.circle(whiteboardPupil,p,5,(int(pointLeft[1]),0,255 - int(pointLeft[1])),-1)            
         screen_point = self.eyeScreen.convertToScreen(p)     
         (w,h) = (self.red_dot_widget.size().width(),self.red_dot_widget.size().height()) 
         self.red_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
 
-        p = (pointRight[0][0],100)
+        p = (pointRight[0][0],pointRight[0][1])
         cv2.circle(whiteboardPupil,p,5,(int(pointRight[1]),0,255 - int(pointRight[1])),-1)            
         screen_point = self.eyeScreen.convertToScreen(p)     
         (w,h) = (self.blue_dot_widget.size().width(),self.blue_dot_widget.size().height()) 
         self.blue_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
+
+    def __display_gaze_intersection(self,display,l_eye,r_eye):
+        l_pupil = l_eye.getPupil()
+        l_gaze  = l_eye.getGaze()
+        
+        r_pupil = r_eye.getPupil()        
+        r_gaze  = r_eye.getGaze()
+
+        l_end = l_gaze + l_pupil
+        r_end = r_gaze + r_pupil
+
+        l_m = (l_end[1] - l_pupil[1])/(l_end[0] - l_pupil[0])
+        r_m = (r_end[1] - r_pupil[1])/(r_end[0] - r_pupil[0])
+
+        l_b = l_end[1] - l_m * l_end[0]
+        r_b = r_end[1] - r_m * r_end[0]
+
+        i_x = (r_b - l_b)/(l_m - r_m)
+        i_y = r_m * i_x + r_b
+
+        print(f"(i_x,i_y): {(i_x,i_y)}, l_pupil: {l_pupil} , r_pupil: {r_pupil}")
+        cv2.circle(display,np.array((i_x,i_y), dtype = np.uint32), 2, (0,0,255),-1)
+
 
     def __display_extended_gaze(self,display,eye,multiplier):
         pupil = eye.getPupil()
@@ -172,6 +195,7 @@ class Lab:
             int(r*math.sin(np.pi * angle / 180)) + int(pupil[1])  # y
         )
 
+        print(start_point,new_point)
         cv2.line(display,start_point,new_point,(255,255,0),1)
 
     def __display_gaze(self,display,eye):
@@ -200,34 +224,27 @@ class Lab:
             self.eyeProcessorRight.append(r_eye.getPupil(),r_eye.getLandmarks())
 
             point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            pointLeft = (point[0],point[1]*20)
+            pointLeft = (point[0],point[1])
 
             point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            pointRight = (point[0],point[1]*20)  
-
+            pointRight = (point[0],point[1])  
+            
             self.pointsBufforLeft.add(pointLeft)
             self.pointsBufforRight.add(pointRight)
 
-            print(f"data: {pointLeft}")
-            print("displaying hist")
             self.__display_hist(whiteboardPupil,pointLeft)
-            print("screen")
-            self.__display_screen(whiteboardPupil)
-            print("eyeTracker")
+            self.__display_hist(whiteboardPupil,pointRight)
+            self.__display_screen(whiteboardPupil,l_eye,r_eye)
             self.__display_eyeTracker(whiteboardPupil,pointLeft,pointRight)
 
-            self.__display_extended_gaze(frame,l_eye,math.dist(pointLeft[0],pointRight[0])/4)
-            self.__display_extended_gaze(frame,r_eye,math.dist(pointLeft[0],pointRight[0])/4)
+            self.__display_extended_gaze(frame,l_eye,10)
+            self.__display_extended_gaze(frame,r_eye,10)
+            # self.__display_gaze_intersection(frame,l_eye,r_eye)
             self.worker.imshow("frame",frame)
 
             self.worker.imshow("whitebaord",whiteboardPupil)
-
-            colour_frame = cv2.cvtColor(l_eye.getImage(), cv2.COLOR_GRAY2BGR)
-            self.worker.imshow("left eye",colour_frame)
-
-            colour_frame = cv2.cvtColor(r_eye.getImage(), cv2.COLOR_GRAY2BGR)
-            self.worker.imshow("right eye",colour_frame)
-
+            self.worker.imshow("left eye",l_eye.getImage())
+            self.worker.imshow("right eye",r_eye.getImage())
 
             # display camera feed
             # showEyes(frame,face)            
@@ -241,12 +258,10 @@ class Lab:
         monitors = get_monitors()
         (width,height) = (int(monitors[0].width),int(monitors[0].height))
         ret = True
-        print("start")
         while ret and self.__run:
 
             ret, frame = self.cap.read()     
             
-            print("run")
             try:
                 self.__display_left_eye(frame)
             except Exception as e:

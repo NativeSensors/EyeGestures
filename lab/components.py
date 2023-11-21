@@ -11,7 +11,6 @@ from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
 class ScreenHist:
 
     def __init__(self,width,height,step):
-
         self.inc_step = 20
 
         self.step = step
@@ -32,9 +31,7 @@ class ScreenHist:
         (x,y) = point
         pos_x = int(x/self.step)
         pos_y = int(y/self.step)
-        print(f"x: {x}, pos_x: {pos_x}")
-        print(f"y: {y}, pos_y: {pos_y}")
-
+        
         self.axis_x[pos_x] += self.inc_step
         self.axis_y[pos_y] += self.inc_step
 
@@ -67,6 +64,8 @@ class ScreenHist:
 class Screen:
 
     def __init__(self, screen_width = 0, screen_height = 0 , x = 0, y = 0, width = 0, height = 0):
+        self.old_scale_w = 0
+        self.old_scale_h = 0
 
         self.screen_buffor = Buffor(15)
         self.setWH(width,height)
@@ -85,6 +84,18 @@ class Screen:
     def setCenter(self, x, y):
         self.x = x - int(self.width/2)
         self.y = y - int(self.height/2)
+
+    def scale(self,scale_w,scale_h):
+        if self.old_scale_w == 0 or self.old_scale_h == 0:
+            self.old_scale_w = scale_w
+            self.old_scale_h = scale_h
+        else:
+            if abs(self.old_scale_w - self.width) > 2: 
+                width  = int(self.width/self.old_scale_w * scale_w)
+                height = int(self.height/self.old_scale_h * scale_h)
+                self.old_scale_w = scale_w
+                self.old_scale_h = scale_h
+                self.setWH(width,height)
 
     def setWH(self, width, height):
         self.width = width

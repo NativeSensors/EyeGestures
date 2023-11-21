@@ -44,13 +44,13 @@ class Display(QWidget):
 
     def imshow(self, q_image):
         pixmap = QPixmap.fromImage(q_image)
-        painter = QPainter(pixmap)
-        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
-        # painter.setBrush(QBrush(Qt.green, Qt.DiagCrossPattern))
-        painter.drawRect(100, 15, 400, 200)
-        # Update the label's pixmap with the new frame
+        # painter = QPainter(pixmap)
+        # painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        # # painter.setBrush(QBrush(Qt.green, Qt.DiagCrossPattern))
+        # painter.drawRect(100, 15, 400, 200)
+        # # Update the label's pixmap with the new frame
         self.label.setPixmap(pixmap)
-        painter.end()
+        # painter.end()
         
         self.label.repaint()
   
