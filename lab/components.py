@@ -1,12 +1,8 @@
 import math
 import numpy as np
-from pynput import keyboard
 
-from eyeGestures.utils import VideoCapture, Buffor
-
-from PySide2.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QVBoxLayout
-from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QImage, QPixmap
-from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
+from screeninfo import get_monitors
+from eyeGestures.utils import Buffor
 
 class ScreenFinder:
     
@@ -16,7 +12,7 @@ class ScreenFinder:
 class ScreenHist:
 
     def __init__(self,width,height,step):
-        self.inc_step = 20
+        self.inc_step = 10
 
         self.step = step
         self.width = width
@@ -83,6 +79,10 @@ class Screen:
     def getCenter(self):
         return (self.x,self.y)
 
+    def setWH(self, width, height):
+        self.width = width
+        self.height = height
+
     def getWH(self):
         return (self.width,self.height)
 
@@ -95,16 +95,12 @@ class Screen:
             self.old_scale_w = scale_w
             self.old_scale_h = scale_h
         else:
-            if abs(self.old_scale_w - self.width) > 2: 
+            if abs(self.old_scale_w - self.width) > 5: 
                 width  = int(self.width/self.old_scale_w * scale_w)
                 height = int(self.height/self.old_scale_h * scale_h)
                 self.old_scale_w = scale_w
                 self.old_scale_h = scale_h
                 self.setWH(width,height)
-
-    def setWH(self, width, height):
-        self.width = width
-        self.height = height
 
     def convertToScreen(self, point):
         x = (point[0] - self.x) * ((point[0] - self.x) > 0)
@@ -118,3 +114,55 @@ class Screen:
 
     def getRect(self):
         return (self.x,self.y,self.width,self.height)
+
+class ScreenManager:
+
+    def __init__(self,eye_screen_w,eye_screen_h):
+
+        self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+
+        self.eye_screen_w = eye_screen_w
+        self.eye_screen_h = eye_screen_h
+        self.step         = 10 
+        self.eyeScreen    = Screen(1920,1080,190,60,100,80)
+        self.eyeHist      = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
+        self.pointsBuffor = Buffor(50)
+        pass
+
+    def process(self, eye ,point : (int,int)):
+        assert(np.array(point).shape[0] == 2)
+
+        self.pointsBuffor.add(point)
+        self.eyeHist.addPoint(point)
+        (x,y) = self.eyeHist.getCenter()
+
+        self.eyeScreen.setCenter(x,y)
+        scale_w = (eye.width  + eye.width)/2
+        scale_h = (eye.height + eye.height)/2
+        self.eyeScreen.scale(scale_w, scale_w)
+
+        min_x,max_x,min_y,max_y = self.eyeHist.getLims()
+
+        # experimetal
+        width  = self.eyeScreen.width
+        height = self.eyeScreen.height
+        if (max_x - min_x) - self.eyeScreen.width > 0.1:
+            width = (max_x - min_x)
+        if (max_y - min_y) - self.eyeScreen.height > 0.1:
+            height = (max_y - min_y)
+
+        self.eyeScreen.setWH(width,height)
+        # ====================================
+
+        p = self.eyeScreen.convertToScreen(point)
+        p += (self.monitor.x,self.monitor.y)
+        return p
+
+    def getScreen(self):
+        return self.eyeScreen
+
+    def getHist(self):
+        return self.eyeHist
+    
+    def getPointsHistory(self):
+        return self.pointsBuffor.getBuffor()

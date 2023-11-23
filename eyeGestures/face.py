@@ -52,19 +52,6 @@ class Face:
         self.landmarks = self._landmarks(self.face)
         self._process(image,self.face)
 
-    # Relative postions to face bounding box  
-    # def __relativePos(self,positions):
-    #     left, top = self.rect.left(), self.rect.top()
-    #     relPositions = positions
-    #     relPositions[:,0] = relPositions[:,0] - left
-    #     relPositions[:,1] = relPositions[:,1] - top
-    #     return relPositions
-
-    # Absolute postions to image
-    # def getBoundingBox(self):
-    #     return np.array([[self.rect.left(),self.rect.top()],
-    #                     [self.rect.right(),self.rect.bottom()]])
-
     def getLeftEye(self):
         return self.eyeLeft
 
@@ -73,12 +60,6 @@ class Face:
 
     def getLandmarks(self):
         return self.landmarks
-
-    # def getHeadTilt(self):
-    #     return self.nose.getHeadTilt()
-
-    # def getNose(self):
-    #     return self.nose
 
     def getLandmarks(self):
         return self.landmarks
@@ -94,16 +75,9 @@ class Face:
                 landmark.x * self.image_w,
                 landmark.y * self.image_h))
 
-        # LEGACY:
-        # landmarks = np.zeros((face.num_parts, 2), dtype=np.dtype)
-        # for i in range(0, face.num_parts):
-        #     landmarks[i] = (face.part(i).x, face.part(i).y)
-
         return np.array(__face_landmarks)
 
     def _process(self,image,face):
-        # self.rect = face.rect
-
         if not hasattr(self,"eyeLeft"):
             self.eyeLeft  = eye.Eye(image,self.landmarks,0)
         else:

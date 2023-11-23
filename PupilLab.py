@@ -9,7 +9,7 @@ from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
 import keyboard
 
 from lab.pupillab import Worker
-from lab.components import Screen, ScreenHist
+from lab.components import Screen, ScreenHist, ScreenManager
 
 from eyeGestures.utils import VideoCapture, Buffor
 from eyeGestures.eyegestures import EyeGestures
@@ -64,12 +64,11 @@ class Lab:
         self.gestures = EyeGestures(height,width)
         # self.noseTilt.show()
 
+        self.step         = 10 
         self.eye_screen_w = 500
         self.eye_screen_h = 500
-        self.eyeScreen    = Screen(1920,1080,190,60,100,80)
-        self.step         = 10 
-        self.eyeHist      = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
-
+        self.l_screen_man   = ScreenManager(self.eye_screen_w,self.eye_screen_h)
+        self.r_screen_man   = ScreenManager(self.eye_screen_w,self.eye_screen_h)
 
         self.eyeProcessorLeft  = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
         self.eyeProcessorRight = EyeProcessor(self.eye_screen_w,self.eye_screen_h)
@@ -86,12 +85,6 @@ class Lab:
         self.listener = keyboard.Listener(on_press=self.on_quit)
         self.listener.start()
 
-        self.pointsBufforLeft  = Buffor(50)
-        self.pointsBufforRight = Buffor(50)
-
-        self.eyeImageBuffer_L = Buffor(5)
-        self.eyeImageBuffer_R = Buffor(5)
-
         self.worker = Worker(self.run)
 
     def on_quit(self,key):
@@ -101,9 +94,8 @@ class Lab:
         if key.char == 'q':
             self.__run = False
 
-    def __display_hist(self,whiteboardPupil,point):
-        self.eyeHist.addPoint(point[0])
-        x_axis,y_axis = self.eyeHist.getHist()
+    def __display_hist(self,whiteboardPupil,hist):
+        x_axis,y_axis = hist.getHist()
 
         bars = int(self.eye_screen_w / self.step)
         for n in range(bars):
@@ -111,47 +103,42 @@ class Lab:
             y_val = min(y_axis[n],255)
             for m in range(bars):
                 y_val = min(y_axis[m],255)
-                cv2.rectangle(whiteboardPupil,(self.step*n,self.step*m),(self.step*n + self.step,self.step*m + self.step),(255,255-x_val,255-y_val,50),1)
+                cv2.rectangle(whiteboardPupil,(self.step*n,self.step*m),(self.step*n + self.step,self.step*m + self.step),(255,255-x_val,255-y_val,50),-1)
 
-    def __display_screen(self,whiteboardPupil, l_eye, r_eye):
+    def __display_screen(self,whiteboardPupil,hist,screen):
 
-        (x,y) = self.eyeHist.getCenter()
-        self.eyeScreen.setCenter(x,y)
-        scale_w = (l_eye.width + r_eye.width)/2
-        scale_h = (l_eye.height + r_eye.height)/2
-        self.eyeScreen.scale(scale_w, scale_w)
-
-        (x_min,x_max,y_min,y_max) = self.eyeHist.getLims()
+        (x_min,x_max,y_min,y_max) = hist.getLims()
         (x,y) = (x_min, y_min)
         (w,h) = (x_max - x_min), (y_max - y_min)
         cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(0,0,255),2)
-
-        (x,y) = self.eyeScreen.getCenter()
-        (w,h) = self.eyeScreen.getWH()  
+        cv2.putText(whiteboardPupil, f'{w,h}', (x,y), cv2.FONT_HERSHEY_SIMPLEX,  
+                   0.5, (0,0,0), 1, cv2.LINE_AA) 
+   
+        (x,y) = screen.getCenter()
+        (w,h) = screen.getWH()  
         cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(255,0,0),2)
+        cv2.putText(whiteboardPupil, f'{w,h}', (x,y), cv2.FONT_HERSHEY_SIMPLEX,  
+                   0.5, (0,0,0), 1, cv2.LINE_AA) 
     
 
-    def __display_eyeTracker(self,whiteboardPupil,pointLeft,pointRight):
+    def __display_eyeTracker(self,whiteboardPupil,l_point,l_point_screen,r_point,r_point_screen):
 
-        for _point,_closeness in self.pointsBufforLeft.getBuffor():
-            p = (_point[0],_point[1])
-            cv2.circle(whiteboardPupil,p,3,(int(_closeness),0,255-int(_closeness)),-1)
+        # this is just helper method
 
-        for _point,_closeness in self.pointsBufforRight.getBuffor():
-            p = (_point[0],_point[1])
-            cv2.circle(whiteboardPupil,p,3,(int(_closeness),255-int(_closeness),0),-1)
+        for p in self.l_screen_man.getPointsHistory():
+            cv2.circle(whiteboardPupil,p,3,(0,0,255,120),-1)
 
-        p = (pointLeft[0][0],pointLeft[0][1])
-        cv2.circle(whiteboardPupil,p,5,(int(pointLeft[1]),0,255 - int(pointLeft[1])),-1)            
-        screen_point = self.eyeScreen.convertToScreen(p)     
+        for p in self.r_screen_man.getPointsHistory():
+            cv2.circle(whiteboardPupil,p,3,(0,255,0,120),-1)
+
+        cv2.circle(whiteboardPupil,l_point,5,(0,0,255),-1)            
+        cv2.circle(whiteboardPupil,r_point,5,(0, 0, 255),-1)            
+
         (w,h) = (self.red_dot_widget.size().width(),self.red_dot_widget.size().height()) 
-        self.red_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
+        self.red_dot_widget.move(l_point_screen[0]-int(w/2),l_point_screen[1]-int(h/2))
 
-        p = (pointRight[0][0],pointRight[0][1])
-        cv2.circle(whiteboardPupil,p,5,(int(pointRight[1]),0,255 - int(pointRight[1])),-1)            
-        screen_point = self.eyeScreen.convertToScreen(p)     
         (w,h) = (self.blue_dot_widget.size().width(),self.blue_dot_widget.size().height()) 
-        self.blue_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
+        self.blue_dot_widget.move(r_point_screen[0]-int(w/2),r_point_screen[1]-int(h/2))
 
     def __gaze_intersection(self,l_eye,r_eye):
         l_pupil = l_eye.getPupil()
@@ -202,10 +189,6 @@ class Lab:
         if not face is None:
             whiteboardPupil = np.full((self.eye_screen_h,self.eye_screen_w,3),255.0,dtype = np.uint8)
             
-            # faceBox = face.getBoundingBox()
-            # (x,y,w,h) = (faceBox[0][0],faceBox[0][1],faceBox[1][0],faceBox[1][1])
-            # print(f"facebox shape: {faceBox.shape}")
-
             l_eye = face.getLeftEye()
             r_eye = face.getRightEye()
             
@@ -217,24 +200,28 @@ class Lab:
             self.eyeProcessorRight.append(r_pupil,r_eye.getLandmarks())
 
             point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            pointLeft = ((int(intersection_x),point[0][1]),point[1])
+            l_point = (int(intersection_x),point[0][1])
 
             point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            pointRight = ((int(intersection_x),point[0][1]),point[1])
+            r_point = (int(intersection_x),point[0][1])
 
-            self.pointsBufforLeft.add(pointLeft)
-            self.pointsBufforRight.add(pointRight)
+            l_point_screen = self.l_screen_man.process(l_eye,l_point)
+            r_point_screen = self.r_screen_man.process(r_eye,r_point)
 
-            self.__display_hist(whiteboardPupil,pointLeft)
-            self.__display_hist(whiteboardPupil,pointRight)
-            self.__display_screen(whiteboardPupil,l_eye,r_eye)
-            self.__display_eyeTracker(whiteboardPupil,pointLeft,pointRight)
+            # here we are having prossed points:
+
+            self.__display_hist(whiteboardPupil,self.l_screen_man.getHist())
+            self.__display_hist(whiteboardPupil,self.r_screen_man.getHist())
+
+            self.__display_screen(whiteboardPupil,self.l_screen_man.getHist(),self.l_screen_man.getScreen())
+            self.__display_screen(whiteboardPupil,self.r_screen_man.getHist(),self.r_screen_man.getScreen())
+
+            self.__display_eyeTracker(whiteboardPupil,l_point,l_point_screen,r_point,r_point_screen)
 
             # self.__display_extended_gaze(frame,l_eye,10)
             # self.__display_extended_gaze(frame,r_eye,10)
             # self.__display_gaze_intersection(frame,l_eye,r_eye)
             self.worker.imshow("frame",frame)
-
             self.worker.imshow("whitebaord",whiteboardPupil)
             # self.worker.imshow("left eye",l_eye.getImage())
             # self.worker.imshow("right eye",r_eye.getImage())
