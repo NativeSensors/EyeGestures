@@ -199,6 +199,7 @@ class Lab:
             self.eyeProcessorLeft.append( l_pupil,l_eye.getLandmarks())
             self.eyeProcessorRight.append(r_pupil,r_eye.getLandmarks())
 
+            # This scales pupil move to the screen we observe
             point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
             l_point = (int(intersection_x),point[0][1])
 
@@ -208,23 +209,26 @@ class Lab:
             l_point_screen = self.l_screen_man.process(l_eye,l_point)
             r_point_screen = self.r_screen_man.process(r_eye,r_point)
 
+            print("processed points")
             # here we are having prossed points:
 
+            print("displaying histograms")
             self.__display_hist(whiteboardPupil,self.l_screen_man.getHist())
             self.__display_hist(whiteboardPupil,self.r_screen_man.getHist())
 
+            print("displaying screens")
             self.__display_screen(whiteboardPupil,self.l_screen_man.getHist(),self.l_screen_man.getScreen())
             self.__display_screen(whiteboardPupil,self.r_screen_man.getHist(),self.r_screen_man.getScreen())
 
             self.__display_eyeTracker(whiteboardPupil,l_point,l_point_screen,r_point,r_point_screen)
 
-            # self.__display_extended_gaze(frame,l_eye,10)
-            # self.__display_extended_gaze(frame,r_eye,10)
-            # self.__display_gaze_intersection(frame,l_eye,r_eye)
+            self.__display_extended_gaze(frame,l_eye,10)
+            self.__display_extended_gaze(frame,r_eye,10)
+            self.__display_gaze_intersection(frame,l_eye,r_eye)
             self.worker.imshow("frame",frame)
             self.worker.imshow("whitebaord",whiteboardPupil)
-            # self.worker.imshow("left eye",l_eye.getImage())
-            # self.worker.imshow("right eye",r_eye.getImage())
+            self.worker.imshow("left eye",l_eye.getImage())
+            self.worker.imshow("right eye",r_eye.getImage())
 
             # display camera feed
             # showEyes(frame,face)            

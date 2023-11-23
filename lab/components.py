@@ -24,11 +24,30 @@ class ScreenHist:
         self.axis_x = np.zeros((bars_x))
         self.axis_y = np.zeros((bars_y))
 
+        self.fading = 1
+
+    def __getParam(self,param,last : bool = False):
+        ret = 0
+        retArray = np.where(param)
+        
+        if len(retArray[0]) > 0:
+            print(f"{dir(retArray)} {retArray} {len(retArray)}")
+            ret = retArray[0][- int(last)] * self.step
+
+            if not ret == np.NAN:
+                ret = int(ret)
+        
+        return ret
+        
     def addPoint(self,point):
 
-        self.axis_x[self.axis_x != 0] -= 1
-        self.axis_y[self.axis_y != 0] -= 1
-
+        print(f"fading: {self.fading}")
+        self.axis_x[self.axis_x > 0] -= self.fading
+        self.axis_y[self.axis_y > 0] -= self.fading
+        self.axis_x[self.axis_x < 0] = 0
+        self.axis_y[self.axis_y < 0] = 0
+        
+        print(f"getting point {point}")
         (x,y) = point
         pos_x = int(x/self.step)
         pos_y = int(y/self.step)
@@ -36,19 +55,16 @@ class ScreenHist:
         self.axis_x[pos_x] += self.inc_step
         self.axis_y[pos_y] += self.inc_step
 
-        self.min_x = np.where(self.axis_x > self.inc_step*3)[0][0] * self.step
-        self.max_x = np.where(self.axis_x > self.inc_step*3)[0][-1]* self.step
-        self.min_y = np.where(self.axis_y > self.inc_step*3)[0][0] * self.step
-        self.max_y = np.where(self.axis_y > self.inc_step*3)[0][-1]* self.step
+        print(f"searching for lims {self.axis_x.shape} {self.axis_y.shape}")
+        self.min_x = self.__getParam((self.axis_x > self.inc_step*3),last=False)
+        self.max_x = self.__getParam((self.axis_x > self.inc_step*3),last=True)
+        self.min_y = self.__getParam((self.axis_y > self.inc_step*3),last=False)
+        self.max_y = self.__getParam((self.axis_y > self.inc_step*3),last=True)
 
-        if not self.min_x is np.NAN:
-            self.min_x = int(self.min_x)
-        if not self.max_x is np.NAN:
-            self.max_x = int(self.max_x)
-        if not self.min_y is np.NAN:
-            self.min_y = int(self.min_y)
-        if not self.max_y is np.NAN:
-            self.max_y = int(self.max_y)
+        print("point added to hist")
+
+    def setFading(self,fading : int):
+        self.fading = fading
 
     def getLims(self):
         return (self.min_x,self.max_x,self.min_y,self.max_y)
@@ -90,17 +106,26 @@ class Screen:
         self.x = x - int(self.width/2)
         self.y = y - int(self.height/2)
 
-    def scale(self,scale_w,scale_h):
+    def scale(self,scale_w,scale_h, change = 5):
         if self.old_scale_w == 0 or self.old_scale_h == 0:
             self.old_scale_w = scale_w
             self.old_scale_h = scale_h
         else:
-            if abs(self.old_scale_w - self.width) > 5: 
+            diff = abs(self.old_scale_w - scale_w)
+            if diff > change: 
                 width  = int(self.width/self.old_scale_w * scale_w)
                 height = int(self.height/self.old_scale_h * scale_h)
                 self.old_scale_w = scale_w
                 self.old_scale_h = scale_h
                 self.setWH(width,height)
+                return diff
+
+        return 0
+
+    def scaleStep(self,step_w : float, step_h : float):
+        new_scale_w = self.old_scale_w - step_w
+        new_scale_h = self.old_scale_h - step_h
+        self.scale(new_scale_w,new_scale_h,0.0)
 
     def convertToScreen(self, point):
         x = (point[0] - self.x) * ((point[0] - self.x) > 0)
@@ -139,21 +164,31 @@ class ScreenManager:
         self.eyeScreen.setCenter(x,y)
         scale_w = (eye.width  + eye.width)/2
         scale_h = (eye.height + eye.height)/2
-        self.eyeScreen.scale(scale_w, scale_w)
 
+        change = self.eyeScreen.scale(scale_w, scale_w)
+
+        if change > 10:
+            self.eyeHist.setFading(500)
+        else:
+            self.eyeHist.setFading(1)
+          
         min_x,max_x,min_y,max_y = self.eyeHist.getLims()
 
-        # experimetal
-        width  = self.eyeScreen.width
-        height = self.eyeScreen.height
-        if (max_x - min_x) - self.eyeScreen.width > 0.1:
-            width = (max_x - min_x)
-        if (max_y - min_y) - self.eyeScreen.height > 0.1:
-            height = (max_y - min_y)
+        if not np.array([min_x,max_x,min_y,max_y]).any() == np.NAN:
+            # experimetal
+            width  = self.eyeScreen.width
+            height = self.eyeScreen.height
+            if (max_x - min_x) - self.eyeScreen.width > 0.1:
+                width = (max_x - min_x)
+            if (max_y - min_y) - self.eyeScreen.height > 0.1:
+                height = (max_y - min_y)
 
-        self.eyeScreen.setWH(width,height)
+            self.eyeScreen.setWH(width,height)
+
+
         # ====================================
-
+        
+        print("converting eye")
         p = self.eyeScreen.convertToScreen(point)
         p += (self.monitor.x,self.monitor.y)
         return p
