@@ -15,10 +15,6 @@ class DisplayWithMask(QWidget):
         self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def imshow(self, q_image):
-        painter = QPainter(q_image)
-        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
-        painter.setBrush(QBrush(Qt.green, Qt.DiagCrossPattern))
-        painter.drawRect(100, 15, 400, 200)
         # Update the label's pixmap with the new frame
         pixmap = QPixmap.fromImage(q_image)
         self.label.setPixmap(pixmap )
@@ -44,13 +40,7 @@ class Display(QWidget):
 
     def imshow(self, q_image):
         pixmap = QPixmap.fromImage(q_image)
-        # painter = QPainter(pixmap)
-        # painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
-        # # painter.setBrush(QBrush(Qt.green, Qt.DiagCrossPattern))
-        # painter.drawRect(100, 15, 400, 200)
-        # # Update the label's pixmap with the new frame
         self.label.setPixmap(pixmap)
-        # painter.end()
         
         self.label.repaint()
   

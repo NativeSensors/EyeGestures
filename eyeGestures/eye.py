@@ -97,7 +97,7 @@ class Eye:
         # TODO: draw additional parameters
         return self.cut_image
 
-    def getGaze(self):
+    def getGaze(self,y_correction=0,x_correction=0):
         # pupilCoords = self.pupil.getCoords()
         
         vectors = self.region - self.center
@@ -109,11 +109,10 @@ class Eye:
         weighted_vectors = vectors * weights[:, None]
         gaze_vector = np.zeros((2))
         # gaze_vector[1] = -np.sum(weighted_vectors, axis=0)[1] * 10000
-        gaze_vector[1] = -np.sum(vectors, axis=0)[1] * 10
-        gaze_vector[0] = -np.sum(vectors, axis=0)[0] * 10
+        gaze_vector[1] = np.sum(vectors, axis=0)[1] * 10 - y_correction
+        gaze_vector[0] = -np.sum(vectors, axis=0)[0] * 10 - x_correction
         
         self.gaze_buff.add(gaze_vector)   
-        print(f"gaze: {self.gaze_buff.getAvg()}")
         return self.gaze_buff.getAvg()
         
     def getOpenness(self):
@@ -145,10 +144,9 @@ class Eye:
         self.center_y = (min_y + max_y)/2
         self.center = np.array((self.center_x,self.center_y)) 
 
-        print(f"add to pupil {self.pupil[1]} max: {np.max(region[:,1])}")
+        # HACKETY_HACK: 
         self.pupil[1] = np.min(region[:,1])
-        print(f"added to pupil {self.pupil[1]}")
-
+    
         # self.intersection = getIntersections(region,self.center_y)
         self.cut_image = masked_image[min_y:max_y,min_x:max_x]
         self.cut_image = cv2.cvtColor(self.cut_image, cv2.COLOR_GRAY2BGR)

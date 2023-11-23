@@ -67,7 +67,7 @@ class Lab:
         self.eye_screen_w = 500
         self.eye_screen_h = 500
         self.eyeScreen    = Screen(1920,1080,190,60,100,80)
-        self.step = 10 
+        self.step         = 10 
         self.eyeHist      = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
 
 
@@ -99,10 +99,7 @@ class Lab:
             return
 
         if key.char == 'q':
-            # Stop listening to the keyboard input and close the application
             self.__run = False
-            # self.listener.join()
-            # self.close()
 
     def __display_hist(self,whiteboardPupil,point):
         self.eyeHist.addPoint(point[0])
@@ -122,8 +119,7 @@ class Lab:
         self.eyeScreen.setCenter(x,y)
         scale_w = (l_eye.width + r_eye.width)/2
         scale_h = (l_eye.height + r_eye.height)/2
-        print(scale_w, scale_h)
-        self.eyeScreen.scale(scale_w, scale_h)
+        self.eyeScreen.scale(scale_w, scale_w)
 
         (x_min,x_max,y_min,y_max) = self.eyeHist.getLims()
         (x,y) = (x_min, y_min)
@@ -157,7 +153,7 @@ class Lab:
         (w,h) = (self.blue_dot_widget.size().width(),self.blue_dot_widget.size().height()) 
         self.blue_dot_widget.move(screen_point[0]-int(w/2),screen_point[1]-int(h/2))
 
-    def __display_gaze_intersection(self,display,l_eye,r_eye):
+    def __gaze_intersection(self,l_eye,r_eye):
         l_pupil = l_eye.getPupil()
         l_gaze  = l_eye.getGaze()
         
@@ -175,10 +171,12 @@ class Lab:
 
         i_x = (r_b - l_b)/(l_m - r_m)
         i_y = r_m * i_x + r_b
+        return (i_x,i_y)
 
-        print(f"(i_x,i_y): {(i_x,i_y)}, l_pupil: {l_pupil} , r_pupil: {r_pupil}")
-        cv2.circle(display,np.array((i_x,i_y), dtype = np.uint32), 2, (0,0,255),-1)
+    def __display_gaze_intersection(self,display,l_eye,r_eye):
+        (i_x,i_y) = self.__gaze_intersection(l_eye,r_eye)
 
+        cv2.circle(display,np.array((i_x,i_y), dtype = np.uint32), 2, (0,0,255),-1)   
 
     def __display_extended_gaze(self,display,eye,multiplier):
         pupil = eye.getPupil()
@@ -195,17 +193,7 @@ class Lab:
             int(r*math.sin(np.pi * angle / 180)) + int(pupil[1])  # y
         )
 
-        print(start_point,new_point)
         cv2.line(display,start_point,new_point,(255,255,0),1)
-
-    def __display_gaze(self,display,eye):
-        pupil = eye.getPupil()
-        gaze = eye.getGaze()
-        
-        start_point = (int(pupil[0]),int(pupil[1]))
-        end_point = (int(pupil[0] + gaze[0]),int(pupil[1] + gaze[1]))
-        cv2.line(display,start_point,end_point,(255,255,0),1)
-
 
     def __display_left_eye(self,frame):
         frame = frame
@@ -220,15 +208,20 @@ class Lab:
 
             l_eye = face.getLeftEye()
             r_eye = face.getRightEye()
-            self.eyeProcessorLeft.append(l_eye.getPupil(),l_eye.getLandmarks())
-            self.eyeProcessorRight.append(r_eye.getPupil(),r_eye.getLandmarks())
+            
+            l_pupil = l_eye.getPupil()
+            r_pupil = r_eye.getPupil()
+            intersection_x,_ = self.__gaze_intersection(l_eye,r_eye)
+
+            self.eyeProcessorLeft.append( l_pupil,l_eye.getLandmarks())
+            self.eyeProcessorRight.append(r_pupil,r_eye.getLandmarks())
 
             point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            pointLeft = (point[0],point[1])
+            pointLeft = ((int(intersection_x),point[0][1]),point[1])
 
             point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            pointRight = (point[0],point[1])  
-            
+            pointRight = ((int(intersection_x),point[0][1]),point[1])
+
             self.pointsBufforLeft.add(pointLeft)
             self.pointsBufforRight.add(pointRight)
 
@@ -237,14 +230,14 @@ class Lab:
             self.__display_screen(whiteboardPupil,l_eye,r_eye)
             self.__display_eyeTracker(whiteboardPupil,pointLeft,pointRight)
 
-            self.__display_extended_gaze(frame,l_eye,10)
-            self.__display_extended_gaze(frame,r_eye,10)
+            # self.__display_extended_gaze(frame,l_eye,10)
+            # self.__display_extended_gaze(frame,r_eye,10)
             # self.__display_gaze_intersection(frame,l_eye,r_eye)
             self.worker.imshow("frame",frame)
 
             self.worker.imshow("whitebaord",whiteboardPupil)
-            self.worker.imshow("left eye",l_eye.getImage())
-            self.worker.imshow("right eye",r_eye.getImage())
+            # self.worker.imshow("left eye",l_eye.getImage())
+            # self.worker.imshow("right eye",r_eye.getImage())
 
             # display camera feed
             # showEyes(frame,face)            

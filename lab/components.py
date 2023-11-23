@@ -8,6 +8,11 @@ from PySide2.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QVBoxL
 from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QImage, QPixmap
 from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
 
+class ScreenFinder:
+    
+    def __init__(self):
+        pass
+
 class ScreenHist:
 
     def __init__(self,width,height,step):
