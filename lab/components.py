@@ -31,7 +31,6 @@ class ScreenHist:
         retArray = np.where(param)
         
         if len(retArray[0]) > 0:
-            print(f"{dir(retArray)} {retArray} {len(retArray)}")
             ret = retArray[0][- int(last)] * self.step
 
             if not ret == np.NAN:
@@ -41,13 +40,11 @@ class ScreenHist:
         
     def addPoint(self,point):
 
-        print(f"fading: {self.fading}")
         self.axis_x[self.axis_x > 0] -= self.fading
         self.axis_y[self.axis_y > 0] -= self.fading
         self.axis_x[self.axis_x < 0] = 0
         self.axis_y[self.axis_y < 0] = 0
         
-        print(f"getting point {point}")
         (x,y) = point
         pos_x = int(x/self.step)
         pos_y = int(y/self.step)
@@ -55,13 +52,10 @@ class ScreenHist:
         self.axis_x[pos_x] += self.inc_step
         self.axis_y[pos_y] += self.inc_step
 
-        print(f"searching for lims {self.axis_x.shape} {self.axis_y.shape}")
         self.min_x = self.__getParam((self.axis_x > self.inc_step*3),last=False)
         self.max_x = self.__getParam((self.axis_x > self.inc_step*3),last=True)
         self.min_y = self.__getParam((self.axis_y > self.inc_step*3),last=False)
         self.max_y = self.__getParam((self.axis_y > self.inc_step*3),last=True)
-
-        print("point added to hist")
 
     def setFading(self,fading : int):
         self.fading = fading
@@ -188,7 +182,6 @@ class ScreenManager:
 
         # ====================================
         
-        print("converting eye")
         p = self.eyeScreen.convertToScreen(point)
         p += (self.monitor.x,self.monitor.y)
         return p

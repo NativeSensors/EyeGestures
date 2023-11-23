@@ -23,7 +23,7 @@ class EyeProcessor:
         self.max_x = np.max(self.landmarks[:,0]) + margin
         self.min_y = np.min(self.landmarks[:,1]) - margin
         self.max_y = np.max(self.landmarks[:,1]) + margin
-
+        
         assert(self.pupil[0] > self.min_x)
         assert(self.pupil[1] > self.min_y)
 
@@ -46,18 +46,6 @@ class EyeProcessor:
         # do I need that?
         self.height_1 = 20
 
-    def getLeftEyeCorner(self,width = None, height = None):
-        newCorner = self.__convertPoint((self.landmarks[1,0],self.landmarks[1,1]),
-                        width = self.scale_w, height = self.scale_h,
-                        scale_w = self.width, scale_h = self.height,
-                        offset = (self.min_x, self.min_y))
-
-        if not width is None and not height is None:
-            return self.__convertPoint(newCorner,
-                        width = width,height = height,
-                        scale_w = self.scale_w, scale_h = self.scale_h)
-        else:
-            return newCorner
 
     def getWidth(self):
         return self.width
@@ -73,7 +61,7 @@ class EyeProcessor:
         else:
             return self.center
 
-    def __convertPoint(self,point,width=1.0,height=1.0,scale_w = 1.0,scale_h = 1.0,offset = (0.0,0.0)):
+    def __convertPoint(self, point, width=1.0, height=1.0, scale_w = 1.0, scale_h = 1.0, offset = (0.0,0.0)):
         (min_x, min_y) = offset
         x = int(((point[0]-min_x)/scale_w)*width)
         y = int(((point[1]-min_y)/scale_h)*height)
@@ -88,9 +76,9 @@ class EyeProcessor:
             _retPupil = self.pupilBuffor.getAvg()
 
         # THIS BUFFOR HAS _retPupil and Width
-        self.avgRetBuffor.add((_retPupil,self.getHeight()))
+        self.avgRetBuffor.add(_retPupil)
         
-        return (_retPupil,self.getHeight())
+        return _retPupil
 
 ## main code:
 

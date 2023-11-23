@@ -88,6 +88,11 @@ class Eye:
         self.pupil = landmarks[self.pupil_index][0]
         self._process(self.image,self.region)
 
+    def getCenter(self):
+        return (self.center_x,self.center_y)
+
+    def getPos(self):
+        return (self.x,self.y)
 
     def getPupil(self):
         # return self.pupil.getCoords()
@@ -137,11 +142,15 @@ class Eye:
         min_y = np.min(region[:,1]) - margin
         max_y = np.max(region[:,1]) + margin
         
+        self.x = min_x
+        self.y = min_y
+        
         self.width  = np.max(region[:,0]) - np.min(region[:,0])
         self.height = np.max(region[:,1]) - np.min(region[:,1])
         
         self.center_x = (min_x + max_x)/2
         self.center_y = (min_y + max_y)/2
+
         self.center = np.array((self.center_x,self.center_y)) 
 
         # HACKETY_HACK: 

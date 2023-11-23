@@ -194,17 +194,24 @@ class Lab:
             
             l_pupil = l_eye.getPupil()
             r_pupil = r_eye.getPupil()
+
+            l_position = l_eye.getPos()
+            
             intersection_x,_ = self.__gaze_intersection(l_eye,r_eye)
 
+            print(f"l_pupil y:{ l_pupil[1]} l_pupil y - min:{l_pupil[1]-l_position[1]}, l_position[1]:{l_position[1]}")
+            # TODO: check what happens here before with l_pupil
             self.eyeProcessorLeft.append( l_pupil,l_eye.getLandmarks())
             self.eyeProcessorRight.append(r_pupil,r_eye.getLandmarks())
+            print("processed")
 
             # This scales pupil move to the screen we observe
             point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            l_point = (int(intersection_x),point[0][1])
+            print(f"processed l_pupil {point}")
+            l_point = (int(intersection_x),point[1])
 
             point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            r_point = (int(intersection_x),point[0][1])
+            r_point = (int(intersection_x),point[1])
 
             l_point_screen = self.l_screen_man.process(l_eye,l_point)
             r_point_screen = self.r_screen_man.process(r_eye,r_point)
