@@ -3,13 +3,14 @@ import sys
 import math
 import random
 import numpy as np
-from PySide2.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QVBoxLayout
-from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QImage, QPixmap
-from PySide2.QtCore import Qt, QTimer, QPointF, QObject, QThread
+
+import pyautogui
+
+from PySide2.QtWidgets import QApplication
 import keyboard
 
 from lab.pupillab import Worker
-from lab.components import Screen, ScreenHist, ScreenManager
+from lab.components import ScreenManager
 
 from eyeGestures.utils import VideoCapture, Buffor
 from eyeGestures.eyegestures import EyeGestures
@@ -76,9 +77,6 @@ class Lab:
         self.red_dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.red_dot_widget.show()
 
-        self.blue_dot_widget = DotWidget(diameter=100,color = (0,120,255))
-        self.blue_dot_widget.show()
-
         self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')        
         self.__run = True
 
@@ -121,7 +119,7 @@ class Lab:
                    0.5, (0,0,0), 1, cv2.LINE_AA) 
 
         (x,y,w,h) = edges.getBoundingBox()
-        cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(255,125,0),2)    
+        cv2.rectangle(whiteboardPupil,(x,y),(w,h),(255,125,0),2)    
 
     def __display_eyeTracker(self,whiteboardPupil,screen_man,point,point_screen, dot_widget):
 
@@ -135,8 +133,6 @@ class Lab:
         (w,h) = (dot_widget.size().width(),dot_widget.size().height()) 
         dot_widget.move(point_screen[0]-int(w/2),point_screen[1]-int(h/2))
 
-        # (w,h) = (self.blue_dot_widget.size().width(),self.blue_dot_widget.size().height()) 
-        # self.blue_dot_widget.move(r_point_screen[0]-int(w/2),r_point_screen[1]-int(h/2))
 
     def __gaze_intersection(self,l_eye,r_eye):
         l_pupil = l_eye.getPupil()
@@ -208,6 +204,10 @@ class Lab:
 
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
 
+            # mouse_position = pyautogui.position()
+            # print(mouse_position)
+            # compound_point = np.array(((mouse_position[0]-840)/1920 * 500 ,(mouse_position[1]-1080)/1080 * 500),dtype=np.uint32)
+            # print(compound_point)
             l_point_screen = self.l_screen_man.process(l_eye,compound_point)
             # r_point_screen = self.r_screen_man.process(r_eye,r_point)
 
