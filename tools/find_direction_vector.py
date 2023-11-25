@@ -27,7 +27,7 @@ min_y = np.min(points[:,1])
 max_y = np.max(points[:,1]) 
 
 center = np.array(((max_x+min_x)/2,(max_y+min_y)/2))
-print(min_x,max_x,center)
+# print(min_x,max_x,center)
 
 points = points - center
 center = center - center

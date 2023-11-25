@@ -52,6 +52,18 @@ class Face:
         self.landmarks = self._landmarks(self.face)
         self._process(image,self.face)
 
+    def getBoundingBox(self):
+        margin = 0
+        min_x = np.min(self.landmarks[:,0]) - margin
+        max_x = np.max(self.landmarks[:,0]) + margin
+        min_y = np.min(self.landmarks[:,1]) - margin
+        max_y = np.max(self.landmarks[:,1]) + margin
+        
+        width  = int((max_x - min_x)/2)
+        height = int((max_y - min_y)/2)
+
+        return (min_x,min_y,width,height)
+
     def getLeftEye(self):
         return self.eyeLeft
 

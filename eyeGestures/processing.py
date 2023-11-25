@@ -29,7 +29,7 @@ class EyeProcessor:
 
         self.width  = self.max_x - self.min_x
         self.height = (self.max_y - self.min_y)/2
-        
+
         self.center = self.__convertPoint(
                         ((self.min_x + self.max_x)/2,
                         (self.min_y + self.max_y)/2),
@@ -39,9 +39,9 @@ class EyeProcessor:
         
         self.pupilBuffor.add(
             self.__convertPoint(self.pupil,
-                            width = self.scale_w, height = self.scale_h,
-                            scale_w = self.width, scale_h = self.height,
-                            offset = (self.min_x, self.min_y)))
+                        width = self.scale_w, height = self.scale_h,
+                        scale_w = self.width, scale_h = self.height,
+                        offset = (self.min_x, self.min_y)))
 
         # do I need that?
         self.height_1 = 20
