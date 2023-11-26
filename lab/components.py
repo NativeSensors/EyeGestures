@@ -4,6 +4,8 @@ import numpy as np
 from screeninfo import get_monitors
 from eyeGestures.utils import Buffor
 
+from scipy import signal
+
 class ScreenHist:
 
     def __init__(self,width,height,step):
@@ -19,7 +21,7 @@ class ScreenHist:
         self.axis_x = np.zeros((bars_x))
         self.axis_y = np.zeros((bars_y))
 
-        self.confidence_limit   = 300
+        self.confidence_limit   = 1000
         self.total_points       = 0
 
         self.fading = 1
@@ -63,7 +65,7 @@ class ScreenHist:
         return (self.min_x,self.max_x,self.min_y,self.max_y)
 
     def getCenter(self):
-        
+
         self.center_x = int((self.max_x - self.min_x)/2 + self.min_x)
         self.center_y = int((self.max_y - self.min_y)/2 + self.min_y)
 
@@ -104,24 +106,25 @@ class Screen:
         self.y = y - int(self.height/2)
 
     def scale(self,scale_w,scale_h, change = 5):
-        if self.old_scale_w == 0 or self.old_scale_h == 0:
+        
+        diff_w = abs(self.old_scale_w - scale_w)
+        diff_h = abs(self.old_scale_h - scale_h)
+        
+        if diff_w > change: 
+            new_width  = int(self.width/self.old_scale_w * scale_w)
             self.old_scale_w = scale_w
+            self.setWH(new_width,self.height)
+        
+        if diff_h > change: 
+            new_height = int(self.height/self.old_scale_h * scale_h)
             self.old_scale_h = scale_h
-        else:
-            diff = abs(self.old_scale_w - scale_w)
-            if diff > change: 
-                width  = int(self.width/self.old_scale_w * scale_w)
-                height = int(self.height/self.old_scale_h * scale_h)
-                self.old_scale_w = scale_w
-                self.old_scale_h = scale_h
-                self.setWH(width,height)
-                return diff
-
-        return 0
-
-    def scaleByStep(self,step_W=0.1,step_h=0.1):
-        new_scale_w = float(self.old_scale_w) * (1 + step_W)
+            self.setWH(self.width,new_height)
+            
+        
+    def scaleByStep(self,step_w=0.1,step_h=0.1):
+        new_scale_w = float(self.old_scale_w) * (1 + step_w)
         new_scale_h = float(self.old_scale_h) * (1 + step_h)
+        print(f"{new_scale_h} {float(self.old_scale_h)} {(1 + step_h)}")
         self.scale(new_scale_w,new_scale_h,0)
 
     def convertToScreen(self, point):
@@ -202,7 +205,7 @@ class EdgeDetector:
         (x_t,y_t) = point_tracker 
         (x_s,y_s) = point_screen
 
-        maring = 0
+        maring = 10
 
         if (x_s <= maring):
             self.edge_min_x = max(self.center_x - x_t, 0)
@@ -225,8 +228,7 @@ class EdgeDetector:
             self.edge_max_y = min(y_t - self.center_y, 500)
 
         self.__checkLims()
-        print(f"edges: {self.edge_min_x} {self.edge_max_x} {self.edge_min_y} {self.edge_max_y}")
-
+        
     def getBoundingBox(self):
         # print(self.center_x,self.center_y)
         w_l = int(self.center_x - self.edge_min_x) 
@@ -235,7 +237,6 @@ class EdgeDetector:
         h_u = int(self.center_y - self.edge_min_y)
         h_d = int(self.center_y + self.edge_max_y) 
         
-        print(self.center_x,w_l,w_r,self.edge_min_x,self.edge_max_x)
         return (w_l,h_u,w_r,h_d)
 
     def getCenter(self):
@@ -248,10 +249,10 @@ class EdgeDetector:
         x = int((w_r + w_l)/2)
         y = int((h_u + h_d)/2)
 
-        # x = min(x,self.lim_max_x)
-        # x = max(x,self.lim_min_x)
-        # y = min(y,self.lim_max_y)
-        # y = max(y,self.lim_min_y)
+        x = min(x,self.lim_max_x)
+        x = max(x,self.lim_min_x)
+        y = min(y,self.lim_max_y)
+        y = max(y,self.lim_min_y)
     
         return (x, y)
 
@@ -276,35 +277,42 @@ class ScreenManager:
         self.eyeHist.addPoint(point)
         (x,y) = self.eyeHist.getCenter()
         (lim_min_x,lim_max_x,lim_min_y,lim_max_y) = self.eyeHist.getLims()
+        
         # (lim_min_x,lim_max_x,lim_min_y,lim_max_y) = (x-30,x+30,y-30,y+30)
         # =====================================
         # ---------histogram obtained---------- 
         # =====================================
-
-        # if self.eyeHist.confident():
-        #     (x,y) = self.edgeDetector.getCenter()
         
         point = self.eyeScreen.limitToScreen(point)
         self.pointsBuffor.add(point)
 
         self.eyeScreen.setCenter(x,y) 
+                w1,h1   = self.eyeScreen.getWH()
+        
+        (w_hist,h_hist) = (lim_max_x - lim_min_x,lim_max_y - lim_min_y)
+
+        if(w_hist > w1):
+            self.eyeScreen.scaleByStep(0.1,0.0)
+        
+        if(h_hist > h1):
+            self.eyeScreen.scaleByStep(0.0,0.1)
+
+        # =====================================
+        # if screen is bigger than edges make it smaller
+        # =====================================
         self.edgeDetector.setCenter(x,y)
         self.edgeDetector.setLim(lim_min_x,lim_max_x,lim_min_y,lim_max_y)
-        
-        _,_,w,h = self.edgeDetector.getBoundingBox()
-        w1,h1   = self.eyeScreen.getWH()
 
-        if (w - w1) < 0.0:
-            step_sign_w = np.sign(w - w1) 
-            self.eyeScreen.scaleByStep(0.1*step_sign_w,0.0)
+        w_l,h_u,w_r,h_d = self.edgeDetector.getBoundingBox()
+        w = w_r - w_l 
+        h = h_d - h_u  
+        print(w, w1)
+        if (w < w1):
+            self.eyeScreen.scaleByStep(-0.1,0.0)
         
-        if (h - h1) < 0.0:
-            step_sign_h = np.sign(h - h1) 
-            self.eyeScreen.scaleByStep(0.0,0.1*step_sign_h)
+        if (h < h1):
+            self.eyeScreen.scaleByStep(0.0,-0.1)
         
-        # if w1 < (lim_max_x - lim_min_x) or h1 < (lim_max_y - lim_min_y):
-        #     self.eyeScreen.setWH((lim_max_x - lim_min_x),(lim_max_y - lim_min_y))
-
         # ====================================
         
         p = self.eyeScreen.convertToScreen(point)
@@ -312,7 +320,6 @@ class ScreenManager:
         if self.pointsBuffor.getLen() > 20:
             self.edgeDetector.check(point,p)
             
-        print(f"{p}")
         p += (self.monitor.x,self.monitor.y)
 
         return p
