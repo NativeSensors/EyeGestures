@@ -205,8 +205,8 @@ class EdgeDetector:
         (x_t,y_t) = point_tracker 
         (x_s,y_s) = point_screen
 
+        # TODO: fix this to estimate w and h
         maring = 10
-
         if (x_s <= maring):
             self.edge_min_x = max(self.center_x - x_t, 0)
         elif (self.center_x - x_t > self.edge_min_x ) and (x_s > maring):
@@ -287,7 +287,7 @@ class ScreenManager:
         self.pointsBuffor.add(point)
 
         self.eyeScreen.setCenter(x,y) 
-                w1,h1   = self.eyeScreen.getWH()
+        w1,h1 = self.eyeScreen.getWH()
         
         (w_hist,h_hist) = (lim_max_x - lim_min_x,lim_max_y - lim_min_y)
 

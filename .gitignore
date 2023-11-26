@@ -2,3 +2,5 @@ build
 recording/*
 dataSetPreparing/*
 pyYTdownload.py
+*.pyc
+__pycache__/*
