@@ -53,10 +53,10 @@ class ScreenHist:
         self.axis_x[pos_x] += self.inc_step
         self.axis_y[pos_y] += self.inc_step
 
-        self.min_x = self.__getParam((self.axis_x > self.inc_step*5),last=False)
-        self.max_x = self.__getParam((self.axis_x > self.inc_step*5),last=True)
-        self.min_y = self.__getParam((self.axis_y > self.inc_step*5),last=False)
-        self.max_y = self.__getParam((self.axis_y > self.inc_step*5),last=True)
+        self.min_x = self.__getParam((self.axis_x > self.inc_step*4),last=False)
+        self.max_x = self.__getParam((self.axis_x > self.inc_step*4),last=True)
+        self.min_y = self.__getParam((self.axis_y > self.inc_step*4),last=False)
+        self.max_y = self.__getParam((self.axis_y > self.inc_step*4),last=True)
 
     def setFading(self,fading : int):
         self.fading = fading
@@ -70,6 +70,11 @@ class ScreenHist:
         self.center_y = int((self.max_y - self.min_y)/2 + self.min_y)
 
         return (self.center_x,self.center_y)
+    
+    def getPeak(self):
+        x = int(np.argmax(self.axis_x)*self.inc_step)
+        y = int(np.argmax(self.axis_y)*self.inc_step)
+        return (x,y)
 
     def confident(self):
         return self.total_points > self.confidence_limit
@@ -113,7 +118,7 @@ class Screen:
         if diff_w > change: 
             new_width  = self.width/self.old_scale_w * scale_w
             self.old_scale_w = scale_w
-            self.setWH(new_width,self.width)
+            self.setWH(new_width,self.height)
         
         if diff_h > change: 
             new_height = self.height/self.old_scale_h * scale_h
@@ -189,10 +194,10 @@ class EdgeDetector:
 
         # TODO: fix this to estimate w and h
         if(x_s <= 0 or x_s >= self.width):
-            self.w = abs(self.center_x - x_t) * 2 + 1
+            self.w = abs(self.center_x - x_t) * 2 + 10
         
         if(y_s <= 0 or y_s >= self.height):
-            self.h = abs(self.center_y - y_t) * 2 + 1
+            self.h = abs(self.center_y - y_t) * 2 + 10
                 
     def getBoundingBox(self):
         x = int(self.center_x - self.w/2)

@@ -32,7 +32,7 @@ class Fixation:
     def process(self,x,y):
         
         if (x - self.x)**2 + (y - self.y)**2 < self.radius**2:
-            self.fixation = min(self.fixation + 0.01, 1.0)
+            self.fixation = min(self.fixation + 0.02, 1.0)
         else:
             self.x = x
             self.y = y
@@ -146,10 +146,11 @@ class GazeTracker:
             l_eye = face.getLeftEye()
             r_eye = face.getRightEye()
 
-            blink = l_eye.getBlink() or r_eye.getBlink() 
 
             l_pupil = l_eye.getPupil()
             r_pupil = r_eye.getPupil()
+            
+            blink = l_eye.getBlink() or r_eye.getBlink()
             
             intersection_x,_ = self.__gaze_intersection(l_eye,r_eye)
 
@@ -169,13 +170,16 @@ class GazeTracker:
             point_screen = self.screen_man.process(compound_point)
             fixation = self.gazeFixation.process(point_screen[0],point_screen[1])
 
+        
+            blink = blink and (fixation > 0.8)
+
             return Gevent(compound_point,
-                         point_screen,
-                         blink,
-                         fixation,
-                         l_eye,
-                         r_eye,
-                         self.screen_man)
+                        point_screen,
+                        blink,
+                        fixation,
+                        l_eye,
+                        r_eye,
+                        self.screen_man)
 
         return None
     

@@ -143,7 +143,11 @@ class Lab:
         event = self.gestures.estimate(frame)
 
         if not event is None:
-            self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
+            
+            if not event.blink:
+                self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
+            else:
+                self.dot_widget.setColour((255,120,255))
 
             whiteboardPupil = np.full((self.eye_screen_h,self.eye_screen_w,3),255.0,dtype = np.uint8)
             
