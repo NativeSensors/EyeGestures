@@ -1,7 +1,6 @@
 import cv2
 import sys
 import math
-import random
 import numpy as np
 
 import pyautogui
@@ -11,9 +10,8 @@ import keyboard
 
 from lab.pupillab import Worker
 
-from eyeGestures.utils import VideoCapture, Buffor
+from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
-from eyeGestures.processing import EyeProcessor
 from screeninfo   import get_monitors
 from appUtils.dot import DotWidget
 from pynput import keyboard
@@ -147,6 +145,7 @@ class Lab:
             if not event.blink:
                 self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
             else:
+                pyautogui.moveTo(event.point_screen[0], event.point_screen[1])
                 self.dot_widget.setColour((255,120,255))
 
             whiteboardPupil = np.full((self.eye_screen_h,self.eye_screen_w,3),255.0,dtype = np.uint8)
@@ -169,6 +168,7 @@ class Lab:
                                       event.point, 
                                       event.point_screen, 
                                       self.dot_widget)
+
 
             self.__display_extended_gaze(frame,
                                          event.l_eye,
