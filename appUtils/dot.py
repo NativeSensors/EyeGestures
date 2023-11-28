@@ -53,7 +53,7 @@ class DotWidget(QWidget):
         path.setFillRule(Qt.WindingFill) 
 
         # Draw the large red circle
-        R,G,B= self.color
+        R,G,B = self.color
         painter.setBrush(QColor(R,G,B, 100))
         painter.setPen(QColor(R,G,B, 0))
         
@@ -72,7 +72,6 @@ class DotWidget(QWidget):
             
         painter.drawPath(path)
 
-
     def on_quit(self,key):
         # Stop listening to the keyboard input and close the application
         self.close()
@@ -83,3 +82,6 @@ class DotWidget(QWidget):
 
     def showEvent(self, event):
         self.setFocus()  # Set focus to the widget when it is shown
+
+    def setColour(self,color):
+        self.color = color

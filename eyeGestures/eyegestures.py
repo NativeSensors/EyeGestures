@@ -17,7 +17,7 @@ class EyeGestures:
         self.width  = width
         self.height = height
 
-        self.gaze = GazeTracker()
+        self.gaze = GazeTracker(width,height)
         self.calibrated = False
 
         self.calibration = Calibration(self.height, self.width, 60)
@@ -50,7 +50,4 @@ class EyeGestures:
         return self.calibrated and not self.calibration.inProgress()
 
     def estimate(self,image):
-        if not self.calibrated:
-            return np.full((1,2),np.NAN)
-        else:
-            return self.gaze.estimate(image)
+        return self.gaze.estimate(image)

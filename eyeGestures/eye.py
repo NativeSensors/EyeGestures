@@ -97,6 +97,10 @@ class Eye:
     def getPupil(self):
         # return self.pupil.getCoords()
         return self.pupil
+    
+    def getBlink(self):
+        # return self.pupil.getCoords()
+        return (self.height - 10) <= 1 # 2x margin 
 
     def getImage(self):
         # TODO: draw additional parameters

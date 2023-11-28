@@ -53,10 +53,10 @@ class ScreenHist:
         self.axis_x[pos_x] += self.inc_step
         self.axis_y[pos_y] += self.inc_step
 
-        self.min_x = self.__getParam((self.axis_x > self.inc_step*3),last=False)
-        self.max_x = self.__getParam((self.axis_x > self.inc_step*3),last=True)
-        self.min_y = self.__getParam((self.axis_y > self.inc_step*3),last=False)
-        self.max_y = self.__getParam((self.axis_y > self.inc_step*3),last=True)
+        self.min_x = self.__getParam((self.axis_x > self.inc_step*5),last=False)
+        self.max_x = self.__getParam((self.axis_x > self.inc_step*5),last=True)
+        self.min_y = self.__getParam((self.axis_y > self.inc_step*5),last=False)
+        self.max_y = self.__getParam((self.axis_y > self.inc_step*5),last=True)
 
     def setFading(self,fading : int):
         self.fading = fading
@@ -99,32 +99,32 @@ class Screen:
         self.height = height
 
     def getWH(self):
-        return (self.width,self.height)
+        return (int(self.width),int(self.height))
 
     def setCenter(self, x, y):
         self.x = x - int(self.width/2)
         self.y = y - int(self.height/2)
 
-    def scale(self,scale_w,scale_h, change = 5):
+    def scale(self,scale_w,scale_h, change = 0.5):
         
         diff_w = abs(self.old_scale_w - scale_w)
         diff_h = abs(self.old_scale_h - scale_h)
         
         if diff_w > change: 
-            new_width  = int(self.width/self.old_scale_w * scale_w)
+            new_width  = self.width/self.old_scale_w * scale_w
             self.old_scale_w = scale_w
-            self.setWH(new_width,self.height)
+            self.setWH(new_width,self.width)
         
         if diff_h > change: 
-            new_height = int(self.height/self.old_scale_h * scale_h)
+            new_height = self.height/self.old_scale_h * scale_h
             self.old_scale_h = scale_h
-            self.setWH(self.width,new_height)
-            
+            self.setWH(self.width,new_height)    
         
     def scaleByStep(self,step_w=0.1,step_h=0.1):
-        new_scale_w = float(self.old_scale_w) * (1 + step_w)
-        new_scale_h = float(self.old_scale_h) * (1 + step_h)
-        print(f"{new_scale_h} {float(self.old_scale_h)} {(1 + step_h)}")
+        self.old_scale_w = 1.0
+        self.old_scale_h = 1.0
+        new_scale_w = float(self.old_scale_w + step_w)
+        new_scale_h = float(self.old_scale_h + step_h)
         self.scale(new_scale_w,new_scale_h,0)
 
     def convertToScreen(self, point):
@@ -150,18 +150,20 @@ class Screen:
         x = min(int(self.x + self.width  + margin),x)
         y = min(int(self.y + self.height + margin),y)
 
-        # print(f"x,y {x,y} lim: {self.x,self.y}")        
         return (x,y)
 
     def getRect(self):
-        return (self.x,self.y,self.width,self.height)
+        return (int(self.x),int(self.y),int(self.width),int(self.height))
 
 class EdgeDetector:
 
-    def __init__(self,width,height, x = 0,y = 0,w = 0,h = 0):
+    def __init__(self,width,height, x = 0,y = 0,w = 500,h = 500):
 
         self.width  = width
         self.height = height
+        
+        self.w = w
+        self.h = h
         self.center_x = x + w/2
         self.center_y = y + h/2
 
@@ -169,12 +171,6 @@ class EdgeDetector:
         self.edge_min_x = int(self.center_x - w/2)
         self.edge_max_y = int(self.center_y + h/2)
         self.edge_min_y = int(self.center_y - h/2)
-
-        self.lim_max_x = 30
-        self.lim_min_x = 30 
-        self.lim_max_y = 30
-        self.lim_min_y = 30 
-
 
     def setCenter(self,x,y):
         self.center_x = x 
@@ -187,74 +183,25 @@ class EdgeDetector:
         self.lim_max_y = lim_max_y
         self.lim_min_y = lim_min_y 
 
-    def __checkLims(self):
-
-        if self.edge_max_x < self.lim_max_x - self.center_x:
-            self.edge_max_x = self.lim_max_x - self.center_x
-
-        if self.edge_min_x > self.center_x - self.lim_min_x:
-            self.edge_min_x = self.center_x - self.lim_min_x
-        
-        if self.edge_max_y < self.lim_max_y - self.center_y:
-            self.edge_max_y = self.lim_max_y - self.center_y
-
-        if self.edge_min_y > self.center_y - self.lim_min_y:
-            self.edge_min_y = self.center_y - self.lim_min_y
-        
     def check(self, point_tracker, point_screen):
         (x_t,y_t) = point_tracker 
         (x_s,y_s) = point_screen
 
         # TODO: fix this to estimate w and h
-        maring = 10
-        if (x_s <= maring):
-            self.edge_min_x = max(self.center_x - x_t, 0)
-        elif (self.center_x - x_t > self.edge_min_x ) and (x_s > maring):
-            self.edge_min_x = max(self.center_x - x_t, 0)
-
-        if (x_s >= self.width - maring):
-            self.edge_max_x = min(x_t - self.center_x, 500)
-        elif (x_t - self.center_x > self.edge_max_x ) and (x_s < self.width - maring):
-            self.edge_max_x = min(x_t - self.center_x, 500)
-            
-        if (y_s <= maring):
-            self.edge_min_y = max(self.center_y - y_t, 0)
-        elif (self.center_y - y_t > self.edge_min_y) and (y_s > maring):
-            self.edge_min_y = max(self.center_x - y_t, 0)
+        if(x_s <= 0 or x_s >= self.width):
+            self.w = abs(self.center_x - x_t) * 2 + 1
         
-        if (y_s >= self.height - maring):
-            self.edge_max_y = min(y_t - self.center_y, 500)
-        elif (y_t - self.center_y > self.edge_max_y) and (y_s < self.height - maring):
-            self.edge_max_y = min(y_t - self.center_y, 500)
-
-        self.__checkLims()
-        
+        if(y_s <= 0 or y_s >= self.height):
+            self.h = abs(self.center_y - y_t) * 2 + 1
+                
     def getBoundingBox(self):
-        # print(self.center_x,self.center_y)
-        w_l = int(self.center_x - self.edge_min_x) 
-        w_r = int(self.center_x + self.edge_max_x)
-
-        h_u = int(self.center_y - self.edge_min_y)
-        h_d = int(self.center_y + self.edge_max_y) 
+        x = int(self.center_x - self.w/2)
+        y = int(self.center_y - self.h/2)
         
-        return (w_l,h_u,w_r,h_d)
+        return (x,y,int(self.w),int(self.h))
 
-    def getCenter(self):
-        w_l = self.center_x - self.edge_min_x
-        w_r = self.center_x + self.edge_max_x
-
-        h_u = self.center_y - self.edge_min_y
-        h_d = self.center_y + self.edge_max_y 
-
-        x = int((w_r + w_l)/2)
-        y = int((h_u + h_d)/2)
-
-        x = min(x,self.lim_max_x)
-        x = max(x,self.lim_min_x)
-        y = min(y,self.lim_max_y)
-        y = max(y,self.lim_min_y)
-    
-        return (x, y)
+    def getCenter(self):    
+        return (self.center_x, self.center_y)
 
 class ScreenManager:
 
@@ -265,58 +212,84 @@ class ScreenManager:
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
         self.step         = 10 
-        self.eyeScreen    = Screen(1920,1080,190,60,int(1920/50),int(1080/50))
-        self.eyeHist      = ScreenHist(self.eye_screen_w,self.eye_screen_h,self.step)
-        self.edgeDetector = EdgeDetector(1920,1080, 250,250,10,10)
-        self.pointsBuffor = Buffor(50)
-        pass
+        self.eyeScreen    = Screen(self.monitor.width,
+                                   self.monitor.height,
+                                   190,60,
+                                   int(self.monitor.width/50),
+                                   int(self.monitor.height/50))
 
-    def process(self, eye ,point : (int,int)):
+        self.eyeHist      = ScreenHist(self.monitor.width,
+                                       self.monitor.height,
+                                       self.step)
+    
+        self.edgeDetector = EdgeDetector(self.monitor.width,
+                                         self.monitor.height,
+                                         250,250,
+                                         10,10)
+        self.pointsBuffor  = Buffor(50)
+        self.limsWHBuffor  = Buffor(20)
+        self.edgesWHBuffor = Buffor(20)
+        
+
+    def __scale_up_to_hist(self,width,height):
+        (lim_min_x,lim_max_x,lim_min_y,lim_max_y) = self.eyeHist.getLims()
+
+        (w_hist,h_hist) = (lim_max_x - lim_min_x,lim_max_y - lim_min_y)
+
+        self.limsWHBuffor.add((w_hist,h_hist))
+        (w_hist,h_hist) = self.limsWHBuffor.getAvg()
+
+        if(w_hist > width):
+            self.eyeScreen.scaleByStep(0.1,0.0)
+        
+        if(h_hist > height):
+            self.eyeScreen.scaleByStep(0.0,0.1)
+
+
+    def __scale_down_to_edge(self,width,height):
+        _,_,w,h = self.edgeDetector.getBoundingBox()
+        
+        self.edgesWHBuffor.add((w,h))
+        (w,h) = self.edgesWHBuffor.getAvg()
+
+        if (w < width):
+            self.eyeScreen.scaleByStep(-0.1,0.0)
+        
+        if (h < height):
+            self.eyeScreen.scaleByStep(0.0,-0.1)
+
+
+    def process(self, point : (int,int)):
         assert(np.array(point).shape[0] == 2)
 
         self.eyeHist.addPoint(point)
         (x,y) = self.eyeHist.getCenter()
-        (lim_min_x,lim_max_x,lim_min_y,lim_max_y) = self.eyeHist.getLims()
         
-        # (lim_min_x,lim_max_x,lim_min_y,lim_max_y) = (x-30,x+30,y-30,y+30)
         # =====================================
         # ---------histogram obtained---------- 
         # =====================================
-        
+
         point = self.eyeScreen.limitToScreen(point)
         self.pointsBuffor.add(point)
 
         self.eyeScreen.setCenter(x,y) 
+        
         w1,h1 = self.eyeScreen.getWH()
-        
-        (w_hist,h_hist) = (lim_max_x - lim_min_x,lim_max_y - lim_min_y)
-
-        if(w_hist > w1):
-            self.eyeScreen.scaleByStep(0.1,0.0)
-        
-        if(h_hist > h1):
-            self.eyeScreen.scaleByStep(0.0,0.1)
+        self.__scale_up_to_hist(w1,h1)
 
         # =====================================
         # if screen is bigger than edges make it smaller
         # =====================================
-        self.edgeDetector.setCenter(x,y)
-        self.edgeDetector.setLim(lim_min_x,lim_max_x,lim_min_y,lim_max_y)
-
-        w_l,h_u,w_r,h_d = self.edgeDetector.getBoundingBox()
-        w = w_r - w_l 
-        h = h_d - h_u  
-        print(w, w1)
-        if (w < w1):
-            self.eyeScreen.scaleByStep(-0.1,0.0)
         
-        if (h < h1):
-            self.eyeScreen.scaleByStep(0.0,-0.1)
+        self.edgeDetector.setCenter(x,y)
+        self.__scale_down_to_edge(w1,h1)
+
+        (lim_min_x,lim_max_x,lim_min_y,lim_max_y) = self.eyeHist.getLims()
+        self.edgeDetector.setLim(lim_min_x,lim_max_x,lim_min_y,lim_max_y)
         
         # ====================================
-        
         p = self.eyeScreen.convertToScreen(point)
-
+        
         if self.pointsBuffor.getLen() > 20:
             self.edgeDetector.check(point,p)
             
