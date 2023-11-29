@@ -2,7 +2,7 @@ import sys
 import math
 import random
 from PySide2.QtWidgets import QApplication, QWidget, QLabel
-from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen
+from PySide2.QtGui import QPainter, QColor, QKeyEvent, QPainterPath, QPen, QRadialGradient, QBrush
 from PySide2.QtCore import Qt, QTimer, QPointF
 
 from pynput import keyboard
@@ -11,7 +11,7 @@ class DotWidget(QWidget):
     
     def __init__(self, diameter=20, color=(255,255,255)):
         super().__init__()
-        self.outer_radius = diameter / 4
+        self.outer_radius = diameter / 2
         self.inner_radii = [self.outer_radius * 0.7, self.outer_radius * 0.8, self.outer_radius * 0.7, self.outer_radius * 0.3]  # Different sizes for inner circles
         self.orbit_distances = [self.outer_radius * 0.2, self.outer_radius * 0.2, self.outer_radius * 0.2, self.outer_radius * 0.2]  # Distances from center
         self.angles = [0, 120, 240, 150]  # Starting angles for the inner circles
@@ -54,8 +54,8 @@ class DotWidget(QWidget):
 
         # Draw the large red circle
         R,G,B = self.color
-        painter.setBrush(QColor(R,G,B, 100))
-        painter.setPen(QColor(R,G,B, 0))
+        # painter.setBrush(QColor(R,G,B, 100))
+        # painter.setPen(QColor(R,G,B, 0))
         
         # Draw the smaller orbiting circles
         for n, (radius, distance, angle) in enumerate(zip(self.inner_radii, self.orbit_distances, self.angles)):
@@ -68,8 +68,17 @@ class DotWidget(QWidget):
             center_x = self.rect().center().x() + distance * math.cos(rad_angle)
             center_y = self.rect().center().y() + distance * math.sin(rad_angle)
 
+            gradient = QRadialGradient(QPointF(center_x, center_y), 20)
+            gradient.setColorAt(0, QColor(255, 255, 255, 200))  # Bright and opaque at center
+            gradient.setColorAt(0.2, QColor(R, G, B, 200))    # Transparent at edges
+            gradient.setColorAt(1, QColor(R, G, B, 20))    # Transparent at edges
+
+            # Set the brush to the radial gradient
+            painter.setBrush(QBrush(gradient))
+            painter.setPen(Qt.NoPen)
+
             path.addEllipse(QPointF(center_x, center_y), radius, radius)
-            
+
         painter.drawPath(path)
 
     def on_quit(self,key):
