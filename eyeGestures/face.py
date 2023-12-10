@@ -44,6 +44,8 @@ class Face:
         self.image_h, self.image_w, _ = image.shape
         
         self.landmarks = self._landmarks(self.face)
+        # self.landmarks = self.landmarks - (x,y)
+        # image = cv2.resize(image[x:x+width,y:y+height],(60,73))
         self._process(image,self.face)
 
     def update(self,image,face):
@@ -61,8 +63,9 @@ class Face:
         
         width  = int((max_x - min_x)/2)
         height = int((max_y - min_y)/2)
-
-        return (min_x,min_y,width,height)
+        x = int(min_x)
+        y = int(min_y) 
+        return (x,y,width,height)
 
     def getLeftEye(self):
         return self.eyeLeft
@@ -90,6 +93,8 @@ class Face:
         return np.array(__face_landmarks)
 
     def _process(self,image,face):
+
+        # print(f"pasing process: {image.shape}")
         if not hasattr(self,"eyeLeft"):
             self.eyeLeft  = eye.Eye(image,self.landmarks,0)
         else:

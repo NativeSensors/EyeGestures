@@ -44,18 +44,20 @@ class EyeGestureWidget(QWidget):
         self.setPalette(palette)
 
         # Window positioning
-        self.setGeometry(100, 100, 1000, 100)  # Adjust size as needed
+        self.setGeometry(100, 100, 400, 200)  # Adjust size as needed
         self.move_to_center()
 
         # Buttons
         self.button1 = QPushButton('Calibrate')
         self.button2 = QPushButton('Disable')
-        self.button3 = QPushButton('Settings')
+        # self.button3 = QPushButton('Button 3')
 
         main_layout = QHBoxLayout()
         self.setLayout(main_layout)
         # Image
         self.image_label = QLabel(self)
+        pixmap = QPixmap('eye.png')  # Replace with your image path
+        scaled_pixmap = pixmap.scaled(30,30, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         green = "#0e6711"
         red = "#ac5453"
@@ -69,9 +71,7 @@ class EyeGestureWidget(QWidget):
                 </radialGradient>
             </defs>
             <circle cx="7.5" cy="7.5" r="6" fill="#c5c5c5" /> <!-- Sclera -->
-            <circle cx="7.5" cy="7.5" r="5.2" fill="#141415" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="4.8" fill="{red}" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="3.5" fill="#c5c5c5" /> <!-- Iris -->
+            <circle cx="7.5" cy="7.5" r="5" fill="{yellow}" /> <!-- Iris -->
             <circle cx="7.5" cy="7.5" r="3" fill="#141415" /> <!-- Pupil -->
             <circle cx="10" cy="6" r="1.5" fill="#c5c5c5" /> <!-- Light -->
             </svg>
@@ -87,7 +87,7 @@ class EyeGestureWidget(QWidget):
 
         self.style_buttons(self.button1
                            ,self.button2
-                           ,self.button3
+                        #    ,self.button3
                            )
 
         self.adjustSize()

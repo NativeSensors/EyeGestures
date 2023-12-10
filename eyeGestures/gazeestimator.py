@@ -69,6 +69,8 @@ class GazeTracker:
         self.__debugCalibBuffer = []
         self.__headDir = [0.5,0.5]
 
+        self.point_screen = [0.0,0.0]
+
     def __getFeatures(self,image):
         
         eyes = np.full((self.N_FEATURES,2),np.NAN)
@@ -83,7 +85,6 @@ class GazeTracker:
             lpupil     = l_eye.getPupil()
             rlandmards = r_eye.getLandmarks()
             rpupil     = r_eye.getPupil()
-            # faceBox    = face.getBoundingBox()
 
             eyes = np.concatenate((llandmards,lpupil,rlandmards,rpupil))
             if np.isnan(eyes).any():
@@ -146,7 +147,6 @@ class GazeTracker:
             l_eye = face.getLeftEye()
             r_eye = face.getRightEye()
 
-
             l_pupil = l_eye.getPupil()
             r_pupil = r_eye.getPupil()
             
@@ -166,15 +166,17 @@ class GazeTracker:
             r_point = np.array((int(intersection_x),point[1]))
 
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
-            
-            point_screen = self.screen_man.process(compound_point)
-            fixation = self.gazeFixation.process(point_screen[0],point_screen[1])
 
-        
+            if blink == True:
+                return None
+            
+            self.point_screen = self.screen_man.process(compound_point)
+
+            fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])        
             blink = blink and (fixation > 0.8)
 
             return Gevent(compound_point,
-                        point_screen,
+                        self.point_screen,
                         blink,
                         fixation,
                         l_eye,

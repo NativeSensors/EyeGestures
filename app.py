@@ -1,6 +1,4 @@
-import cv2
 import sys
-import math
 import numpy as np
 
 import pyautogui
@@ -12,7 +10,7 @@ from lab.pupillab import Worker
 
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
-from screeninfo   import get_monitors
+from appUtils.EyeGestureWidget import EyeGestureWidget
 from appUtils.dot import DotWidget
 from pynput import keyboard
 
@@ -27,7 +25,8 @@ class Lab:
         self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.dot_widget.show()
 
-        self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')        
+        # self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
+        self.cap = VideoCapture(0)        
         self.__run = True
 
         self.listener = keyboard.Listener(on_press=self.on_quit)
@@ -43,7 +42,7 @@ class Lab:
             self.__run = False
 
     def __display_eye(self,frame):
-        frame = frame
+        frame = cv2.flip(frame, 1)
         event = self.gestures.estimate(frame)
 
         if not event is None:
@@ -73,6 +72,8 @@ class Lab:
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    widget = EyeGestureWidget()
+    widget.show()
     Lab()
     sys.exit(app.exec_())
     

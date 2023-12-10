@@ -97,20 +97,38 @@ class VideoCapture:
         self.bufforless = bufforless
         self.run = True
         
-        if ".pkl" in name:
-            self.stream = False
+        if name is str:
+            if ".pkl" in name:
+                self.stream = False
+            else:
+                self.stream = True
         else:
             self.stream = True
         
+
         if self.stream: 
             self.prev_frame = None
-            self.cap = cv2.VideoCapture(name)
+
+            self.__openCam(name)
+            
             self.q = queue.Queue()
             self.t = threading.Thread(target=self.__reader).start()
         else:
             self.frames = []
             with open(name, 'rb') as file:
                 self.frames = pickle.load(file)
+
+    def __openCam(self,name):
+        
+        if name is int:
+            self.cap = cv2.VideoCapture(name)
+            if self.cap is None or not self.cap.isOpened():
+                print(f"Was unable to open camera: {name}.")
+                print(f"Trying to open camera: {name}.")
+                self.__openCam(name + 1)
+        else:
+            self.cap = cv2.VideoCapture(name)
+            
 
     def __reader(self):
         while self.run:

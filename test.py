@@ -1,8 +1,16 @@
-import screeninfo
+from sklearn.cluster import DBSCAN
+import numpy as np
+import time  
+X = np.array([[1, 2], [2, 2], [2, 3], [8, 7], [8, 8], [25, 80], [8, 20], [8, 21]])
 
-print(dir(screeninfo))
+Dbscan = DBSCAN(eps=3, min_samples=2)
 
-print(screeninfo.get_monitors())
+start = time.time()
+clustering = Dbscan.fit(X)
+print(clustering.labels_, time.time() - start)
 
-for monitor in screeninfo.get_monitors():
-    print(monitor.is_primary,monitor)
+
+X = np.array([[8, 7], [8, 8], [25, 80], [8, 20], [8, 21], [1, 2], [2, 2], [2, 3]])
+start = time.time()
+clustering = Dbscan.fit_predict(X)
+print(clustering.labels_, time.time() - start)

@@ -140,7 +140,7 @@ class Eye:
 
         masked_image = cv2.bitwise_not(background, cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY), mask=mask)
         
-        margin = 5
+        margin = 2
         min_x = np.min(region[:,0]) - margin
         max_x = np.max(region[:,0]) + margin
         min_y = np.min(region[:,1]) - margin
@@ -162,6 +162,7 @@ class Eye:
     
         # self.intersection = getIntersections(region,self.center_y)
         self.cut_image = masked_image[min_y:max_y,min_x:max_x]
+        # print(f"here: {self.cut_image.shape,min_y,max_y,min_x,max_x}")
         self.cut_image = cv2.cvtColor(self.cut_image, cv2.COLOR_GRAY2BGR)
         
         for point in self.region:
@@ -169,6 +170,8 @@ class Eye:
             cv2.circle(self.cut_image,point.astype(int),1,(255,0,0,150),1)
 
         pupil = self.pupil - (min_x,min_y)
+
+        # print(f"pupil: {pupil}")
         cv2.circle(self.cut_image,pupil.astype(int),1,(0,255,0,150),1)
 
         self.cut_image = cv2.resize(self.cut_image,self.scale)

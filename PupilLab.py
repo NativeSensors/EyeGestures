@@ -1,6 +1,7 @@
 import cv2
 import sys
 import math
+import time
 import numpy as np
 
 import pyautogui
@@ -56,6 +57,9 @@ def showEyes(image,face):
 class Lab:
 
     def __init__(self):
+        self.start_time = time.time()
+        self.frame_counter = 0
+
         self.step         = 10 
         self.eye_screen_w = 500
         self.eye_screen_h = 500
@@ -64,7 +68,8 @@ class Lab:
         self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.dot_widget.show()
 
-        self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')        
+        # self.cap = VideoCapture('rtsp://192.168.18.30:8080/h264.sdp')
+        self.cap = VideoCapture(0)        
         self.__run = True
 
         self.listener = keyboard.Listener(on_press=self.on_quit)
@@ -79,6 +84,22 @@ class Lab:
         if key.char == 'q':
             self.__run = False
 
+    def __display_clusters(self,whiteboardPupil,clusters):
+        colours = {0:(255,0,0),1:(0,255,0),2:(0,0,255),3:(255,0,255),4:(255,255,155),5:(155,255,255),6:(255,255,255),7:(155,155,155)}
+
+        for cluster in clusters:
+            points = cluster.points
+            colour = cluster.label % 8
+
+            for point in points:
+                if colour >= 0:
+                    x,y = point
+                    cv2.circle(whiteboardPupil,(int(x),int(y)),3,colours[colour],-1)
+
+            x,y,w,h = cluster.getBoundaries()
+
+            cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x+w),int(y+h)),colours[colour],1)
+
     def __display_hist(self,whiteboardPupil,hist):
         x_axis,y_axis = hist.getHist()
 
@@ -90,29 +111,31 @@ class Lab:
                 y_val = min(y_axis[m],255)
                 cv2.rectangle(whiteboardPupil,(self.step*n,self.step*m),(self.step*n + self.step,self.step*m + self.step),(255,255-x_val,255-y_val,50),-1)
 
-    def __display_screen(self,whiteboardPupil,hist,screen,edges):
+    def __display_screen(self,whiteboardPupil,screen,backup_screen,edges):
 
-        (x_min,x_max,y_min,y_max) = hist.getLims()
-        (x,y) = (x_min, y_min)
-        (w,h) = (x_max - x_min), (y_max - y_min)
-        cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(0,0,255),2)
-        cv2.putText(whiteboardPupil, f'{w,h}', (x,y), cv2.FONT_HERSHEY_SIMPLEX,  
-                   0.5, (0,0,0), 2, cv2.LINE_AA) 
+        # (x_min,x_max,y_min,y_max) = hist.getLims()
+        # (x,y) = (x_min, y_min)
+        # (w,h) = (x_max - x_min), (y_max - y_min)
+        # cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(0,0,255),2)
+        # cv2.putText(whiteboardPupil, f'{w,h}', (x,y), cv2.FONT_HERSHEY_SIMPLEX,  
+        #            0.5, (0,0,0), 2, cv2.LINE_AA) 
    
         (x,y) = screen.getCenter()
         (w,h) = screen.getWH()  
-        cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(255,0,0),2)
-        cv2.putText(whiteboardPupil, f'{w,h}', (x,y), cv2.FONT_HERSHEY_SIMPLEX,  
+        cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(255,0,0),2)
+        cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
+                   0.5, (0,0,0), 2, cv2.LINE_AA) 
+   
+        (x,y) = backup_screen.getCenter()
+        (w,h) = backup_screen.getWH()  
+        cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(255,255,0),2)
+        cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
                    0.5, (0,0,0), 2, cv2.LINE_AA) 
 
         (x,y,w,h) = edges.getBoundingBox()
-        cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(255,125,0),2)    
+        cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(255,125,0),2)    
 
     def __display_eyeTracker(self, whiteboardPupil, screen_man, point, point_screen, dot_widget):
-
-        # this is just helper method
-        for p in screen_man.getPointsHistory():
-            cv2.circle(whiteboardPupil,p,3,(0,0,255,120),-1)
 
         cv2.circle(whiteboardPupil,point,5,(0,0,255),-1)            
         
@@ -137,10 +160,12 @@ class Lab:
         cv2.line(display,start_point,new_point,(255,255,0),1)
 
     def __display_eye(self,frame):
-        frame = frame
+        
+        frame = cv2.flip(frame, 1)
         event = self.gestures.estimate(frame)
 
         if not event is None:
+            self.frame_counter += 1
             
             if not event.blink:
                 self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
@@ -155,12 +180,17 @@ class Lab:
             
             # here we are having prossed points:
 
-            self.__display_hist(whiteboardPupil,
-                                event.screen_man.getHist())
+            # self.__display_hist(whiteboardPupil,
+            #                     event.screen_man.getHist())
             
+            self.__display_clusters(whiteboardPupil, 
+                                    event.screen_man.getClusters())
+
+
             self.__display_screen(whiteboardPupil, 
-                                event.screen_man.getHist(), 
-                                event.screen_man.getScreen(), 
+                                # event.screen_man.getHist(), 
+                                event.screen_man.getScreen(),
+                                event.screen_man.getScreenBackup(), 
                                 event.screen_man.getEdgeDetector())
 
             self.__display_eyeTracker(whiteboardPupil, 
@@ -182,6 +212,8 @@ class Lab:
             self.worker.imshow("whitebaord",whiteboardPupil)
             self.worker.imshow("left eye",l_eye.getImage())
             self.worker.imshow("right eye",r_eye.getImage())
+
+            print(f"frames/s: {self.frame_counter/(time.time() - self.start_time)} FPS")
 
             # display camera feed
             # showEyes(frame,face)            

@@ -5,6 +5,80 @@ from screeninfo import get_monitors
 from eyeGestures.utils import Buffor
 
 from scipy import signal
+from sklearn.cluster import DBSCAN
+
+class Cluster:
+
+    def __init__(self, label, points, centroid):
+        
+        self.label    = label
+        self.points   = np.array(points)
+        self.weight   = len(self.points)
+        self.centroid = np.array(centroid)
+
+        x,y,w,h = self.boundaries(points)
+
+        self.x =  x
+        self.y =  y
+        self.w =  w
+        self.h =  h
+        pass
+
+    def boundaries(self,points):
+
+        x = np.min(points[:,0]) 
+        width = abs(np.max(points[:,0]) - x) 
+
+        y = np.min(points[:,1]) 
+        height = abs(np.max(points[:,1]) - y) 
+
+        return (x,y,width,height)
+    
+    def getBoundaries(self):
+        return (self.x,self.y,self.w,self.h)
+    
+    def getCenter(self):
+        return (self.centroid)
+    
+class ScreenClusters:
+
+    def __init__(self):
+
+        self.filled = 0
+        self.head = 0
+        self.size = 500
+        self.points = np.zeros((self.size,2), dtype=np.uint32)
+        self.Dbscan = DBSCAN(eps=8, min_samples=2)
+        # self.clusters = dict()
+        pass
+
+    def addPoint(self,point):
+        self.clusters = []
+        
+        index = self.head 
+        self.points[index] = point
+        
+        self.head = (self.head + 1) % self.size
+        self.filled += 1
+        self.filled = min(self.filled,self.size)
+
+        clustering  = self.Dbscan.fit(self.points[:self.filled])
+
+        labels = clustering.labels_
+        unique_labels = set(labels) - {-1}
+
+        for u_label in unique_labels:
+
+            cluster_points = self.points[:self.filled][labels == u_label]
+            cluster_center = np.mean(cluster_points, axis=0)
+        
+            self.clusters.append(Cluster(u_label,cluster_points,cluster_center))
+
+        # return sorted(self.clusters, key=lambda cluster: cluster.weight)[-1]
+        return self.clusters[labels[index]]
+    
+    def getClusters(self):
+        return self.clusters
 
 class ScreenHist:
 
@@ -177,6 +251,8 @@ class EdgeDetector:
         self.edge_max_y = int(self.center_y + h/2)
         self.edge_min_y = int(self.center_y - h/2)
 
+        self.locked = False
+
     def setCenter(self,x,y):
         self.center_x = x 
         self.center_y = y
@@ -194,11 +270,13 @@ class EdgeDetector:
 
         # TODO: fix this to estimate w and h
         if(x_s <= 0 or x_s >= self.width):
-            self.w = abs(self.center_x - x_t) * 2 + 10
+            self.w = abs(self.center_x - x_t) * 1.5 + 5
+            self.h = self.w*self.height/self.width
         
         if(y_s <= 0 or y_s >= self.height):
-            self.h = abs(self.center_y - y_t) * 2 + 10
-                
+            self.h = abs(self.center_y - y_t) * 1.5 + 5
+            self.w = self.h*self.width/self.height
+            
     def getBoundingBox(self):
         x = int(self.center_x - self.w/2)
         y = int(self.center_y - self.h/2)
@@ -208,42 +286,74 @@ class EdgeDetector:
     def getCenter(self):    
         return (self.center_x, self.center_y)
 
-class ScreenManager:
+class ScreenProcessor:
 
-    def __init__(self,eye_screen_w,eye_screen_h):
-
+    def __init__(self,eye_screen_w,eye_screen_h,x = 250,y = 250, w = 50,h = 50):
+        self.init_w = w 
+        self.init_h = h
+        
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
-        self.step         = 10 
         self.eyeScreen    = Screen(self.monitor.width,
                                    self.monitor.height,
-                                   190,60,
-                                   int(self.monitor.width/50),
-                                   int(self.monitor.height/50))
+                                   x,y,
+                                   w,h)
 
-        self.eyeHist      = ScreenHist(self.monitor.width,
-                                       self.monitor.height,
-                                       self.step)
-    
         self.edgeDetector = EdgeDetector(self.monitor.width,
                                          self.monitor.height,
-                                         250,250,
-                                         10,10)
+                                         x,y,
+                                         w,h)
         self.pointsBuffor  = Buffor(50)
         self.limsWHBuffor  = Buffor(20)
         self.edgesWHBuffor = Buffor(20)
+
+    def process(self,point,cluster):
+
+        (x,y) = cluster.getCenter()
+        (lim_min_x,lim_min_y,lim_max_x,lim_max_y) = cluster.getBoundaries()
+
+        # =====================================
+        # ---------histogram obtained---------- 
+        # =====================================
+
+        self.eyeScreen.setCenter(x,y) 
+        w_screen,h_screen = self.eyeScreen.getWH()
+        self.__scale_up_to_hist(w_screen, h_screen, cluster)
+
+        # =====================================
+        # if screen is bigger than edges make it smaller
+        # =====================================
         
+        self.edgeDetector.setCenter(x,y)
+        self.__scale_down_to_edge(w_screen,h_screen)
+        self.edgeDetector.setLim(lim_min_x,lim_min_x+lim_max_x,lim_min_y,lim_min_y+lim_max_y)
+        
+        # ====================================
 
-    def __scale_up_to_hist(self,width,height):
-        (lim_min_x,lim_max_x,lim_min_y,lim_max_y) = self.eyeHist.getLims()
+        point = self.eyeScreen.limitToScreen(point)
+        p = self.eyeScreen.convertToScreen(point)
+        
+        self.pointsBuffor.add(point)
+        if self.pointsBuffor.getLen() > 20:
+            self.edgeDetector.check(point,p)
 
-        (w_hist,h_hist) = (lim_max_x - lim_min_x,lim_max_y - lim_min_y)
+        p += (self.monitor.x,self.monitor.y)
+
+        # return how close that is hist region
+        w_hist = lim_max_x
+        h_hist = lim_max_y
+
+        closeness_percentage = (w_hist * h_hist)/(w_screen * h_screen)
+        return (p,closeness_percentage)
+
+    def __scale_up_to_hist(self, width, height, cluster):
+        (_,_,w_hist,h_hist) = cluster.getBoundaries()
 
         self.limsWHBuffor.add((w_hist,h_hist))
         (w_hist,h_hist) = self.limsWHBuffor.getAvg()
-
+        self.eyeScreen.getWH()
         if(w_hist > width):
             self.eyeScreen.scaleByStep(0.1,0.0)
         
@@ -252,6 +362,7 @@ class ScreenManager:
 
 
     def __scale_down_to_edge(self,width,height):
+        print
         _,_,w,h = self.edgeDetector.getBoundingBox()
         
         self.edgesWHBuffor.add((w,h))
@@ -263,53 +374,94 @@ class ScreenManager:
         if (h < height):
             self.eyeScreen.scaleByStep(0.0,-0.1)
 
-
-    def process(self, point : (int,int)):
-        assert(np.array(point).shape[0] == 2)
-
-        self.eyeHist.addPoint(point)
-        (x,y) = self.eyeHist.getCenter()
-        
-        # =====================================
-        # ---------histogram obtained---------- 
-        # =====================================
-
-        point = self.eyeScreen.limitToScreen(point)
-        self.pointsBuffor.add(point)
-
-        self.eyeScreen.setCenter(x,y) 
-        
-        w1,h1 = self.eyeScreen.getWH()
-        self.__scale_up_to_hist(w1,h1)
-
-        # =====================================
-        # if screen is bigger than edges make it smaller
-        # =====================================
-        
-        self.edgeDetector.setCenter(x,y)
-        self.__scale_down_to_edge(w1,h1)
-
-        (lim_min_x,lim_max_x,lim_min_y,lim_max_y) = self.eyeHist.getLims()
-        self.edgeDetector.setLim(lim_min_x,lim_max_x,lim_min_y,lim_max_y)
-        
-        # ====================================
-        p = self.eyeScreen.convertToScreen(point)
-        
-        if self.pointsBuffor.getLen() > 20:
-            self.edgeDetector.check(point,p)
-            
-        p += (self.monitor.x,self.monitor.y)
-
-        return p
-
     def getScreen(self):
         return self.eyeScreen
 
-    def getHist(self):
-        return self.eyeHist
-    
     def getPointsHistory(self):
         return self.pointsBuffor.getBuffor()
 
     def getEdgeDetector(self):
         return self.edgeDetector
+
+
+class ScreenManager:
+
+    def __init__(self,eye_screen_w,eye_screen_h):
+
+        self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+
+        self.eye_screen_w = eye_screen_w
+        self.eye_screen_h = eye_screen_h
+        self.step         = 10 
+
+        self.eyeClusters = ScreenClusters()
+        # self.eyeHist      = ScreenHist(self.monitor.width,
+        #                                self.monitor.height,
+        #                                self.step)
+        
+        self.screen_processor = ScreenProcessor(
+                                        self.monitor.width,
+                                        self.monitor.height)
+        
+        self.backup_screen_processor = ScreenProcessor(
+                                            self.monitor.width,
+                                            self.monitor.height)
+
+        self.pointsBuffor  = Buffor(50)
+
+        self.back_up_counter = 0
+        
+
+    def process(self, point : (int,int)):
+        assert(np.array(point).shape[0] == 2)
+
+        print("trying to get cluster")
+        cluster = self.eyeClusters.addPoint(point)
+
+        print(f"cluster: {cluster}")
+        if cluster is not None:
+            x,y = cluster.getCenter()
+
+            p, percentage_main = self.screen_processor.process(point,cluster)
+            # p_backup, percentage_backup = self.backup_screen_processor.process(point,cluster)
+            
+            # self.back_up_counter += 1
+            # if abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and self.back_up_counter > 100:
+            #     print("calling backup {:.2f}% and {:.2f}%".format(100*percentage_backup,100*percentage_main))
+            #     p = p_backup
+            #     _,_,w,h = self.screen_processor.getEdgeDetector().getBoundingBox()
+            #     self.screen_processor = self.backup_screen_processor
+            #     self.backup_screen_processor = ScreenProcessor(
+            #                                 self.monitor.width,
+            #                                 self.monitor.height,
+            #                                 x,y,
+            #                                 w-0.01*w,h-0.01*h)
+            #     self.back_up_counter = 0
+
+            # if self.back_up_counter > 100:
+            #     self.back_up_counter = 0 
+            #     self.backup_screen_processor = ScreenProcessor(
+            #                                 self.monitor.width,
+            #                                 self.monitor.height,
+            #                                 x,y)
+
+            return p
+        return [0,0]
+
+    def getScreen(self):
+        return self.screen_processor.getScreen()
+
+    def getScreenBackup(self):
+        return self.backup_screen_processor.getScreen()
+
+    # def getHist(self):
+    #     return self.cluster
+
+    def getClusters(self):
+        return self.eyeClusters.getClusters()
+    
+    def getPointsHistory(self):
+        return self.screen_processor.getPointsHistory()
+
+    def getEdgeDetector(self):
+        return self.screen_processor.getEdgeDetector()
