@@ -4,3 +4,4 @@ dataSetPreparing/*
 pyYTdownload.py
 *.pyc
 __pycache__/*
+dist/*
