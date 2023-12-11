@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "eyeGestures/*.py",
+  "eyeGestures/eyegestures.py"
+]
+
+exclude = [
+  "*.json",
+  "lab/*",
+  "app.py",
+  "PupilLab.py",
+  "test_app.py",
+  "test.py",
+  "tools/*"
+]
+
+[project]
+name = "eyeGestures"
+version = "0.0.1"
+authors = [
+  { name="Piotr Walas", email="walas.piotr.prywatny@gmail.com" },
+]
+description = "Package for eye tracking algorithm allowing for development of gaze controlled computer interface"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/PeterWaIIace/EyeGestures"
+Issues = "https://github.com/PeterWaIIace/EyeGestures/Issues"
