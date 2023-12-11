@@ -13,11 +13,20 @@ from eyeGestures.calibration import Calibration
 
 class EyeGestures:
 
-    def __init__(self,height,width):
+    def __init__(self,screen_width,screen_height,
+                 height,width,
+                 monitor_offset_x = 0,
+                 monitor_offset_y = 0):
+
         self.width  = width
         self.height = height
 
-        self.gaze = GazeTracker(width,height)
+        self.gaze = GazeTracker(screen_width,
+                                screen_height,
+                                width,height,
+                                monitor_offset_x,
+                                monitor_offset_y)
+
         self.calibrated = False
 
         self.calibration = Calibration(self.height, self.width, 60)

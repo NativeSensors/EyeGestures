@@ -13,10 +13,10 @@ from lab.pupillab import Worker
 
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
-from screeninfo   import get_monitors
 from appUtils.dot import DotWidget
 from pynput import keyboard
 
+from screeninfo import get_monitors
 
 def rotate(point,face):
 
@@ -61,10 +61,17 @@ class Lab:
         self.frame_counter = 0
 
         self.step         = 10 
+        self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+
         self.eye_screen_w = 500
         self.eye_screen_h = 500
-        self.gestures = EyeGestures(self.eye_screen_w,self.eye_screen_h)
-        
+        self.gestures = EyeGestures(self.monitor.width,
+                                    self.monitor.height,
+                                    self.eye_screen_w,
+                                    self.eye_screen_h,
+                                    self.monitor.x,
+                                    self.monitor.y)
+
         self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.dot_widget.show()
 

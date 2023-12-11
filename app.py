@@ -2,6 +2,7 @@ import sys
 import numpy as np
 
 import pyautogui
+from screeninfo import get_monitors
 
 from PySide2.QtWidgets import QApplication
 import keyboard
@@ -18,9 +19,16 @@ class Lab:
 
     def __init__(self):
         self.step         = 10 
+        self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+
         self.eye_screen_w = 500
         self.eye_screen_h = 500
-        self.gestures = EyeGestures(self.eye_screen_w,self.eye_screen_h)
+        self.gestures = EyeGestures(self.monitor.width,
+                                    self.monitor.height,
+                                    self.eye_screen_w,
+                                    self.eye_screen_h,
+                                    self.monitor.x,
+                                    self.monitor.y)
         
         self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.dot_widget.show()

@@ -1,7 +1,6 @@
 import math
 import numpy as np
 
-from screeninfo import get_monitors
 from eyeGestures.utils import Buffor
 
 from scipy import signal
@@ -9,12 +8,12 @@ from sklearn.cluster import DBSCAN
 
 class Cluster:
 
-    def __init__(self, label, points, centroid):
+    def __init__(self, label, points):
         
         self.label    = label
         self.points   = np.array(points)
         self.weight   = len(self.points)
-        self.centroid = np.array(centroid)
+        self.centroid = self.centroid(points)
 
         x,y,w,h = self.boundaries(points)
 
@@ -23,6 +22,17 @@ class Cluster:
         self.w =  w
         self.h =  h
         pass
+
+    def centroid(self,points):
+        x,y,w,h = self.boundaries(points)
+
+        c_x, c_y = (x+w/2,y+h/2)
+
+        x,y = sum(points)/len(points)
+
+        c_x, c_y = (c_x + x)/2, (c_y + y)/2
+        return (c_x, c_y)
+
 
     def boundaries(self,points):
 
@@ -48,7 +58,7 @@ class ScreenClusters:
         self.head = 0
         self.size = 500
         self.points = np.zeros((self.size,2), dtype=np.uint32)
-        self.Dbscan = DBSCAN(eps=8, min_samples=2)
+        self.Dbscan = DBSCAN(eps=8, min_samples=4)
         # self.clusters = dict()
         pass
 
@@ -69,10 +79,8 @@ class ScreenClusters:
 
         for u_label in unique_labels:
 
-            cluster_points = self.points[:self.filled][labels == u_label]
-            cluster_center = np.mean(cluster_points, axis=0)
-        
-            self.clusters.append(Cluster(u_label,cluster_points,cluster_center))
+            cluster_points = self.points[:self.filled][clustering.core_sample_indices_][labels[clustering.core_sample_indices_] == u_label]
+            self.clusters.append(Cluster(u_label,cluster_points))
 
         # return sorted(self.clusters, key=lambda cluster: cluster.weight)[-1]
         return self.clusters[labels[index]]
@@ -158,7 +166,7 @@ class ScreenHist:
 
 class Screen:
 
-    def __init__(self, screen_width = 0, screen_height = 0 , x = 0, y = 0, width = 0, height = 0):
+    def __init__(self, screen_width = 0, screen_height = 0, x = 0, y = 0, width = 0, height = 0):
         self.old_scale_w = 1.0
         self.old_scale_h = 1.0
 
@@ -288,21 +296,30 @@ class EdgeDetector:
 
 class ScreenProcessor:
 
-    def __init__(self,eye_screen_w,eye_screen_h,x = 250,y = 250, w = 50,h = 50):
+    def __init__(self,eye_screen_w,eye_screen_h,
+                 monitor_width,monitor_height,
+                 x = 250, y = 250,
+                 w = 50, h = 50,
+                 monitor_offset_x = 0,
+                 monitor_offset_y = 0):
+        
         self.init_w = w 
         self.init_h = h
         
-        self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+        self.monitor_width    = monitor_width
+        self.monitor_height   = monitor_height
+        self.monitor_offset_x = monitor_offset_x
+        self.monitor_offset_y = monitor_offset_y
 
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
-        self.eyeScreen    = Screen(self.monitor.width,
-                                   self.monitor.height,
+        self.eyeScreen    = Screen(self.monitor_width,
+                                   self.monitor_height,
                                    x,y,
                                    w,h)
 
-        self.edgeDetector = EdgeDetector(self.monitor.width,
-                                         self.monitor.height,
+        self.edgeDetector = EdgeDetector(self.monitor_width,
+                                         self.monitor_height,
                                          x,y,
                                          w,h)
         self.pointsBuffor  = Buffor(50)
@@ -312,7 +329,7 @@ class ScreenProcessor:
     def process(self,point,cluster):
 
         (x,y) = cluster.getCenter()
-        (lim_min_x,lim_min_y,lim_max_x,lim_max_y) = cluster.getBoundaries()
+        (cluster_x,cluster_y,cluster_w,cluster_h) = cluster.getBoundaries()
 
         # =====================================
         # ---------histogram obtained---------- 
@@ -328,7 +345,7 @@ class ScreenProcessor:
         
         self.edgeDetector.setCenter(x,y)
         self.__scale_down_to_edge(w_screen,h_screen)
-        self.edgeDetector.setLim(lim_min_x,lim_min_x+lim_max_x,lim_min_y,lim_min_y+lim_max_y)
+        self.edgeDetector.setLim(cluster_x, cluster_y, cluster_x + cluster_w, cluster_y + cluster_h)
         
         # ====================================
 
@@ -339,25 +356,23 @@ class ScreenProcessor:
         if self.pointsBuffor.getLen() > 20:
             self.edgeDetector.check(point,p)
 
-        p += (self.monitor.x,self.monitor.y)
+        p += (self.monitor_offset_x, self.monitor_offset_y)
 
         # return how close that is hist region
-        w_hist = lim_max_x
-        h_hist = lim_max_y
-
-        closeness_percentage = (w_hist * h_hist)/(w_screen * h_screen)
+        closeness_percentage = (cluster_w * cluster_h)/(w_screen * h_screen)
         return (p,closeness_percentage)
 
     def __scale_up_to_hist(self, width, height, cluster):
-        (_,_,w_hist,h_hist) = cluster.getBoundaries()
+        (_,_,cluster_w,cluster_h) = cluster.getBoundaries()
 
-        self.limsWHBuffor.add((w_hist,h_hist))
-        (w_hist,h_hist) = self.limsWHBuffor.getAvg()
+        self.limsWHBuffor.add((cluster_w,cluster_h))
+        (cluster_w,cluster_h) = self.limsWHBuffor.getAvg()
         self.eyeScreen.getWH()
-        if(w_hist > width):
+
+        if(cluster_w > width):
             self.eyeScreen.scaleByStep(0.1,0.0)
         
-        if(h_hist > height):
+        if(cluster_h > height):
             self.eyeScreen.scaleByStep(0.0,0.1)
 
 
@@ -386,9 +401,15 @@ class ScreenProcessor:
 
 class ScreenManager:
 
-    def __init__(self,eye_screen_w,eye_screen_h):
+    def __init__(self,monitor_width,monitor_height,
+                 eye_screen_w,eye_screen_h,
+                 monitor_offset_x = 0,
+                 monitor_offset_y = 0):
 
-        self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+        self.monitor_width  = monitor_width
+        self.monitor_height = monitor_height
+        self.monitor_offset_x = monitor_offset_x
+        self.monitor_offset_y = monitor_offset_y
 
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
@@ -400,12 +421,20 @@ class ScreenManager:
         #                                self.step)
         
         self.screen_processor = ScreenProcessor(
-                                        self.monitor.width,
-                                        self.monitor.height)
+                                        self.eye_screen_w,
+                                        self.eye_screen_h,
+                                        self.monitor_width,
+                                        self.monitor_height,
+                                        monitor_offset_x = monitor_offset_x,
+                                        monitor_offset_y = monitor_offset_y)
         
         self.backup_screen_processor = ScreenProcessor(
-                                            self.monitor.width,
-                                            self.monitor.height)
+                                            self.monitor_width,
+                                            self.monitor_height,
+                                            self.eye_screen_w,
+                                            self.eye_screen_h,
+                                            monitor_offset_x = monitor_offset_x,
+                                            monitor_offset_y = monitor_offset_y)
 
         self.pointsBuffor  = Buffor(50)
 
@@ -423,27 +452,34 @@ class ScreenManager:
             x,y = cluster.getCenter()
 
             p, percentage_main = self.screen_processor.process(point,cluster)
-            # p_backup, percentage_backup = self.backup_screen_processor.process(point,cluster)
+            p_backup, percentage_backup = self.backup_screen_processor.process(point,cluster)
             
-            # self.back_up_counter += 1
-            # if abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and self.back_up_counter > 100:
-            #     print("calling backup {:.2f}% and {:.2f}%".format(100*percentage_backup,100*percentage_main))
-            #     p = p_backup
-            #     _,_,w,h = self.screen_processor.getEdgeDetector().getBoundingBox()
-            #     self.screen_processor = self.backup_screen_processor
-            #     self.backup_screen_processor = ScreenProcessor(
-            #                                 self.monitor.width,
-            #                                 self.monitor.height,
-            #                                 x,y,
-            #                                 w-0.01*w,h-0.01*h)
-            #     self.back_up_counter = 0
+            self.back_up_counter += 1
+            if abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and self.back_up_counter > 100:
+                print("calling backup {:.2f}% and {:.2f}%".format(100*percentage_backup,100*percentage_main))
+                p = p_backup
+                # _,_,w,h = self.screen_processor.getEdgeDetector().getBoundingBox()
+                self.screen_processor = self.backup_screen_processor
+                self.backup_screen_processor = ScreenProcessor(
+                                            self.eye_screen_w,
+                                            self.eye_screen_h,
+                                            self.monitor_width,
+                                            self.monitor_height,
+                                            x,y,
+                                            monitor_offset_x = self.monitor_offset_x,
+                                            monitor_offset_y = self.monitor_offset_y)
+                self.back_up_counter = 0
 
-            # if self.back_up_counter > 100:
-            #     self.back_up_counter = 0 
-            #     self.backup_screen_processor = ScreenProcessor(
-            #                                 self.monitor.width,
-            #                                 self.monitor.height,
-            #                                 x,y)
+            if self.back_up_counter > 100:
+                self.back_up_counter = 0 
+                self.backup_screen_processor = ScreenProcessor(
+                                            self.eye_screen_w,
+                                            self.eye_screen_h,
+                                            self.monitor_width,
+                                            self.monitor_height,
+                                            x,y,
+                                            monitor_offset_x = self.monitor_offset_x,
+                                            monitor_offset_y = self.monitor_offset_y)
 
             return p
         return [0,0]

@@ -43,7 +43,10 @@ class GazeTracker:
 
     N_FEATURES = 16
 
-    def __init__(self,eye_screen_w,eye_screen_h):
+    def __init__(self,screen_width,screen_heigth,
+                 eye_screen_w,eye_screen_h,
+                 monitor_offset_x = 0,
+                 monitor_offset_y = 0):
 
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
@@ -51,7 +54,12 @@ class GazeTracker:
         self.eyeProcessorLeft  = EyeProcessor(eye_screen_w,eye_screen_h)
         self.eyeProcessorRight = EyeProcessor(eye_screen_w,eye_screen_h)
 
-        self.screen_man = ScreenManager(self.eye_screen_w,self.eye_screen_h)
+        self.screen_man = ScreenManager(screen_width,
+                                        screen_heigth,
+                                        self.eye_screen_w,
+                                        self.eye_screen_h,
+                                        monitor_offset_x,
+                                        monitor_offset_y)
 
         self.noseDirection = NoseDirection()
         self.predictor = GazePredictor()
