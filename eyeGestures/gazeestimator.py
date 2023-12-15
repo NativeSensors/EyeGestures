@@ -12,10 +12,10 @@ def isInside(circle_x, circle_y, r, x, y):
     # with distance of its center
     # from given point
     if ((x - circle_x) * (x - circle_x) +
-        (y - circle_y) * (y - circle_y) <= rad * rad):
-        return True;
+        (y - circle_y) * (y - circle_y) <= r * r):
+        return True
     else:
-        return False;
+        return False
  
 class Gevent:
 
