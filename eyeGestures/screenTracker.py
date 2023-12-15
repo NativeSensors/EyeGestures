@@ -280,12 +280,21 @@ class EdgeDetector:
 
         # TODO: fix this to estimate w and h
         if(x_s <= 0 or x_s >= self.width):
-            self.w = abs(self.center_x - x_t) * 1.5 + 5
-            self.h = self.w*self.height/self.width
-        
+            new_w = abs(self.center_x - x_t) * 1.5 + 5
+            new_h = new_w*self.height/self.width
+
+            if self.w < new_w:
+                self.w = new_w
+                self.h = new_h
+                
+
         if(y_s <= 0 or y_s >= self.height):
-            self.h = abs(self.center_y - y_t) * 1.5 + 5
-            self.w = self.h*self.width/self.height
+            new_h = abs(self.center_y - y_t) * 1.5 + 5
+            new_w = new_h*self.width/self.height
+
+            if self.h < new_h:
+                self.w = new_w
+                self.h = new_h
             
     def getBoundingBox(self):
         x = int(self.center_x - self.w/2)
@@ -454,33 +463,33 @@ class ScreenManager:
             center = (x,y)
 
             p, percentage_main = self.screen_processor.process(point,center,self.eyeHist.getBoundaries)
-            # p_backup, percentage_backup = self.backup_screen_processor.process(point,center,self.eyeHist.getBoundaries)
+            p_backup, percentage_backup = self.backup_screen_processor.process(point,center,self.eyeHist.getBoundaries)
             
-            # self.back_up_counter += 1
-            # if abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and self.back_up_counter > 100:
-            #     p = p_backup
-            #     # _,_,w,h = self.screen_processor.getEdgeDetector().getBoundingBox()
-            #     self.screen_processor = self.backup_screen_processor
-            #     self.backup_screen_processor = ScreenProcessor(
-            #                                 self.eye_screen_w,
-            #                                 self.eye_screen_h,
-            #                                 self.monitor_width,
-            #                                 self.monitor_height,
-            #                                 x,y,
-            #                                 monitor_offset_x = self.monitor_offset_x,
-            #                                 monitor_offset_y = self.monitor_offset_y)
-            #     self.back_up_counter = 0
+            self.back_up_counter += 1
+            if abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and self.back_up_counter > 100:
+                p = p_backup
+                # _,_,w,h = self.screen_processor.getEdgeDetector().getBoundingBox()
+                self.screen_processor = self.backup_screen_processor
+                self.backup_screen_processor = ScreenProcessor(
+                                            self.eye_screen_w,
+                                            self.eye_screen_h,
+                                            self.monitor_width,
+                                            self.monitor_height,
+                                            x,y,
+                                            monitor_offset_x = self.monitor_offset_x,
+                                            monitor_offset_y = self.monitor_offset_y)
+                self.back_up_counter = 0
 
-            # if self.back_up_counter > 100:
-            #     self.back_up_counter = 0 
-            #     self.backup_screen_processor = ScreenProcessor(
-            #                                 self.eye_screen_w,
-            #                                 self.eye_screen_h,
-            #                                 self.monitor_width,
-            #                                 self.monitor_height,
-            #                                 x,y,
-            #                                 monitor_offset_x = self.monitor_offset_x,
-            #                                 monitor_offset_y = self.monitor_offset_y)
+            if self.back_up_counter > 100:
+                self.back_up_counter = 0 
+                self.backup_screen_processor = ScreenProcessor(
+                                            self.eye_screen_w,
+                                            self.eye_screen_h,
+                                            self.monitor_width,
+                                            self.monitor_height,
+                                            x,y,
+                                            monitor_offset_x = self.monitor_offset_x,
+                                            monitor_offset_y = self.monitor_offset_y)
 
             return p
         return [0,0]
