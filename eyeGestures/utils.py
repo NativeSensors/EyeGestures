@@ -1,8 +1,6 @@
 import cv2
-import dlib
 import time
 import pickle
-import pyautogui
 import numpy as np
 from typing import Callable, Tuple
 import numpy as np
@@ -10,9 +8,6 @@ import queue
 import threading
 
 # Make predictions for new data points
-predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
 
 def shape_to_np(shape, dtype="int"):
     coords = np.zeros((68, 2), dtype=dtype)

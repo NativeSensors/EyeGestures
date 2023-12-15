@@ -6,6 +6,17 @@ from eyeGestures.calibration   import GazePredictor, CalibrationData
 from eyeGestures.processing    import EyeProcessor
 from eyeGestures.screenTracker import ScreenManager
 
+def isInside(circle_x, circle_y, r, x, y):
+     
+    # Compare radius of circle
+    # with distance of its center
+    # from given point
+    if ((x - circle_x) * (x - circle_x) +
+        (y - circle_y) * (y - circle_y) <= rad * rad):
+        return True;
+    else:
+        return False;
+ 
 class Gevent:
 
     def __init__(self,point,point_screen,blink,fixation,l_eye,r_eye,screen_man):
@@ -78,6 +89,7 @@ class GazeTracker:
         self.__headDir = [0.5,0.5]
 
         self.point_screen = [0.0,0.0]
+        self.freezed_point = [0.0,0.0]
 
     def __getFeatures(self,image):
         
@@ -146,7 +158,7 @@ class GazeTracker:
             return points[0]
         return weighted_centroid
 
-    def estimate(self,image):
+    def estimate(self,image ,fixation_freeze = 0.7):
 
         face = self.getFeatures(image)
 
@@ -181,7 +193,20 @@ class GazeTracker:
             self.point_screen = self.screen_man.process(compound_point)
 
             fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])        
-            blink = blink and (fixation > 0.8)
+            blink = blink and (fixation > fixation_freeze)
+
+            if fixation > fixation_freeze:
+                r = 20
+                if not isInside(self.freezed_point[0],self.freezed_point[1],r,self.point_screen[0],self.point_screen[1]):
+                    self.freezed_point = self.point_screen
+
+                return Gevent(compound_point,
+                        self.freezed_point,
+                        blink,
+                        fixation,
+                        l_eye,
+                        r_eye,
+                        self.screen_man)
 
             return Gevent(compound_point,
                         self.point_screen,

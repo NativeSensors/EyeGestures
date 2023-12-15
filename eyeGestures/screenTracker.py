@@ -58,7 +58,7 @@ class ScreenClusters:
         self.head = 0
         self.size = 500
         self.points = np.zeros((self.size,2), dtype=np.uint32)
-        self.Dbscan = DBSCAN(eps=8, min_samples=4)
+        self.Dbscan = DBSCAN(eps=10, min_samples=4)
         # self.clusters = dict()
         pass
 

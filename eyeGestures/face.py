@@ -1,6 +1,4 @@
 import cv2
-import dlib
-import math
 import numpy as np
 import mediapipe as mp
 import eyeGestures.eye as eye
@@ -8,10 +6,15 @@ import eyeGestures.nose as nose
 
 class FaceFinder:
 
-    def __init__(self):
-        self.facePredictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+    def __init__(self, static_image_mode = True):
         self.faceDetector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        self.mp_face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
+        
+        self.mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
+            refine_landmarks=True,
+            static_image_mode=static_image_mode,
+            min_detection_confidence=0.5,
+            min_tracking_confidence=0.5
+        )
 
     def find(self,image):
 

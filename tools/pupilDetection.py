@@ -1,12 +1,4 @@
 import cv2
-import dlib
-import time
-import queue
-import pickle
-import random
-import threading
-import numpy as np
-from typing import Callable, Tuple
 from eyeGestures.utils import VideoCapture
 from eyeGestures.face import FaceFinder
 

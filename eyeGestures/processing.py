@@ -1,7 +1,4 @@
 
-import cv2
-import dlib
-import math
 import numpy as np
 from eyeGestures.utils import Buffor
 

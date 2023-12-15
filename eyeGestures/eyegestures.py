@@ -1,12 +1,4 @@
-import cv2
-import dlib
-import math
-import time
-import queue
-import pickle
-import random
-import numpy as np
-from typing import Callable, Tuple
+
 from eyeGestures.gazeestimator import GazeTracker
 from eyeGestures.calibration import Calibration
 
@@ -58,5 +50,5 @@ class EyeGestures:
     def isCalibrated(self):
         return self.calibrated and not self.calibration.inProgress()
 
-    def estimate(self,image):
-        return self.gaze.estimate(image)
+    def estimate(self,image ,fixation_freeze = 0.7):
+        return self.gaze.estimate(image,fixation_freeze)
