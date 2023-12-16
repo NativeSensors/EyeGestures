@@ -169,7 +169,7 @@ class Lab:
     def __display_eye(self,frame):
         
         frame = cv2.flip(frame, 1)
-        event = self.gestures.estimate(frame)
+        event = self.gestures.estimate(frame,0.8)
 
         if not event is None:
             self.frame_counter += 1

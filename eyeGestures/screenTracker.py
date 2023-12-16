@@ -246,7 +246,7 @@ class Screen:
 
 class EdgeDetector:
 
-    def __init__(self,width,height, x = 0,y = 0,w = 500,h = 500):
+    def __init__(self,width,height, x = 0,y = 0,w = 50,h = 50):
 
         self.width  = width
         self.height = height
