@@ -91,6 +91,12 @@ class GazeTracker:
         self.point_screen = [0.0,0.0]
         self.freezed_point = [0.0,0.0]
 
+    def freeze_calibration(self):
+        self.screen_man.freeze_calibration()
+
+    def unfreeze_calibration(self):
+        self.screen_man.unfreeze_calibration()
+
     def __getFeatures(self,image):
         
         eyes = np.full((self.N_FEATURES,2),np.NAN)

@@ -59,6 +59,7 @@ class ScreenClusters:
         self.size = 500
         self.points = np.zeros((self.size,2), dtype=np.uint32)
         self.Dbscan = DBSCAN(eps=12, min_samples=3)
+        self.main_cluster = None
         # self.clusters = dict()
         pass
 
@@ -83,10 +84,14 @@ class ScreenClusters:
             self.clusters.append(Cluster(u_label,cluster_points))
 
         # return sorted(self.clusters, key=lambda cluster: cluster.weight)[-1]
+        self.main_cluster = self.clusters[labels[index]]
         return self.clusters[labels[index]]
     
     def getClusters(self):
         return self.clusters
+    
+    def getMainCluster(self):
+        return self.main_cluster
 
 class ScreenHist:
 
@@ -449,14 +454,24 @@ class ScreenManager:
 
         self.pointsBuffor  = Buffor(50)
 
+        self.calibration_freeze = False
         self.back_up_counter = 0
         
+
+    def freeze_calibration(self):
+        self.calibration_freeze = True
+
+    def unfreeze_calibration(self):
+        self.calibration_freeze = False
 
     def process(self, point : (int,int)):
         assert(np.array(point).shape[0] == 2)
 
-        cluster = self.eyeClusters.addPoint(point)
-        self.eyeHist.addPoint(point)
+        if not self.calibration_freeze:
+            cluster = self.eyeClusters.addPoint(point)
+            self.eyeHist.addPoint(point)
+        else: 
+            cluster = self.eyeClusters.getMainCluster()
 
         if cluster is not None:
             x,y = cluster.getCenter()
@@ -466,9 +481,11 @@ class ScreenManager:
             p_backup, percentage_backup = self.backup_screen_processor.process(point,center,self.eyeHist.getBoundaries)
             
             self.back_up_counter += 1
-            if abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and self.back_up_counter > 100:
+            if(abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and
+                        self.back_up_counter > 100 and
+                        not self.calibration_freeze):
+
                 p = p_backup
-                # _,_,w,h = self.screen_processor.getEdgeDetector().getBoundingBox()
                 self.screen_processor = self.backup_screen_processor
                 self.backup_screen_processor = ScreenProcessor(
                                             self.eye_screen_w,

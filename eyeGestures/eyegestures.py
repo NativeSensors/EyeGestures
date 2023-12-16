@@ -52,3 +52,9 @@ class EyeGestures:
 
     def estimate(self,image ,fixation_freeze = 0.7):
         return self.gaze.estimate(image,fixation_freeze)
+
+    def stop_calibration(self):
+        self.gaze.freeze_calibration()
+
+    def start_calibration(self):
+        self.gaze.freeze_calibration()
