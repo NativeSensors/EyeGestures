@@ -1,5 +1,4 @@
 import sys
-import numpy as np
 
 import pyautogui
 from screeninfo import get_monitors
