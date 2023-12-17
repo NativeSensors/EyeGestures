@@ -79,17 +79,26 @@ class Lab:
         self.cap = VideoCapture(0)        
         self.__run = True
 
-        self.listener = keyboard.Listener(on_press=self.on_quit)
+        self.listener = keyboard.Listener(on_press=self.on_button)
         self.listener.start()
 
         self.worker = Worker(self.run)
 
-    def on_quit(self,key):
+    def on_button(self,key):
         if not hasattr(key,'char'):
             return
 
         if key.char == 'q':
             self.__run = False
+
+        if key.char == 'c':
+            print("Calibration stop")
+            self.gestures.stop_calibration()
+
+        if key.char == 's':
+            print("Calibration start")
+            self.gestures.start_calibration()
+
 
     def __display_clusters(self,whiteboardPupil,clusters):
         colours = {0:(255,0,0),1:(0,255,0),2:(0,0,255),3:(255,0,255),4:(255,255,155),5:(155,255,255),6:(255,255,255),7:(155,155,155)}
@@ -220,7 +229,7 @@ class Lab:
             self.worker.imshow("left eye",l_eye.getImage())
             self.worker.imshow("right eye",r_eye.getImage())
 
-            print(f"frames/s: {self.frame_counter/(time.time() - self.start_time)} FPS")
+            # print(f"frames/s: {self.frame_counter/(time.time() - self.start_time)} FPS")
 
             # display camera feed
             # showEyes(frame,face)            

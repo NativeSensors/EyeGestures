@@ -341,8 +341,29 @@ class ScreenProcessor:
         self.pointsBuffor  = Buffor(50)
         self.limsWHBuffor  = Buffor(20)
         self.edgesWHBuffor = Buffor(20)
+        
+        self.scaling = True
 
-    def process(self,point,center,getBoundaries):
+    def process(self,point,getBoundaries):
+        (roi_x,roi_y,roi_w,roi_h) = getBoundaries()
+        w_screen,h_screen = self.eyeScreen.getWH()
+
+
+        point = self.eyeScreen.limitToScreen(point)
+        p = self.eyeScreen.convertToScreen(point)
+        
+        self.pointsBuffor.add(point)
+        if self.pointsBuffor.getLen() > 20:
+            self.edgeDetector.check(point,p)
+
+        p += (self.monitor_offset_x, self.monitor_offset_y)
+
+        # return how close that is hist region
+        closeness_percentage = (roi_w * roi_h)/(w_screen * h_screen)
+        return (p,closeness_percentage)
+
+
+    def update(self,center,getBoundaries):
 
         (x,y) = center
         (roi_x,roi_y,roi_w,roi_h) = getBoundaries()
@@ -362,21 +383,6 @@ class ScreenProcessor:
         self.edgeDetector.setCenter(x,y)
         self.__scale_down_to_edge(w_screen,h_screen)
         self.edgeDetector.setLim(x,y,x + roi_w,y + roi_h)
-        
-        # ====================================
-
-        point = self.eyeScreen.limitToScreen(point)
-        p = self.eyeScreen.convertToScreen(point)
-        
-        self.pointsBuffor.add(point)
-        if self.pointsBuffor.getLen() > 20:
-            self.edgeDetector.check(point,p)
-
-        p += (self.monitor_offset_x, self.monitor_offset_y)
-
-        # return how close that is hist region
-        closeness_percentage = (roi_w * roi_h)/(w_screen * h_screen)
-        return (p,closeness_percentage)
 
     def __scale_up_to_hist(self, width, height, boundaries):
         (_,_,cluster_w,cluster_h) = boundaries()
@@ -444,7 +450,7 @@ class ScreenManager:
                                         monitor_offset_x = monitor_offset_x,
                                         monitor_offset_y = monitor_offset_y)
         
-        self.backup_screen_processor = ScreenProcessor(
+        self.backup_processor = ScreenProcessor(
                                             self.monitor_width,
                                             self.monitor_height,
                                             self.eye_screen_w,
@@ -477,8 +483,12 @@ class ScreenManager:
             x,y = cluster.getCenter()
             center = (x,y)
 
-            p, percentage_main = self.screen_processor.process(point,center,self.eyeHist.getBoundaries)
-            p_backup, percentage_backup = self.backup_screen_processor.process(point,center,self.eyeHist.getBoundaries)
+            if not self.calibration_freeze:
+                self.screen_processor.update(center,self.eyeHist.getBoundaries)
+                self.backup_processor.update(center,self.eyeHist.getBoundaries)
+
+            p, percentage_main          = self.screen_processor.process(point,self.eyeHist.getBoundaries)
+            p_backup, percentage_backup = self.backup_processor.process(point,self.eyeHist.getBoundaries)
             
             self.back_up_counter += 1
             if(abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and
@@ -486,8 +496,8 @@ class ScreenManager:
                         not self.calibration_freeze):
 
                 p = p_backup
-                self.screen_processor = self.backup_screen_processor
-                self.backup_screen_processor = ScreenProcessor(
+                self.screen_processor = self.backup_processor
+                self.backup_processor = ScreenProcessor(
                                             self.eye_screen_w,
                                             self.eye_screen_h,
                                             self.monitor_width,
@@ -499,7 +509,7 @@ class ScreenManager:
 
             if self.back_up_counter > 100:
                 self.back_up_counter = 0 
-                self.backup_screen_processor = ScreenProcessor(
+                self.backup_processor = ScreenProcessor(
                                             self.eye_screen_w,
                                             self.eye_screen_h,
                                             self.monitor_width,
@@ -515,7 +525,7 @@ class ScreenManager:
         return self.screen_processor.getScreen()
 
     def getScreenBackup(self):
-        return self.backup_screen_processor.getScreen()
+        return self.backup_processor.getScreen()
 
     # def getHist(self):
     #     return self.cluster

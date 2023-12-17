@@ -57,4 +57,4 @@ class EyeGestures:
         self.gaze.freeze_calibration()
 
     def start_calibration(self):
-        self.gaze.freeze_calibration()
+        self.gaze.unfreeze_calibration()
