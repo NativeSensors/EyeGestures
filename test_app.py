@@ -12,6 +12,11 @@ class SvgWidget(QWidget):
         super(SvgWidget, self).__init__(parent)
         self.svg_renderer = QSvgRenderer(QByteArray(svg_data.encode()))
 
+    def set_svg_data(self, svg_data):
+        self.svg_renderer.load(QByteArray(svg_data.encode()))
+        self.update()
+
+
     def paintEvent(self, event):
         painter = QPainter(self)
         self.svg_renderer.render(painter)
@@ -48,8 +53,8 @@ class EyeGestureWidget(QWidget):
         self.move_to_center()
 
         # Buttons
-        self.button1 = QPushButton('Calibrate')
-        self.button2 = QPushButton('Disable')
+        self.calibrate_btn = QPushButton('Calibrate')
+        self.disable_btn = QPushButton('Disable')
         self.button3 = QPushButton('Settings')
 
         main_layout = QHBoxLayout()
@@ -57,10 +62,8 @@ class EyeGestureWidget(QWidget):
         # Image
         self.image_label = QLabel(self)
 
-        green = "#0e6711"
         red = "#ac5453"
-        yellow = "#e6b505"
-
+        self.color = red
         svg_data =  f"""
             <svg width="15" height="15" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -70,23 +73,24 @@ class EyeGestureWidget(QWidget):
             </defs>
             <circle cx="7.5" cy="7.5" r="6" fill="#c5c5c5" /> <!-- Sclera -->
             <circle cx="7.5" cy="7.5" r="5.2" fill="#141415" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="4.8" fill="{red}" /> <!-- Iris -->
+            <circle cx="7.5" cy="7.5" r="4.8" fill="{self.color}" /> <!-- Iris -->
             <circle cx="7.5" cy="7.5" r="3.5" fill="#c5c5c5" /> <!-- Iris -->
             <circle cx="7.5" cy="7.5" r="3" fill="#141415" /> <!-- Pupil -->
             <circle cx="10" cy="6" r="1.5" fill="#c5c5c5" /> <!-- Light -->
             </svg>
             """
+        
         self.svgWidget = SvgWidget(svg_data)
-
+        print(f"self.svgWidget: {self.svgWidget}")
         # self.image_label.setPixmap(scaled_pixmap)
 
         main_layout.addWidget(self.svgWidget)
-        main_layout.addWidget(self.button1)
-        main_layout.addWidget(self.button2)
+        main_layout.addWidget(self.calibrate_btn)
+        main_layout.addWidget(self.disable_btn)
         # main_layout.addWidget(self.button3)
 
-        self.style_buttons(self.button1
-                           ,self.button2
+        self.style_buttons(self.calibrate_btn
+                           ,self.disable_btn
                            ,self.button3
                            )
 
@@ -145,8 +149,49 @@ class EyeGestureWidget(QWidget):
     def mouseReleaseEvent(self, event: QMouseEvent):
         self.oldPos = None
 
+    def updateEye(self):
+        svg_data =  f"""
+            <svg width="15" height="15" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="iris-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <!-- Gradient stops for the iris -->
+                </radialGradient>
+            </defs>
+            <circle cx="7.5" cy="7.5" r="6" fill="#c5c5c5" /> <!-- Sclera -->
+            <circle cx="7.5" cy="7.5" r="5.2" fill="#141415" /> <!-- Iris -->
+            <circle cx="7.5" cy="7.5" r="4.8" fill="{self.color}" /> <!-- Iris -->
+            <circle cx="7.5" cy="7.5" r="3.5" fill="#c5c5c5" /> <!-- Iris -->
+            <circle cx="7.5" cy="7.5" r="3" fill="#141415" /> <!-- Pupil -->
+            <circle cx="10" cy="6" r="1.5" fill="#c5c5c5" /> <!-- Light -->
+            </svg>
+            """
+        self.svgWidget.set_svg_data(svg_data)
+
+    def set_calibrate_btn(self,callback):
+        self.calibrate_btn.clicked.connect(callback)
+
+    def set_disable_btn(self,callback):
+        self.disable_btn.clicked.connect(callback)
+
+    def set_calibrate(self):
+        yellow = "#e6b505"
+        self.color = yellow
+        self.updateEye()
+        
+    def set_ready(self):
+        green = "#0e6711"
+        self.color = green
+        self.updateEye()
+        
+    def set_disconnected(self):
+        red = "#ac5453"
+        self.color = red
+        self.updateEye()
+        
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     widget = EyeGestureWidget()
     widget.show()
+    widget.set_calibrate_btn(widget.set_calibrate)
+    widget.set_disable_btn(widget.set_disconnected)
     sys.exit(app.exec_())

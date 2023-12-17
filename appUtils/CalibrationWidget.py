@@ -35,7 +35,7 @@ class WarningPill(QWidget):
         self.setStyleSheet("background-color: #99ffff00; border-radius: 10px;")
 
 
-class OverlayWidget():
+class CalibrationWidget():
     def __init__(self):
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
@@ -61,13 +61,3 @@ class OverlayWidget():
     def show_again(self):
         for pill in self.warning_pills:
             pill.show()
-
-def main():
-    app = QApplication(sys.argv)
-    overlay = OverlayWidget()
-    overlay.disappear()
-    overlay.show_again()
-    sys.exit(app.exec_())
-
-if __name__ == "__main__":
-    main()
