@@ -37,6 +37,8 @@ class WarningPill(QWidget):
 
 class CalibrationWidget():
     def __init__(self):
+        self.dict = {"left": 2, "right": 3, "top" : 0 , "bottom" : 1}
+
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
         # Create warning pills on each edge and add them to the layout
@@ -53,6 +55,10 @@ class CalibrationWidget():
 
         for pill in self.warning_pills:
             pill.show()
+
+    def disappear_pill(self,pill):
+        self.warning_pills[
+            self.dict[pill]].disappear()
 
     def disappear(self):
         for pill in self.warning_pills:

@@ -62,18 +62,25 @@ class Lab:
         self.calibrate_bottom = False
         self.calibrated = False
 
-    def calibrate(self,x,y):
+    def calibrate(self,x,y,fix):
         print(self.calibrate_bottom, self.calibrate_top, self.calibrate_left, self.calibrate_right )
-        
-        if x <= self.monitor.x and not self.calibrated:
+
+        fix_thresh = 0.4
+
+        if x <= self.monitor.x + 10 and not self.calibrated and fix_thresh < fix:
             self.calibrate_left = True
-        if x >= self.monitor.width + self.monitor.x and not self.calibrated:
+            self.calibration_widget.disappear_pill("left")
+        if x >= self.monitor.width + self.monitor.x - 10 and not self.calibrated and fix_thresh < fix:
             self.calibrate_right = True
-    
-        if y <= self.monitor.y and not self.calibrated:
+            self.calibration_widget.disappear_pill("right")
+            
+            
+        if y <= self.monitor.y + 10 and not self.calibrated and fix_thresh < fix:
             self.calibrate_top = True
-        if y >= self.monitor.height + self.monitor.y - 10 and not self.calibrated:
+            self.calibration_widget.disappear_pill("top")
+        if y >= self.monitor.height + self.monitor.y - 10 and not self.calibrated and fix_thresh < fix:
             self.calibrate_bottom = True
+            self.calibration_widget.disappear_pill("bottom")
 
 
         if( self.calibrate_bottom
@@ -126,7 +133,7 @@ class Lab:
 
             (w,h) = (self.dot_widget.size().width(),self.dot_widget.size().height()) 
             self.dot_widget.move(event.point_screen[0]-int(w/2),event.point_screen[1]-int(h/2))
-            self.calibrate(event.point_screen[0], event.point_screen[1])
+            self.calibrate(event.point_screen[0], event.point_screen[1], event.fixation)
                 
             # here we are having prossed points:            
             
