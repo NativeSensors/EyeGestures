@@ -7,8 +7,6 @@ import eyeGestures.nose as nose
 class FaceFinder:
 
     def __init__(self, static_image_mode = True):
-        self.faceDetector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        
         self.mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
             refine_landmarks=True,
             static_image_mode=static_image_mode,
@@ -23,10 +21,6 @@ class FaceFinder:
         #     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         try:
-            # LEGACY:
-            # (x, y, w, h) = self.faceDetector.detectMultiScale(image, 1.1, 9)[0]
-            # __face_landmarks = self.facePredictor(image, dlib.rectangle(x, y, x+w, y+h))
-        
             face = self.mp_face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
  
             # if attrirbute do not exist then create it

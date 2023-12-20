@@ -438,9 +438,9 @@ class ScreenManager:
         self.step         = 10 
 
         self.eyeClusters = ScreenClusters()
-        self.eyeHist     = ScreenHist(self.monitor_width,
-                                       self.monitor_height,
-                                       self.step)
+        self.eyeHist     = ScreenHist(self.eye_screen_w,
+                                      self.eye_screen_h,
+                                      self.step)
         
         self.screen_processor = ScreenProcessor(
                                         self.eye_screen_w,
