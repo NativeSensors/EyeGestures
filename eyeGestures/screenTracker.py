@@ -87,6 +87,9 @@ class ScreenClusters:
         self.main_cluster = self.clusters[labels[index]]
         return self.clusters[labels[index]]
     
+    def clearPoints(self):
+        self.head = 0
+
     def getClusters(self):
         return self.clusters
     
@@ -428,6 +431,9 @@ class ScreenManager:
                  monitor_offset_x = 0,
                  monitor_offset_y = 0):
 
+        self.frame_counter = 0
+        self.starting_frame = 20
+
         self.monitor_width  = monitor_width
         self.monitor_height = monitor_height
         self.monitor_offset_x = monitor_offset_x
@@ -472,6 +478,10 @@ class ScreenManager:
 
     def process(self, point : (int,int)):
         assert(np.array(point).shape[0] == 2)
+
+        self.frame_counter+=1 
+        if self.frame_counter < self.starting_frame:
+            return [0,0]
 
         if not self.calibration_freeze:
             cluster = self.eyeClusters.addPoint(point)

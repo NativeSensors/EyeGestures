@@ -81,6 +81,10 @@ class DotWidget(QWidget):
 
         painter.drawPath(path)
 
+    def close_event(self):
+        self.timer.stop()
+        self.close() 
+
     def on_quit(self,key):
         # Stop listening to the keyboard input and close the application
         self.close()

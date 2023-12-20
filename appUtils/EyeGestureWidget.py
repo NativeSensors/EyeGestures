@@ -25,6 +25,8 @@ class EyeGestureWidget(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.close_events = []
+
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
         postion_x = int(self.monitor.width/2) + self.monitor.x - 110
         postion_y = 45 + self.monitor.y
@@ -55,7 +57,8 @@ class EyeGestureWidget(QWidget):
         # Buttons
         self.calibrate_btn = QPushButton('Calibrate')
         self.disable_btn = QPushButton('Disable')
-        self.button3 = QPushButton('Settings')
+        self.close_btn = QPushButton('Close')
+        self.close_btn.clicked.connect(self.close_event)
 
         main_layout = QHBoxLayout()
         self.setLayout(main_layout)
@@ -87,15 +90,15 @@ class EyeGestureWidget(QWidget):
         main_layout.addWidget(self.svgWidget)
         main_layout.addWidget(self.calibrate_btn)
         main_layout.addWidget(self.disable_btn)
-        # main_layout.addWidget(self.button3)
+        main_layout.addWidget(self.close_btn)
 
         self.style_buttons(self.calibrate_btn
                            ,self.disable_btn
-                           ,self.button3
+                           ,self.close_btn
                            )
 
         self.adjustSize()
-        self.resize(300,self.frameGeometry().height())
+        self.resize(400,self.frameGeometry().height())
         radius = 10.0
         path = QPainterPath()
         # self.resize(440,220)
@@ -105,6 +108,16 @@ class EyeGestureWidget(QWidget):
 
         self.setLayout(main_layout)
         self.move(postion_x, postion_y)
+
+    def add_close_event(self,clsoe_callback):
+        self.close_events.append(clsoe_callback)
+
+    def close_event(self):
+    
+        for event in self.close_events:
+            event()
+
+        self.close() 
 
     def move_to_center(self):
         screen_geometry = QApplication.desktop().screenGeometry()

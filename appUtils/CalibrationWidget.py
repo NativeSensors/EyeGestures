@@ -31,6 +31,9 @@ class WarningPill(QWidget):
     def disappear(self):
         self.hide()
 
+    def close_event(self):
+        self.close()
+
     def show_again(self):
         self.setStyleSheet("background-color: #99ffff00; border-radius: 10px;")
 
@@ -55,6 +58,10 @@ class CalibrationWidget():
 
         for pill in self.warning_pills:
             pill.show()
+
+    def close_event(self):
+        for pill in self.warning_pills:
+            pill.close_event()
 
     def disappear_pill(self,pill):
         self.warning_pills[

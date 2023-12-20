@@ -38,6 +38,10 @@ class Lab:
         self.eyegesture_widget.show()
         self.dot_widget.show()
 
+        self.eyegesture_widget.add_close_event(self.dot_widget.close_event)
+        self.eyegesture_widget.add_close_event(self.calibration_widget.close_event)
+        self.eyegesture_widget.add_close_event(self.on_quit)
+
         self.eyegesture_widget.set_disable_btn(
             self.stopCalibration
         )
@@ -51,8 +55,8 @@ class Lab:
         
         self.__run = True
 
-        self.listener = keyboard.Listener(on_press=self.on_quit)
-        self.listener.start()
+        # self.listener = keyboard.Listener(on_press=self.on_quit)
+        # self.listener.start()
 
         self.worker = Worker(self.run)
 
@@ -63,8 +67,6 @@ class Lab:
         self.calibrated = False
 
     def calibrate(self,x,y,fix):
-        print(self.calibrate_bottom, self.calibrate_top, self.calibrate_left, self.calibrate_right )
-
         fix_thresh = 0.4
 
         if x <= self.monitor.x + 10 and not self.calibrated and fix_thresh < fix:
@@ -99,7 +101,6 @@ class Lab:
 
             
     def startCalibration(self):
-        print("press starCalibration")
         self.calibrated = False
         self.gestures.start_calibration()
         self.calibration_widget.show_again()
@@ -107,17 +108,12 @@ class Lab:
         pass
 
     def stopCalibration(self):
-        print("press stopCalibration")
         self.gestures.stop_calibration()
         self.calibration_widget.disappear()
         pass
 
-    def on_quit(self,key):
-        if not hasattr(key,'char'):
-            return
-
-        if key.char == 'q':
-            self.__run = False
+    def on_quit(self):
+        self.__run = False
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)

@@ -5,7 +5,7 @@ a = Analysis(
     ['app.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('./venv/lib/python3.10/site-packages/mediapipe/modules', 'mediapipe/modules'),],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -13,8 +13,7 @@ a = Analysis(
     excludes=[],
     noarchive=False,
 )
-pyz = PYZ(a.pure)
-
+pyz = PYZ(a.pure, a.zipped_data)
 exe = EXE(
     pyz,
     a.scripts,
