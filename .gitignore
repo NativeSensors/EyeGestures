@@ -6,3 +6,4 @@ pyYTdownload.py
 __pycache__/*
 dist/*
 venv
+*.pyc

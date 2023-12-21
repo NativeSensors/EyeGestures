@@ -16,18 +16,19 @@ class DotWidget(QWidget):
         self.orbit_distances = [self.outer_radius * 0.2, self.outer_radius * 0.2, self.outer_radius * 0.2, self.outer_radius * 0.2]  # Distances from center
         self.angles = [0, 120, 240, 150]  # Starting angles for the inner circles
 
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.WindowTransparentForInput)
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.WindowTransparentForInput)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(diameter, diameter)
-        
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_orbits)        
-        self.timer.start(10)  # Update the orbits every 50 milliseconds
+
+        # self.timer = QTimer(self)
+        # self.timer.timeout.connect(self.update_orbits)
+        # self.timer.start(10)  # Update the orbits every 50 milliseconds
 
         self.color = color
 
         self.position_label = QLabel(self)
-        
+
         self.move(500,500)
 
     def moveEvent(self, event):
@@ -56,7 +57,7 @@ class DotWidget(QWidget):
         R,G,B = self.color
         # painter.setBrush(QColor(R,G,B, 100))
         # painter.setPen(QColor(R,G,B, 0))
-        
+
         # Draw the smaller orbiting circles
         for n, (radius, distance, angle) in enumerate(zip(self.inner_radii, self.orbit_distances, self.angles)):
             if self.orbit_distances[n] >= (self.outer_radius/4 - (radius * random.random())):

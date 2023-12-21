@@ -2,10 +2,9 @@ import cv2
 import time
 import pickle
 import numpy as np
-from typing import Callable, Tuple
-import numpy as np
 import queue
 import threading
+from typing import Callable, Tuple
 
 # Make predictions for new data points
 
@@ -31,8 +30,8 @@ def make_image_grid(images, rows, cols):
     # assert len(images) >= rows * cols, "Not enough images to fill the grid"
 
     # Get image dimensions
-    img_h, img_w = images[0].shape[:2] 
-    
+    img_h, img_w = images[0].shape[:2]
+
     if len(images[0].shape) > 2:
         # Create a black canvas to draw the grid on
         grid_image = np.zeros((img_h * rows, img_w * cols, images[0].shape[2]), dtype=np.uint8)
@@ -88,24 +87,23 @@ class Buffor:
 # Bufforless
 class VideoCapture:
 
-    def __init__(self,name,bufforless = True):
+    def __init__(self, name, bufforless = True):
         self.bufforless = bufforless
         self.run = True
-        
-        if name is str:
+
+        if isinstance(name,str):
             if ".pkl" in name:
                 self.stream = False
             else:
                 self.stream = True
         else:
             self.stream = True
-        
 
-        if self.stream: 
+        if self.stream:
             self.prev_frame = None
 
             self.__openCam(name)
-            
+
             self.q = queue.Queue()
             self.t = threading.Thread(target=self.__reader).start()
         else:
@@ -114,29 +112,27 @@ class VideoCapture:
                 self.frames = pickle.load(file)
 
     def __openCam(self,name):
-        
-        if name is int:
-            self.cap = cv2.VideoCapture(name)
+        if isinstance(name,int):
+            self.cap = cv2.VideoCapture(name, cv2.CAP_DSHOW)
             if self.cap is None or not self.cap.isOpened():
                 print(f"Was unable to open camera: {name}.")
                 print(f"Trying to open camera: {name}.")
                 self.__openCam(name + 1)
         else:
             self.cap = cv2.VideoCapture(name)
-            
 
     def __reader(self):
         while self.run:
             ret, frame = self.cap.read()
             if not ret:
-                break 
+                break
             if not self.q.empty() and self.bufforless:
-                try: 
+                try:
                     self.q.get_nowait()
                 except queue.Empty:
                     pass
             self.q.put((ret,frame))
-        
+
         self.run = False
 
     def read(self):
@@ -147,3 +143,5 @@ class VideoCapture:
             self.frames.pop(0)
             return ((len(self.frames) >= 1), frame)
 
+    def close(self):
+        self.run = False
