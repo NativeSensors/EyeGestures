@@ -1,73 +1,63 @@
-import sys
-from PySide2.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
-from PySide2.QtCore import Qt, QTimer, QRect
-from PySide2.QtGui import QTransform
-import PySide2.QtGui as QtGui
-import PySide2.QtCore as QtCore
-from screeninfo import get_monitors
+import win32api
+import win32con
+import win32gui
+import win32ui
+import win32event
+import win32process
+from PySide2.QtGui import QColor
 
-class WarningPill(QWidget):
-    def __init__(self, position, text, angle = 0):
-        super(WarningPill, self).__init__()
-        
-        width = 150
-        height= 40
+def create_cursor(color, radius):
+    # Create a window to attach the cursor to
+    hwnd = win32gui.GetDesktopWindow()
+    dc = win32gui.GetDC(hwnd)
 
-        # Set up the window attributes
-        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+    # Create a memory DC
+    mem_dc = win32ui.CreateDCFromHandle(dc)
+    mem_dc.CreateCompatibleDC()
 
-        self.setGeometry(position[0], position[1], width, height)
-        self.setStyleSheet("background-color: #99ffff00; border-radius: 10px;")
+    # Create a bitmap
+    bmp = win32ui.CreateBitmap()
+    bmp.CreateCompatibleBitmap(mem_dc, radius * 2, radius * 2)
 
-        # Add a label for displaying text
-        self.angle = angle
-        self.text = text
-        self.label = QLabel(text, self)
-        self.label.setAlignment(Qt.AlignCenter)
-        self.label.setGeometry(0, 0, width, height)
+    # Select the bitmap into the memory DC
+    mem_dc.SelectObject(bmp)
 
-    def disappear(self):
-        self.hide()
+    # Draw a transparent circle on the bitmap
+    mem_dc.SetBkMode(win32con.TRANSPARENT)
+    brush = win32ui.CreateBrush(1, 0)  # 1: BS_SOLID, 0: TRANSPARENT
+    mem_dc.SelectObject(brush)
 
-    def show_again(self):
-        self.setStyleSheet("background-color: #99ffff00; border-radius: 10px;")
+    pen = win32ui.CreatePen(0, 1, 0)  # 0: PS_SOLID, 1: pen width
+    mem_dc.SelectObject(pen)
 
+    mem_dc.Ellipse((0, 0, radius * 2, radius * 2))
 
-class OverlayWidget():
-    def __init__(self):
-        self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+    # Release resources
+    win32gui.ReleaseDC(hwnd, dc)
 
-        # Create warning pills on each edge and add them to the layout
-        self.warning_pills = [
-            WarningPill((self.monitor.x + self.monitor.width/2 - 50,
-                         self.monitor.y + 0), "Move cursor here", 0),
-            WarningPill((self.monitor.x + self.monitor.width/2 - 50,
-                         self.monitor.y + self.monitor.height - 50), "Move cursor here", 0),
-            WarningPill((self.monitor.x + 0,
-                         self.monitor.y + self.monitor.height/2), "Move cursor here", 90),
-            WarningPill((self.monitor.x + self.monitor.width - 100,
-                         self.monitor.y + self.monitor.height/2), "Move cursor here", -90)
-        ]
+    # Create a cursor from the bitmap
+    cursor_info = win32gui.GetIconInfo(bmp.GetHandle())
+    cursor = win32gui.CreateIconIndirect(cursor_info[4])
 
-        for pill in self.warning_pills:
-            pill.show()
+    return cursor
 
-    def disappear(self):
-        for pill in self.warning_pills:
-            pill.disappear()
-
-    def show_again(self):
-        for pill in self.warning_pills:
-            pill.show()
+def set_custom_cursor(cursor):
+    # Set the cursor
+    win32gui.SetSystemCursor(cursor, win32con.OCR_NORMAL)
 
 def main():
-    app = QApplication(sys.argv)
-    overlay = OverlayWidget()
-    overlay.disappear()
-    overlay.show_again()
-    sys.exit(app.exec_())
+    # Specify the color and radius of the circular cursor
+    cursor_color = QColor(255, 0, 0, 128)  # Red color with 50% transparency
+    cursor_radius = 20
+
+    # Create a circular semi-transparent cursor
+    cursor = create_cursor(cursor_color, cursor_radius)
+
+    # Set the custom cursor
+    set_custom_cursor(cursor)
+
+    # Run the application (you can add your own event loop or use PyQt, etc.)
+    win32event.WaitForSingleObject(win32process.GetCurrentProcess(), win32event.INFINITE)
 
 if __name__ == "__main__":
     main()
