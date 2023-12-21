@@ -481,7 +481,7 @@ class ScreenManager:
 
         self.frame_counter+=1 
         if self.frame_counter < self.starting_frame:
-            return [0,0]
+            return [int(self.eye_screen_w/2),int(self.eye_screen_h/2)]
 
         if not self.calibration_freeze:
             cluster = self.eyeClusters.addPoint(point)
@@ -529,7 +529,7 @@ class ScreenManager:
                                             monitor_offset_y = self.monitor_offset_y)
 
             return p
-        return [0,0]
+        return [int(self.eye_screen_w/2),int(self.eye_screen_h/2)]
 
     def getScreen(self):
         return self.screen_processor.getScreen()
