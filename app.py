@@ -8,9 +8,12 @@ from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
 from appUtils.EyeGestureWidget import EyeGestureWidget
 from appUtils.CalibrationWidget import CalibrationWidget
-from appUtils.dot import DotWidget
 
 import cv2
+
+import platform
+
+from appUtils.dot import DotWidget
 
 class Lab:
 
@@ -27,11 +30,17 @@ class Lab:
                                     self.monitor.x,
                                     self.monitor.y)
 
-        self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.calibration_widget = CalibrationWidget()
         self.eyegesture_widget = EyeGestureWidget()
         self.eyegesture_widget.show()
-        self.dot_widget.show()
+
+        if platform.system() == "Windows":
+            self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
+            self.dot_widget.show()
+        else:
+            green = RGBA(0, 100, 0, 128) # green
+            self.dot_widget = WindowsCircle(50, 2, green, self.monitor.width, self.monitor.height)
+
         self.cap = VideoCapture(0)
 
         self.eyegesture_widget.add_close_event(self.dot_widget.close_event)
@@ -120,6 +129,7 @@ class Lab:
             (w,h) = (self.dot_widget.size().width(),self.dot_widget.size().height())
             print("moving cursor")
             self.dot_widget.move(event.point_screen[0]-int(w/2),event.point_screen[1]-int(h/2))
+
             self.calibrate(event.point_screen[0], event.point_screen[1], event.fixation)
 
     def run(self):

@@ -8,7 +8,7 @@ from PySide2.QtCore import Qt, QTimer, QPointF
 from pynput import keyboard
 
 class DotWidget(QWidget):
-    
+
     def __init__(self, diameter=20, color=(255,255,255)):
         super().__init__()
         self.outer_radius = diameter / 2

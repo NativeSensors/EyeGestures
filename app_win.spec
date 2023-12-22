@@ -3,7 +3,7 @@
 
 
 a = Analysis(
-    ['app.py'],
+    ['app_win.py'],
     pathex=[],
     binaries=[],
     datas=[('./venv/Lib/python3.10/site-packages/mediapipe/modules', 'mediapipe/modules'),],
