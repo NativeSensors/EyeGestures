@@ -13,17 +13,17 @@ class DotWidget(QWidget):
         super().__init__()
         self.outer_radius = diameter / 2
         self.inner_radii = [self.outer_radius * 0.7, self.outer_radius * 0.8, self.outer_radius * 0.7, self.outer_radius * 0.3]  # Different sizes for inner circles
-        self.orbit_distances = [self.outer_radius * 0.2, self.outer_radius * 0.2, self.outer_radius * 0.2, self.outer_radius * 0.2]  # Distances from center
+        self.orbit_distances = [self.outer_radius * 0.0, self.outer_radius * 0.0, self.outer_radius * 0.0, self.outer_radius * 0.0]  # Distances from center
         self.angles = [0, 120, 240, 150]  # Starting angles for the inner circles
 
-        # self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.WindowTransparentForInput)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.WindowTransparentForInput)
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(diameter, diameter)
 
-        # self.timer = QTimer(self)
-        # self.timer.timeout.connect(self.update_orbits)
-        # self.timer.start(10)  # Update the orbits every 50 milliseconds
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_orbits)
+        self.timer.start(10)  # Update the orbits every 50 milliseconds
 
         self.color = color
 
@@ -60,10 +60,6 @@ class DotWidget(QWidget):
 
         # Draw the smaller orbiting circles
         for n, (radius, distance, angle) in enumerate(zip(self.inner_radii, self.orbit_distances, self.angles)):
-            if self.orbit_distances[n] >= (self.outer_radius/4 - (radius * random.random())):
-                self.orbit_distances[n] -= random.random()
-            else:
-                self.orbit_distances[n] += random.random() 
 
             rad_angle = math.radians(angle)
             center_x = self.rect().center().x() + distance * math.cos(rad_angle)

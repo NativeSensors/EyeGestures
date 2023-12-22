@@ -288,16 +288,16 @@ class EdgeDetector:
 
         # TODO: fix this to estimate w and h
         if(x_s <= 0 or x_s >= self.width):
-            new_w = abs(self.center_x - x_t) * 1.5 + 5
+            new_w = abs(self.center_x - x_t) * 1 + 5
             new_h = new_w*self.height/self.width
 
             if self.w < new_w:
                 self.w = new_w
-                self.h = new_h
+                # self.h = new_h
                 
 
         if(y_s <= 0 or y_s >= self.height):
-            new_h = abs(self.center_y - y_t) * 1.5 + 5
+            new_h = abs(self.center_y - y_t) * 1 + 5
             new_w = new_h*self.width/self.height
 
             if self.h < new_h:
@@ -431,6 +431,9 @@ class ScreenManager:
                  monitor_offset_x = 0,
                  monitor_offset_y = 0):
 
+        self.offset_x = 0
+        self.offset_y = 0
+
         self.frame_counter = 0
         self.starting_frame = 20
 
@@ -468,7 +471,11 @@ class ScreenManager:
 
         self.calibration_freeze = False
         self.back_up_counter = 0
-        
+
+    def push_window(self,x,y):
+        print(f"pushing window: {x,y}")
+        self.offset_x = x
+        self.offset_y = y
 
     def freeze_calibration(self):
         self.calibration_freeze = True
@@ -491,7 +498,7 @@ class ScreenManager:
 
         if cluster is not None:
             x,y = cluster.getCenter()
-            center = (x,y)
+            center = (x + self.offset_x,y + self.offset_y)
 
             if not self.calibration_freeze:
                 self.screen_processor.update(center,self.eyeHist.getBoundaries)

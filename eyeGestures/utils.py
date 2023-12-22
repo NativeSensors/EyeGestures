@@ -3,6 +3,7 @@ import time
 import pickle
 import numpy as np
 import queue
+import platform
 import threading
 from typing import Callable, Tuple
 
@@ -113,11 +114,16 @@ class VideoCapture:
 
     def __openCam(self,name):
         if isinstance(name,int):
-            self.cap = cv2.VideoCapture(name, cv2.CAP_DSHOW)
+            if "Windows" in platform.system():
+                self.cap = cv2.VideoCapture(name, cv2.CAP_DSHOW)
+            else:
+                self.cap = cv2.VideoCapture(name)
+
             if self.cap is None or not self.cap.isOpened():
                 print(f"Was unable to open camera: {name}.")
                 print(f"Trying to open camera: {name}.")
-                self.__openCam(name + 1)
+                if name + 1 < 10:
+                    self.__openCam(name + 1)
         else:
             self.cap = cv2.VideoCapture(name)
 

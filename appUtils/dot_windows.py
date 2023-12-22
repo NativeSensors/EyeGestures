@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
 import pyautogui
 import threading
+import platform
 
 class WindowsCursor():
 
@@ -64,8 +65,8 @@ class WindowsCursor():
         self.label.pack(fill="both", expand=True)
 
         # Set transparency
-        self.root.attributes("-transparentcolor", "black")
-
+        if "Windows" in platform.system():
+            self.root.attributes("-transparentcolor", "black")
         # Schedule the update of the window position
         self.root.after(10, lambda: self.__update_window_position(self.root))
 

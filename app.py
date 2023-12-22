@@ -11,8 +11,6 @@ from appUtils.CalibrationWidget import CalibrationWidget
 
 import cv2
 
-import platform
-
 from appUtils.dot import DotWidget
 
 class Lab:
@@ -33,20 +31,17 @@ class Lab:
         self.calibration_widget = CalibrationWidget()
         self.eyegesture_widget = EyeGestureWidget()
         self.eyegesture_widget.show()
+        self.startCalibration()
 
-        if platform.system() == "Windows":
-            self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
-            self.dot_widget.show()
-        else:
-            green = RGBA(0, 100, 0, 128) # green
-            self.dot_widget = WindowsCircle(50, 2, green, self.monitor.width, self.monitor.height)
+        self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
+        self.dot_widget.show()
 
         self.cap = VideoCapture(0)
 
-        self.eyegesture_widget.add_close_event(self.dot_widget.close_event)
         self.eyegesture_widget.add_close_event(self.calibration_widget.close_event)
         self.eyegesture_widget.add_close_event(self.on_quit)
         self.eyegesture_widget.add_close_event(self.cap.close)
+        self.eyegesture_widget.add_close_event(self.dot_widget.close_event)
 
         self.eyegesture_widget.set_disable_btn(
             self.stopCalibration
@@ -55,7 +50,6 @@ class Lab:
             self.startCalibration
         )
 
-        self.startCalibration()
         self.__run = True
 
         self.worker = Worker(self.run)
@@ -64,26 +58,27 @@ class Lab:
         self.calibrate_right = False
         self.calibrate_top = False
         self.calibrate_bottom = False
+        self.window_pushed = False
         self.calibrated = False
+
+        self.push_timer = 500
 
     def calibrate(self,x,y,fix):
         fix_thresh = 0.4
 
-        if x <= self.monitor.x + 10 and not self.calibrated and fix_thresh < fix:
+        if x <= self.monitor.x + 30 and not self.calibrated and fix_thresh < fix:
             self.calibrate_left = True
             self.calibration_widget.disappear_pill("left")
-        if x >= self.monitor.width + self.monitor.x - 10 and not self.calibrated and fix_thresh < fix:
+        if x >= self.monitor.width + self.monitor.x - 30 and not self.calibrated and fix_thresh < fix:
             self.calibrate_right = True
             self.calibration_widget.disappear_pill("right")
 
-
-        if y <= self.monitor.y + 10 and not self.calibrated and fix_thresh < fix:
+        if y <= self.monitor.y + 30 and not self.calibrated and fix_thresh < fix:
             self.calibrate_top = True
             self.calibration_widget.disappear_pill("top")
-        if y >= self.monitor.height + self.monitor.y - 10 and not self.calibrated and fix_thresh < fix:
+        if y >= self.monitor.height + self.monitor.y - 30 and not self.calibrated and fix_thresh < fix:
             self.calibrate_bottom = True
             self.calibration_widget.disappear_pill("bottom")
-
 
         if( self.calibrate_bottom
             and self.calibrate_top
@@ -116,20 +111,22 @@ class Lab:
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)
-        event = self.gestures.estimate(frame)
+        event = self.gestures.estimate(frame, 0.7, 200)
 
         if not event is None:
 
-            if not event.blink:
-                self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
-            else:
-                pyautogui.moveTo(event.point_screen[0], event.point_screen[1])
-                self.dot_widget.setColour((255,120,255))
+            #scale down radius when focusing
+            self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
+            
+            if self.calibrated:
+                if event.fixation > 0.7:
+                    pyautogui.moveTo(event.point_screen[0]+25, event.point_screen[1]+25)
 
-            (w,h) = (self.dot_widget.size().width(),self.dot_widget.size().height())
-            print("moving cursor")
-            self.dot_widget.move(event.point_screen[0]-int(w/2),event.point_screen[1]-int(h/2))
+                if event.blink:
+                    pyautogui.moveTo(event.point_screen[0]+25, event.point_screen[1]+25)
+                    pyautogui.click()
 
+            self.dot_widget.move(int(event.point_screen[0]),int(event.point_screen[1]))
             self.calibrate(event.point_screen[0], event.point_screen[1], event.fixation)
 
     def run(self):

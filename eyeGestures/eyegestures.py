@@ -50,8 +50,11 @@ class EyeGestures:
     def isCalibrated(self):
         return self.calibrated and not self.calibration.inProgress()
 
-    def estimate(self,image ,fixation_freeze = 0.7):
-        return self.gaze.estimate(image,fixation_freeze)
+    def estimate(self,image ,fixation_freeze = 0.7, freeze_radius=20):
+        return self.gaze.estimate(image, fixation_freeze, freeze_radius)
+
+    def add_offset(self,x,y):
+        self.gaze.add_offset(x,y)
 
     def stop_calibration(self):
         self.gaze.freeze_calibration()

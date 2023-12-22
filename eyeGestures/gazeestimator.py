@@ -164,7 +164,7 @@ class GazeTracker:
             return points[0]
         return weighted_centroid
 
-    def estimate(self,image ,fixation_freeze = 0.7):
+    def estimate(self,image ,fixation_freeze = 0.7, freeze_radius=20):
 
         face = self.getFeatures(image)
 
@@ -193,16 +193,18 @@ class GazeTracker:
 
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
 
-            if blink == True:
-                return None
-            
             self.point_screen = self.screen_man.process(compound_point)
 
             fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])        
+            
+            if blink == True and fixation < fixation_freeze:
+                return None
+            
             blink = blink and (fixation > fixation_freeze)
+            
 
             if fixation > fixation_freeze:
-                r = 20
+                r = freeze_radius
                 if not isInside(self.freezed_point[0],self.freezed_point[1],r,self.point_screen[0],self.point_screen[1]):
                     self.freezed_point = self.point_screen
 
@@ -224,6 +226,9 @@ class GazeTracker:
 
         return None
     
+    def add_offset(self,x,y):
+        self.screen_man.push_window(x,y)
+
     def calibrate(self,calibrationPoint,image):
 
         features = self.__getFeatures(image)

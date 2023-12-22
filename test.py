@@ -1,18 +1,20 @@
-from appUtils.dot_windows import WindowsCircle, RGBA
-from screeninfo import get_monitors
-import win32gui, win32ui, win32api, win32con, win32event
+import tkinter as tk
 
+def make_transparent(window):
+    window.attributes('-type', 'dock')  # Set window type to 'dock' for _NET_WM_WINDOW_OPACITY to work
+    window.attributes('-alpha', 0.2)  # Set the transparency level
 
+root = tk.Tk()
 
-monitor = list(filter(lambda monitor: monitor.is_primary == True, get_monitors()))[0]
+# Set window size and position
+root.geometry('300x200+100+100')
 
-green = RGBA(0, 100, 0, 128) # green
-dot = WindowsCircle(50, 4, green, monitor.width, monitor.height)
-dot.show()
+# Make the window transparent
+make_transparent(root)
 
-for n in range(10000):
-    # Check for messages without blocking
-    m = win32gui.GetCursorPos()
-    dot.show()
-    dot.position(m[0], m[1])
-    # dot.set_radius(n%100)
+# Add some content to the window
+label = tk.Label(root, text='Transparent Window')
+label.pack(padx=20, pady=20)
+
+# Run the Tkinter event loop
+root.mainloop()

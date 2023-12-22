@@ -109,22 +109,23 @@ class Lab:
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)
-        event = self.gestures.estimate(frame)
+        event = self.gestures.estimate(frame, 0.7, 200)
 
         if not event is None:
 
             #scale down radius when focusing
-            self.dot_widget.set_radius(int(60 - (50 * event.fixation)))
+            radius = int(60 - (50 * event.fixation))
+            self.dot_widget.set_radius(radius)
 
             if self.calibrated:
                 if event.fixation > 0.7:
-                    pyautogui.moveTo(event.point_screen[0], event.point_screen[1])
+                    pyautogui.moveTo(event.point_screen[0] + radius/2, event.point_screen[1] + radius/2)
 
                 if event.blink:
-                    pyautogui.moveTo(event.point_screen[0], event.point_screen[1])
+                    pyautogui.moveTo(event.point_screen[0] + radius/2, event.point_screen[1] + radius/2)
                     pyautogui.click()
 
-            self.dot_widget.move(int(event.point_screen[0]),int(event.point_screen[1]))
+            self.dot_widget.move(int(event.point_screen[0] ),int(event.point_screen[1]))
             self.calibrate(event.point_screen[0], event.point_screen[1], event.fixation)
 
     def run(self):
