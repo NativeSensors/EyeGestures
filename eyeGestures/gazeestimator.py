@@ -216,6 +216,7 @@ class GazeTracker:
                         r_eye,
                         self.screen_man)
 
+            self.freezed_point = self.point_screen
             return Gevent(compound_point,
                         self.point_screen,
                         blink,
