@@ -6,7 +6,7 @@ a = Analysis(
     ['app_win.py'],
     pathex=[],
     binaries=[],
-    datas=[('./venv/Lib/python3.10/site-packages/mediapipe/modules', 'mediapipe/modules'),],
+    datas=[('./venv/Lib/site-packages/mediapipe/modules', 'mediapipe/modules'),],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
