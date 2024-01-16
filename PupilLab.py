@@ -83,6 +83,7 @@ class Lab:
         self.listener.start()
 
         self.worker = Worker(self.run)
+        self.prev_event = None
 
     def on_button(self,key):
         if not hasattr(key,'char'):
@@ -98,6 +99,15 @@ class Lab:
         if key.char == 's':
             print("Calibration start")
             self.gestures.start_calibration()
+
+        if key.char == 'w' and self.prev_event:
+            print("Pushing on width")
+            self.gestures.start_calibration()
+
+        if key.char == 'e' and self.prev_event:
+            print("Pushing on height")
+            self.gestures.add_offset()
+
 
 
     def __display_clusters(self,whiteboardPupil,clusters):
@@ -179,6 +189,7 @@ class Lab:
         
         frame = cv2.flip(frame, 1)
         event = self.gestures.estimate(frame,0.8)
+        self.prev_event = event    
 
         if not event is None:
             self.frame_counter += 1
@@ -237,7 +248,6 @@ class Lab:
             #     self.__convertFrame(frame))
 
             # print(f"HeadDirection: {self.gestures.getHeadDirection()}")
-            
             
     def run(self):
         monitors = get_monitors()

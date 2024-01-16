@@ -56,63 +56,36 @@ class NoseDirection:
 
 class Nose:    
     # Indecies are one smaller than the landmarks documentation due to indexing starting from 1
-    NOSE_KEYPOINTS = [27, 28, 29, 30, 31, 32 ,33, 34, 35] # keypoint indices for nose
-    NOSE_CENTER = [30]
-    NOSE_LEFT_RIGHT = [31,35]
-    LEFT_EDGE   = [2]
-    RIGHT_EDGE  = [15]
-    BOTTOM_EDGE = [8]
-    TOP_EDGE    = [27]
+    NOSE_CENTER = [1]
     
-    def __init__(self,image : np.ndarray, landmarks : list):
+    def __init__(self,image : np.ndarray, landmarks : list, boundaries: np.ndarray):
         self.image = image
-        
-        self._process(self.image,landmarks)
+
+        self._process(self.image,landmarks,boundaries)
         #getting polar coordinates
 
     def getCenter(self):
         return self.center
 
-    def getLandmarks(self):
-        return self.landmarks
+    def getHeadTiltOffset(self):
+        x,y,w,h = self.boundaries
 
-    def getcenterDist(self):
-        return self.centerDist
+        w_limit = w/2
+        h_limit = h/2 
 
-    def getLeftRightDists(self):
-        return np.array([self.dist2left,self.dist2right])
+        print("tild without limits: ", np.array((self.dist2left,self.dist2top)))
+        tilt = np.array((self.dist2left - w_limit,self.dist2top - h_limit)) 
+        return tilt
+    
+    def _process(self,image,landmarks,boundaries):
+        self.boundaries = boundaries
+        x,y,w,h = self.boundaries
 
-    def getHeadTilt(self):
-        return self.headTilt
+        self.center = np.array(landmarks[self.NOSE_CENTER], dtype=np.int32) - np.array((x,y))
+        print(self.center)
+        print("boundaries: ", x,y,w,h, self.center, np.array((x,y)))
 
-    def __headTilt(self,landmarks):
-        leftPoint  = landmarks[self.NOSE_LEFT_RIGHT[0]]
-        rightPoint = landmarks[self.NOSE_LEFT_RIGHT[1]]
-        x = (rightPoint[0] - leftPoint[0])  
-        y = (rightPoint[1] - leftPoint[1])  
-        
-        return math.atan2(y,x) * 180/math.pi
-
-    def _process(self,image,landmarks):
-        self.left   = np.array(landmarks[self.LEFT_EDGE], dtype=np.int32)
-        self.right  = np.array(landmarks[self.RIGHT_EDGE], dtype=np.int32)
-        self.bottom = np.array(landmarks[self.BOTTOM_EDGE], dtype=np.int32)
-        self.top    = np.sum(np.array(landmarks[self.TOP_EDGE], dtype=np.int32))/len(self.TOP_EDGE)
-        
-        
-        self.center = np.array(landmarks[self.NOSE_CENTER], dtype=np.int32)
-        
-        self.dist2left  = np.linalg.norm(self.left-self.center)
-        self.dist2right = np.linalg.norm(self.right-self.center)
-        self.dist2bottom  = np.linalg.norm(self.bottom-self.center)
-        self.dist2top     = np.linalg.norm(self.top-self.center)
-
-        self.headTilt = self.__headTilt(landmarks)
-
-        self.centerDist = (self.dist2left/(self.dist2left + self.dist2right),
-                           self.dist2bottom/(self.dist2bottom + self.dist2top))
-
-
-        # overwritting landmarks
-        self.landmarks = np.array(landmarks[self.NOSE_KEYPOINTS], dtype=np.int32)
-        pass
+        self.dist2left    = self.center[0,0]
+        self.dist2right   = w - self.center[0,0]
+        self.dist2top     = self.center[0,1]
+        self.dist2bottom  = h - self.center[0,1]

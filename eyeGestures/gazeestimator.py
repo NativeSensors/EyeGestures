@@ -167,9 +167,9 @@ class GazeTracker:
     def estimate(self,image ,fixation_freeze = 0.7, freeze_radius=20):
 
         face = self.getFeatures(image)
-
-        if not face is None:
         
+        if not face is None:
+            
             l_eye = face.getLeftEye()
             r_eye = face.getRightEye()
 
