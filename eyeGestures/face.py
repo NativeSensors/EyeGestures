@@ -96,8 +96,8 @@ class Face:
         x, y, _, _ = self.getBoundingBox()
         offset = np.array((x,y))
         print("offset: ", offset)
-        offset = offset + self.nose.getHeadTiltOffset()
-        print("offset with tilt: ", offset)
+        offset = offset - self.nose.getHeadTiltOffset()
+        print("offset with tilt: ", offset + self.nose.getHeadTiltOffset())
         
         if not hasattr(self,"eyeLeft"):
             self.eyeLeft  = eye.Eye(image,self.landmarks,0,offset)

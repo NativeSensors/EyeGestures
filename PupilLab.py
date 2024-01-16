@@ -91,6 +91,8 @@ class Lab:
 
         if key.char == 'q':
             self.__run = False
+            self.dot_widget.close_event()
+            self.cap.close()
 
         if key.char == 'c':
             print("Calibration stop")

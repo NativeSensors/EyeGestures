@@ -73,8 +73,7 @@ class Nose:
         w_limit = w/2
         h_limit = h/2 
 
-        print("tild without limits: ", np.array((self.dist2left,self.dist2top)))
-        tilt = np.array((self.dist2left - w_limit,self.dist2top - h_limit)) 
+        tilt = np.array(((self.dist2left - w_limit),(self.dist2top - h_limit))) 
         return tilt
     
     def _process(self,image,landmarks,boundaries):
