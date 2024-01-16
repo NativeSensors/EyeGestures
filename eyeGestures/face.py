@@ -58,8 +58,8 @@ class Face:
         min_y = np.min(self.landmarks[:,1]) - margin
         max_y = np.max(self.landmarks[:,1]) + margin
         
-        width  = int((max_x - min_x)/2)
-        height = int((max_y - min_y)/2)
+        width  = int((max_x - min_x))
+        height = int((max_y - min_y))
         x = int(min_x)
         y = int(min_y) 
         return (x,y,width,height)
@@ -90,17 +90,23 @@ class Face:
         return np.array(__face_landmarks)
 
     def _process(self,image,face):
-
+        self.nose = nose.Nose(image,self.landmarks,self.getBoundingBox())
+        print("headtilt",self.nose.getHeadTiltOffset())
         # print(f"pasing process: {image.shape}")
+        x, y, _, _ = self.getBoundingBox()
+        offset = np.array((x,y))
+        print("offset: ", offset)
+        offset = offset - self.nose.getHeadTiltOffset()
+        print("offset with tilt: ", offset + self.nose.getHeadTiltOffset())
+        
         if not hasattr(self,"eyeLeft"):
-            self.eyeLeft  = eye.Eye(image,self.landmarks,0)
+            self.eyeLeft  = eye.Eye(image,self.landmarks,0,offset)
         else:
-            self.eyeLeft.update(image,self.landmarks)
+            self.eyeLeft.update(image,self.landmarks,offset)
 
         if not hasattr(self,"eyeRight"):
-            self.eyeRight  = eye.Eye(image,self.landmarks,1)
+            self.eyeRight  = eye.Eye(image,self.landmarks,1,offset)
         else:
-            self.eyeRight.update(image,self.landmarks)
+            self.eyeRight.update(image,self.landmarks,offset)
 
-        # self.nose = nose.Nose(image,self.landmarks)
         

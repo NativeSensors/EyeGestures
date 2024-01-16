@@ -55,11 +55,12 @@ class Eye:
 
     scale = (150,100)
 
-    def __init__(self,image : np.ndarray, landmarks : list, side : int):
+    def __init__(self,image : np.ndarray, landmarks : list, side : int, offset : np.ndarray):
         self.gaze_buff = Buffor(20)
         self.eyeBuffer = Buffor(2)
         
         self.image = image
+        self.offset = offset
         self.landmarks = landmarks
 
         # check if eye is left or right
@@ -75,9 +76,11 @@ class Eye:
         self.pupil = landmarks[self.pupil_index][0]
         self._process(self.image,self.region)
 
-    def update(self,image : np.ndarray, landmarks : list):
+    def update(self,image : np.ndarray, landmarks : list, offset : np.ndarray):
         self.image = image
+        self.offset = offset
         self.landmarks = landmarks
+
         # check if eye is left or right
         if self.side == "right":
             self.region = np.array(landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
@@ -108,19 +111,21 @@ class Eye:
 
     def getGaze(self,y_correction=0,x_correction=0):
         # pupilCoords = self.pupil.getCoords()
+        center = np.array((self.center_x,self.center_y)) - self.offset
         
-        vectors = self.region - self.center
-        pupil = self.pupil - self.center
+        region_corrected = self.region - self.offset
+        pupil_corrected = self.pupil - self.offset
+
+        vectors = region_corrected  - center
+        pupil = pupil_corrected - center
         
         vectors = vectors - pupil
-        distances = np.linalg.norm(vectors, axis=1)
-        weights = np.exp(-distances)  # Exponential weighting based on distance
-        weighted_vectors = vectors * weights[:, None]
         gaze_vector = np.zeros((2))
-        # gaze_vector[1] = -np.sum(weighted_vectors, axis=0)[1] * 10000
+        
         gaze_vector[1] = np.sum(vectors, axis=0)[1] * 10 - y_correction
         gaze_vector[0] = -np.sum(vectors, axis=0)[0] * 10 - x_correction
         
+        print("gaze_vector: ",gaze_vector)
         self.gaze_buff.add(gaze_vector)   
         return self.gaze_buff.getAvg()
         
@@ -131,7 +136,6 @@ class Eye:
         return self.region 
 
     def _process(self,image,region):
-
         h, w, _ = image.shape
 
         mask = np.full((h, w), 0, dtype=np.uint8) 
@@ -154,8 +158,6 @@ class Eye:
         
         self.center_x = (min_x + max_x)/2
         self.center_y = (min_y + max_y)/2
-
-        self.center = np.array((self.center_x,self.center_y)) 
 
         # HACKETY_HACK: 
         self.pupil[1] = np.min(region[:,1])
