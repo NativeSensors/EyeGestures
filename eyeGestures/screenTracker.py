@@ -230,7 +230,6 @@ class Screen:
             half_width = self.width/2
             half_height = self.height/2
 
-            print(self.x - half_width,point[0],self.x + half_width)
             if self.x - half_width < point[0] and point[0]  < self.x + half_width:
                 isX = True
 
@@ -520,8 +519,9 @@ class ScreenManager:
             x,y = cluster.getCenter()
             center = (x + self.offset_x,y + self.offset_y)
 
-            self.screen_processor.update(center,self.eyeHist.getBoundaries)
-            self.backup_processor.update(center,self.eyeHist.getBoundaries)
+            if not self.calibration_freeze:
+                self.screen_processor.update(center,self.eyeHist.getBoundaries)
+                self.backup_processor.update(center,self.eyeHist.getBoundaries)
 
             p        = self.screen_processor.process(point,self.eyeHist.getBoundaries)
             p_backup = self.backup_processor.process(point,self.eyeHist.getBoundaries)
