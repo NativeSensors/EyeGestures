@@ -91,13 +91,13 @@ class Face:
 
     def _process(self,image,face):
         self.nose = nose.Nose(image,self.landmarks,self.getBoundingBox())
-        print("headtilt",self.nose.getHeadTiltOffset())
+        # print("headtilt",self.nose.getHeadTiltOffset())
         # print(f"pasing process: {image.shape}")
         x, y, _, _ = self.getBoundingBox()
         offset = np.array((x,y))
-        print("offset: ", offset)
+        # print("offset: ", offset)
         offset = offset - self.nose.getHeadTiltOffset()
-        print("offset with tilt: ", offset + self.nose.getHeadTiltOffset())
+        # print("offset with tilt: ", offset + self.nose.getHeadTiltOffset())
         
         if not hasattr(self,"eyeLeft"):
             self.eyeLeft  = eye.Eye(image,self.landmarks,0,offset)

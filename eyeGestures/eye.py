@@ -173,7 +173,7 @@ class Eye:
         gaze_vector[1] = np.sum(vectors, axis=0)[1] * 10 - y_correction
         gaze_vector[0] = -np.sum(vectors, axis=0)[0] * 10 - x_correction
         
-        print("gaze_vector: ",gaze_vector)
+        # print("gaze_vector: ",gaze_vector)
         self.gaze_buff.add(gaze_vector)   
         return self.gaze_buff.getAvg()
         

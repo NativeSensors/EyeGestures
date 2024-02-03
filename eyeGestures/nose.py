@@ -81,9 +81,7 @@ class Nose:
         x,y,w,h = self.boundaries
 
         self.center = np.array(landmarks[self.NOSE_CENTER], dtype=np.int32) - np.array((x,y))
-        print(self.center)
-        print("boundaries: ", x,y,w,h, self.center, np.array((x,y)))
-
+        
         self.dist2left    = self.center[0,0]
         self.dist2right   = w - self.center[0,0]
         self.dist2top     = self.center[0,1]
