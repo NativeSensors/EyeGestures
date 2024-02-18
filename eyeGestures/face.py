@@ -37,6 +37,9 @@ class FaceFinder:
             print(f"Exception in FaceFinder: {e}")
             return None
 
+    def get_contextes(self):
+        return self.contexter.get_number_contextes()
+
 class Face:
 
     def __init__(self,image,face):

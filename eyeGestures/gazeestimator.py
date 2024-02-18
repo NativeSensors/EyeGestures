@@ -19,7 +19,15 @@ def isInside(circle_x, circle_y, r, x, y):
  
 class Gevent:
 
-    def __init__(self,point,point_screen,blink,fixation,l_eye,r_eye,screen_man):
+    def __init__(self,
+                 point,
+                 point_screen,
+                 blink,
+                 fixation,
+                 l_eye,
+                 r_eye,
+                 screen_man,
+                 context):
 
         self.point = point
         self.blink = blink
@@ -30,6 +38,7 @@ class Gevent:
         self.l_eye = l_eye
         self.r_eye = r_eye
         self.screen_man = screen_man
+        self.context = context
 
 class Fixation:
 
@@ -91,6 +100,8 @@ class GazeTracker:
         self.point_screen = [0.0,0.0]
         self.freezed_point = [0.0,0.0]
 
+        self.contextes = 0
+
     def freeze_calibration(self):
         self.screen_man.freeze_calibration()
 
@@ -116,11 +127,6 @@ class GazeTracker:
         i_x = (r_b - l_b)/(l_m - r_m)
         i_y = r_m * i_x + r_b
         return (i_x,i_y)
-
-    def __gaussian_weight(self, distance, sigma=1.0):
-        # Gaussian function to assign a weight based on distance
-        # e^(dist^2/(2*sigma^2))
-        return np.exp(-distance**2 / (2 * sigma**2))
 
     def estimate(self,image,context,fixation_freeze = 0.7, freeze_radius=20):
 
@@ -160,7 +166,6 @@ class GazeTracker:
             
             blink = blink and (fixation > fixation_freeze)
             
-
             if fixation > fixation_freeze:
                 r = freeze_radius
                 if not isInside(self.freezed_point[0],self.freezed_point[1],r,self.point_screen[0],self.point_screen[1]):
@@ -172,7 +177,8 @@ class GazeTracker:
                         fixation,
                         l_eye,
                         r_eye,
-                        self.screen_man)
+                        self.screen_man,
+                        context)
 
             self.freezed_point = self.point_screen
             return Gevent(compound_point,
@@ -181,10 +187,14 @@ class GazeTracker:
                         fixation,
                         l_eye,
                         r_eye,
-                        self.screen_man)
+                        self.screen_man,
+                        context)
 
         return None
     
+    def get_contextes(self):
+        return self.finder.get_contextes()
+
     def add_offset(self,x,y):
         self.screen_man.push_window(x,y)
 

@@ -21,3 +21,6 @@ class Contexter:
             return self.context[context_id]
         self.add_context(context_id,constructor)
         return self.context[context_id]
+    
+    def get_number_contextes(self):
+        return len(self.context.keys())
