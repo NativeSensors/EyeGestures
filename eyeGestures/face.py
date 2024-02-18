@@ -3,6 +3,7 @@ import numpy as np
 import mediapipe as mp
 import eyeGestures.eye as eye
 import eyeGestures.nose as nose
+from eyeGestures.contexter import Contexter 
 
 class FaceFinder:
 
@@ -14,22 +15,24 @@ class FaceFinder:
             min_tracking_confidence=0.5
         )
 
-    def find(self,image):
+        self.contexter = Contexter()
+
+    def find(self,image,context_id):
 
         assert(len(image.shape) > 2)
-        # if len(image.shape) > 2:
-        #     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         try:
-            face = self.mp_face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            face_mesh = self.mp_face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
  
             # if attrirbute do not exist then create it
-            if not hasattr(self,"face"):
-                self.face = Face(image,face)
-            else:
-                self.face.update(image,face)
-
-            return self.face
+            # if not hasattr(self,"face"):
+            #     self.face = Face(image,face)
+            # else:
+            #     self.face.update(image,face)
+            face = self.contexter.get_context(context_id,Face(image,face_mesh))
+            face.update(image,face_mesh)
+            
+            return face
         except Exception as e:
             print(f"Exception in FaceFinder: {e}")
             return None
@@ -43,7 +46,15 @@ class Face:
         self.landmarks = self._landmarks(self.face)
         # self.landmarks = self.landmarks - (x,y)
         # image = cv2.resize(image[x:x+width,y:y+height],(60,73))
-        self._process(image,self.face)
+        # self._process(image,self.face)
+
+        x, y, _, _ = self.getBoundingBox()
+        offset = np.array((x,y))
+        # offset = offset - self.nose.getHeadTiltOffset()
+        
+        self.eyeLeft  = eye.Eye(image,self.landmarks,0,offset)
+        self.eyeRight  = eye.Eye(image,self.landmarks,1,offset)
+        
 
     def update(self,image,face):
         self.face = face
@@ -90,23 +101,13 @@ class Face:
         return np.array(__face_landmarks)
 
     def _process(self,image,face):
-        self.nose = nose.Nose(image,self.landmarks,self.getBoundingBox())
-        # print("headtilt",self.nose.getHeadTiltOffset())
-        # print(f"pasing process: {image.shape}")
+        # self.nose = nose.Nose(image,self.landmarks,self.getBoundingBox())
+        
         x, y, _, _ = self.getBoundingBox()
         offset = np.array((x,y))
-        # print("offset: ", offset)
-        offset = offset - self.nose.getHeadTiltOffset()
-        # print("offset with tilt: ", offset + self.nose.getHeadTiltOffset())
-        
-        if not hasattr(self,"eyeLeft"):
-            self.eyeLeft  = eye.Eye(image,self.landmarks,0,offset)
-        else:
-            self.eyeLeft.update(image,self.landmarks,offset)
+        # offset = offset - self.nose.getHeadTiltOffset()
 
-        if not hasattr(self,"eyeRight"):
-            self.eyeRight  = eye.Eye(image,self.landmarks,1,offset)
-        else:
-            self.eyeRight.update(image,self.landmarks,offset)
+        self.eyeLeft.update(image,self.landmarks,offset)
+        self.eyeRight.update(image,self.landmarks,offset)
 
         

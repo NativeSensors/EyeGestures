@@ -41,55 +41,6 @@ def getIntersections(points, reference_point):
     _, intersetions = getCurves(points, reference_point)
     return np.array(intersetions)
 
-
-class EyeTiles:
-
-    def __init__(self, start_x, start_y, width, height, nx_tiles = 3, ny_tiles = 1):
-        self.start_x = start_x
-        self.start_y = start_y
-        self.width  = width
-        self.height = height
-
-        self.nx_tiles = nx_tiles
-        self.ny_tiles = ny_tiles
-
-        self.x_step = self.width/nx_tiles
-        self.y_step = self.height/ny_tiles
-
-        self.x_tiles = []
-        for n in self.nx_tiles:
-            self.x_tiles.append(EyeTile(self.start_x+self.x_step*n,self.start_x+self.x_step*(n+1)))
-
-        self.y_tiles = []
-        for n in self.ny_tiles:
-            self.y_tiles.append(EyeTile(self.start_y+self.y_step*n,self.start_y+self.y_step*(n+1)))
-
-        pass
-
-    def getActiveTile(self,x,y):
-        x_n,y_n = 0,0
-        for n,tile in enumerate(self.x_tiles):
-            if tile.isTileActive():
-                x_n = n
-
-        for n,tile in enumerate(self.x_tiles):
-            if tile.isTileActive():
-                y_n = n
-
-        return (x_n,y_n)
-
-class EyeTile:
-
-    def __init__(self,lower_limit,high_limit):
-        self.lower_limit = lower_limit
-        self.high_limit  = high_limit
-        pass
-
-    def isTileActive(self,position):
-        if self.lower_limit < position and self.high_limit < position:
-            return True
-        return False
-
 class Eye:    
     LEFT_EYE_KEYPOINTS  = np.array(list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:,0]
     RIGHT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_RIGHT_EYE))[:,0]
@@ -122,7 +73,7 @@ class Eye:
             self.pupil_index = self.LEFT_EYE_PUPIL_KEYPOINT
         
         self.pupil = landmarks[self.pupil_index][0]
-        self._process(self.image,self.region)
+        # self._process(self.image,self.region)
 
     def update(self,image : np.ndarray, landmarks : list, offset : np.ndarray):
         self.image = image

@@ -97,27 +97,6 @@ class GazeTracker:
     def unfreeze_calibration(self):
         self.screen_man.unfreeze_calibration()
 
-    def __getFeatures(self,image):
-        
-        eyes = np.full((self.N_FEATURES,2),np.NAN)
-        face = self.finder.find(image)
-        
-        if not face is None:
-            # self.__headDir = self.noseDirection.getPos(face.getNose())
-            l_eye = face.getLeftEye()
-            r_eye = face.getRightEye()
-            
-            llandmards = l_eye.getLandmarks()
-            lpupil     = l_eye.getPupil()
-            rlandmards = r_eye.getLandmarks()
-            rpupil     = r_eye.getPupil()
-
-            eyes = np.concatenate((llandmards,lpupil,rlandmards,rpupil))
-            if np.isnan(eyes).any():
-                eyes = np.full((self.N_FEATURES,2),np.NAN)
-
-        return np.array(eyes) 
-    
     def __gaze_intersection(self,l_eye,r_eye):
         l_pupil = l_eye.getPupil()
         l_gaze  = l_eye.getGaze()
@@ -143,30 +122,9 @@ class GazeTracker:
         # e^(dist^2/(2*sigma^2))
         return np.exp(-distance**2 / (2 * sigma**2))
 
-    # that can be useful to stabilise data 
-    def __weightedCentroid(self, points):
-        # Calculate the pairwise distances between points
-        distances = np.sqrt(((points[:, np.newaxis, :] - points[np.newaxis, :, :]) ** 2).sum(axis=2))
+    def estimate(self,image,context,fixation_freeze = 0.7, freeze_radius=20):
 
-        # Apply the Gaussian function to the distances to get weights
-        # Using a small sigma to ensure that farther points have significantly less weight
-        weights = self.__gaussian_weight(distances, sigma=0.1)
-
-        # Avoid division by zero by setting the diagonal to zero (distance from a point to itself)
-        np.fill_diagonal(weights, 0)
-
-        # Sum the weights for each point
-        sum_weights = np.sum(weights, axis=1)
-
-        # Calculate the weighted centroid
-        weighted_centroid = np.sum(points.T * sum_weights, axis=1) / np.sum(sum_weights)
-        if np.isnan(weighted_centroid).any():
-            return points[0]
-        return weighted_centroid
-
-    def estimate(self,image ,fixation_freeze = 0.7, freeze_radius=20):
-
-        face = self.getFeatures(image)
+        face = self.getFeatures(image,context)
         
         if not face is None:
             
@@ -245,8 +203,8 @@ class GazeTracker:
     def getCalibration(self):
         return self.calibrationData.get()
 
-    def getFeatures(self,image):
-        face = self.finder.find(image)
+    def getFeatures(self,image,context):
+        face = self.finder.find(image,context)
         return face
         
     def getHeadDirection(self):

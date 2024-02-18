@@ -44,9 +44,6 @@ class Cluster:
 
         return (x,y,width,height)
     
-    def getPoints(self):
-        return self.points
-
     def getBoundaries(self):
         return (self.x,self.y,self.w,self.h)
     
@@ -61,7 +58,7 @@ class ScreenClusters:
         self.head = 0
         self.size = 500
         self.points = np.zeros((self.size,2), dtype=np.uint32)
-        self.Dbscan = DBSCAN(eps=12, min_samples=4)
+        self.Dbscan = DBSCAN(eps=12, min_samples=3)
         self.main_cluster = None
         # self.clusters = dict()
         pass
@@ -219,29 +216,7 @@ class Screen:
             new_height = self.height/self.old_scale_h * scale_h
             self.old_scale_h = scale_h
             self.setWH(self.width,new_height)    
-
-    def poinstInScreen(self,points):
-
-        filling = 0.0
-        for point in points:
-            isX = False
-            isY = False
-
-            half_width = self.width/2
-            half_height = self.height/2
-
-            if (self.x - half_width) <= point[0] and point[0] <= (self.x + half_width):
-                isX = True
-
-            if (self.y - half_height) <= point[1] and point[1] <= (self.y + half_height):
-                isY = True
-
-            if isX * isY: 
-                filling += 1
-
-        print(filling, len(points))
-        return filling/len(points)
-
+        
     def scaleByStep(self,step_w=0.1,step_h=0.1):
         self.old_scale_w = 1.0
         self.old_scale_h = 1.0
@@ -307,21 +282,27 @@ class EdgeDetector:
         self.lim_max_y = lim_max_y
         self.lim_min_y = lim_min_y 
 
-    # BUG: for some reason looking left side of screen is shrinking screen but right side is enlarging it
-    # Need investigation 
     def check(self, point_tracker, point_screen):
         (x_t,y_t) = point_tracker 
         (x_s,y_s) = point_screen
 
         # TODO: fix this to estimate w and h
         if(x_s <= 0 or x_s >= self.width):
-            new_w = abs(self.center_x - x_t)           
-            self.w = new_w
+            new_w = abs(self.center_x - x_t) * 1 + 5
+            new_h = new_w*self.height/self.width
+
+            if self.w < new_w:
+                self.w = new_w
+                # self.h = new_h
                 
 
         if(y_s <= 0 or y_s >= self.height):
-            new_h = abs(self.center_y - y_t)
-            self.h = new_h
+            new_h = abs(self.center_y - y_t) * 1 + 5
+            new_w = new_h*self.width/self.height
+
+            if self.h < new_h:
+                self.w = new_w
+                self.h = new_h
             
     def getBoundingBox(self):
         x = int(self.center_x - self.w/2)
@@ -381,12 +362,9 @@ class ScreenProcessor:
         p += (self.monitor_offset_x, self.monitor_offset_y)
 
         # return how close that is hist region
-        # closeness_percentage = (roi_w * roi_h)/(w_screen * h_screen)
-        # return (p,closeness_percentage)
-        return p
-    
-    def poinstInScreen(self,points):
-        return self.eyeScreen.poinstInScreen(points)
+        closeness_percentage = (roi_w * roi_h)/(w_screen * h_screen)
+        return (p,closeness_percentage)
+
 
     def update(self,center,getBoundaries):
 
@@ -526,33 +504,34 @@ class ScreenManager:
                 self.screen_processor.update(center,self.eyeHist.getBoundaries)
                 self.backup_processor.update(center,self.eyeHist.getBoundaries)
 
-            p        = self.screen_processor.process(point,self.eyeHist.getBoundaries)
-            p_backup = self.backup_processor.process(point,self.eyeHist.getBoundaries)
+            p, percentage_main          = self.screen_processor.process(point,self.eyeHist.getBoundaries)
+            p_backup, percentage_backup = self.backup_processor.process(point,self.eyeHist.getBoundaries)
             
-            percentage_backup = self.backup_processor.poinstInScreen(cluster.getPoints())
-            percentage_main   = self.screen_processor.poinstInScreen(cluster.getPoints())
-
             self.back_up_counter += 1
-            if((percentage_backup > percentage_main) and
+            if(abs(1.0 - percentage_backup) < abs(1.0 - percentage_main) and
+                        self.back_up_counter > 100 and
                         not self.calibration_freeze):
-                print(percentage_backup,percentage_main, percentage_backup > percentage_main)
 
                 p = p_backup
                 self.screen_processor = self.backup_processor
-                if self.screen_processor > 0.2:
-                    self.calibration_freeze = True
-                    print("calibration stopped from inside")
-
-            if self.back_up_counter > 100:
-                self.back_up_counter = 0 
-                _,_,w,h = cluster.getBoundaries()
                 self.backup_processor = ScreenProcessor(
                                             self.eye_screen_w,
                                             self.eye_screen_h,
                                             self.monitor_width,
                                             self.monitor_height,
                                             x,y,
-                                            w,h,
+                                            monitor_offset_x = self.monitor_offset_x,
+                                            monitor_offset_y = self.monitor_offset_y)
+                self.back_up_counter = 0
+
+            if self.back_up_counter > 100:
+                self.back_up_counter = 0 
+                self.backup_processor = ScreenProcessor(
+                                            self.eye_screen_w,
+                                            self.eye_screen_h,
+                                            self.monitor_width,
+                                            self.monitor_height,
+                                            x,y,
                                             monitor_offset_x = self.monitor_offset_x,
                                             monitor_offset_y = self.monitor_offset_y)
 

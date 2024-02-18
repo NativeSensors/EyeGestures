@@ -190,7 +190,7 @@ class Lab:
     def __display_eye(self,frame):
         
         frame = cv2.flip(frame, 1)
-        event = self.gestures.estimate(frame,0.8)
+        event = self.gestures.estimate(frame,"main",0.8)
         self.prev_event = event    
 
         if not event is None:

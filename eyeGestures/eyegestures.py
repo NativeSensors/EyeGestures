@@ -24,23 +24,6 @@ class EyeGestures:
         self.calibration = Calibration(self.height, self.width, 60)
         pass
 
-    def __onCalibrated(self):
-        self.gaze.fit()
-        self.calibrated = True
-
-    def calibrate(self,image):
-        if(not self.calibrated and not self.calibration.inProgress()):
-            self.calibration.start(self.__onCalibrated)
-
-        point = self.calibration.getTrainingPoint()
-        self.gaze.calibrate(point,image)
-        
-        if len(self.gaze.getCalibration()[0]) > 10:
-            self.gaze.fit()
-            self.calibrated = True
-
-        return point 
-
     def getFeatures(self,image):
         return self.gaze.getFeatures(image)
 
@@ -50,8 +33,8 @@ class EyeGestures:
     def isCalibrated(self):
         return self.calibrated and not self.calibration.inProgress()
 
-    def estimate(self,image ,fixation_freeze = 0.7, freeze_radius=20):
-        return self.gaze.estimate(image, fixation_freeze, freeze_radius)
+    def estimate(self,image, context, fixation_freeze = 0.7, freeze_radius=20):
+        return self.gaze.estimate(image, context, fixation_freeze, freeze_radius)
 
     def add_offset(self,x,y):
         self.gaze.add_offset(x,y)
