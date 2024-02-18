@@ -6,6 +6,8 @@ from eyeGestures.utils import Buffor
 from scipy import signal
 from sklearn.cluster import DBSCAN
 
+# THIS FILE IS SLOWLY BECOMING BLACK MAGIC
+
 class Cluster:
 
     def __init__(self, label, points):
