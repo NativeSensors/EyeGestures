@@ -2,7 +2,7 @@
 from eyeGestures.gazeestimator import GazeTracker
 from eyeGestures.calibration import Calibration
 
-
+VERSION = "0.1.0"
 class EyeGestures:
 
     def __init__(self,screen_width,screen_height,
