@@ -3,7 +3,6 @@ import numpy as np
 import mediapipe as mp
 import eyeGestures.eye as eye
 import eyeGestures.nose as nose
-from eyeGestures.contexter import Contexter 
 
 class FaceFinder:
 
@@ -15,55 +14,33 @@ class FaceFinder:
             min_tracking_confidence=0.5
         )
 
-        self.contexter = Contexter()
-
-    def find(self,image,context_id):
+    def find(self,image):
 
         assert(len(image.shape) > 2)
 
         try:
             face_mesh = self.mp_face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
  
-            # if attrirbute do not exist then create it
-            # if not hasattr(self,"face"):
-            #     self.face = Face(image,face)
-            # else:
-            #     self.face.update(image,face)
-            face = self.contexter.get_context(context_id,Face(image,face_mesh))
-            face.update(image,face_mesh)
-            
-            return face
+            return face_mesh
         except Exception as e:
             print(f"Exception in FaceFinder: {e}")
             return None
 
-    def get_contextes(self):
-        return self.contexter.get_number_contextes()
-
 class Face:
 
-    def __init__(self,image,face):
-        self.face = face
-        self.image_h, self.image_w, _ = image.shape
+    def __init__(self):
+        self.eyeLeft  = eye.Eye(0)
+        self.eyeRight = eye.Eye(1)
         
-        self.landmarks = self._landmarks(self.face)
-        # self.landmarks = self.landmarks - (x,y)
-        # image = cv2.resize(image[x:x+width,y:y+height],(60,73))
-        # self._process(image,self.face)
+    def dump_context(self):
+        return {
+                "l_eye":self.eyeLeft.getBuffor(),
+                "r_eye":self.eyeRight.getBuffor()
+            } 
 
-        x, y, _, _ = self.getBoundingBox()
-        offset = np.array((x,y))
-        # offset = offset - self.nose.getHeadTiltOffset()
-        
-        self.eyeLeft  = eye.Eye(image,self.landmarks,0,offset)
-        self.eyeRight  = eye.Eye(image,self.landmarks,1,offset)
-        
-
-    def update(self,image,face):
-        self.face = face
-
-        self.landmarks = self._landmarks(self.face)
-        self._process(image,self.face)
+    def load_context(self,context_payload):
+        self.eyeLeft.loadBuffor(context_payload["l_eye"])
+        self.eyeRight.loadBuffor(context_payload["l_eye"])
 
     def getBoundingBox(self):
         margin = 0
@@ -86,9 +63,6 @@ class Face:
 
     def getLandmarks(self):
         return self.landmarks
-
-    def getLandmarks(self):
-        return self.landmarks
         
     def _landmarks(self,face):
                    
@@ -103,7 +77,10 @@ class Face:
 
         return np.array(__face_landmarks)
 
-    def _process(self,image,face):
+    def process(self,image,face):
+        self.face = face
+        self.image_h, self.image_w, _ = image.shape
+        self.landmarks = self._landmarks(self.face)
         # self.nose = nose.Nose(image,self.landmarks,self.getBoundingBox())
         
         x, y, _, _ = self.getBoundingBox()
@@ -112,5 +89,6 @@ class Face:
 
         self.eyeLeft.update(image,self.landmarks,offset)
         self.eyeRight.update(image,self.landmarks,offset)
+
 
         

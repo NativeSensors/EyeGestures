@@ -39,11 +39,14 @@ class EyeGestures:
     def add_offset(self,x,y):
         self.gaze.add_offset(x,y)
 
-    def stop_calibration(self):
+    def stop_calibration(self,context):
         self.gaze.freeze_calibration()
 
-    def start_calibration(self):
+    def start_calibration(self,context):
         self.gaze.unfreeze_calibration()
     
     def get_contextes(self):
         return self.gaze.contextes()
+    
+    def rm_context(self,context):
+        return self.gaze.rm_context(context)

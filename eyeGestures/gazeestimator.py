@@ -1,10 +1,11 @@
 
 import numpy as np
 from eyeGestures.nose import NoseDirection
-from eyeGestures.face import FaceFinder
+from eyeGestures.face import FaceFinder, Face
 from eyeGestures.calibration   import GazePredictor, CalibrationData
 from eyeGestures.processing    import EyeProcessor
 from eyeGestures.screenTracker import ScreenManager
+from eyeGestures.contexter     import Contexter 
 
 def isInside(circle_x, circle_y, r, x, y):
      
@@ -93,20 +94,21 @@ class GazeTracker:
         self.bufforLength = 10
 
         # those are used for analysis
-        self.__debugBuffer = []
-        self.__debugCalibBuffer = []
         self.__headDir = [0.5,0.5]
 
         self.point_screen = [0.0,0.0]
         self.freezed_point = [0.0,0.0]
 
-        self.contextes = 0
+        self.contexter = Contexter()
+        self.face = Face()
 
     def freeze_calibration(self):
-        self.screen_man.freeze_calibration()
+        pass
+        # self.screen_man.freeze_calibration()
 
     def unfreeze_calibration(self):
-        self.screen_man.unfreeze_calibration()
+        pass
+        # self.screen_man.unfreeze_calibration()
 
     def __gaze_intersection(self,l_eye,r_eye):
         l_pupil = l_eye.getPupil()
@@ -128,39 +130,36 @@ class GazeTracker:
         i_y = r_m * i_x + r_b
         return (i_x,i_y)
 
-    def estimate(self,image,context,fixation_freeze = 0.7, freeze_radius=20):
+    def estimate(self,image,context_id,fixation_freeze = 0.7, freeze_radius=20):
 
-        face = self.getFeatures(image,context)
-        
-        if not face is None:
+        event = None
+        face_mesh = self.getFeatures(image)
+    
+        self.face.process(image,face_mesh)
+        if not self.face is None:
             
-            l_eye = face.getLeftEye()
-            r_eye = face.getRightEye()
-
+            l_eye = self.face.getLeftEye()
+            r_eye = self.face.getRightEye()
             l_pupil = l_eye.getPupil()
             r_pupil = r_eye.getPupil()
             
-            blink = l_eye.getBlink() or r_eye.getBlink()
-            
             intersection_x,_ = self.__gaze_intersection(l_eye,r_eye)
-
             # TODO: check what happens here before with l_pupil
             self.eyeProcessorLeft.append( l_pupil, l_eye.getLandmarks())
             self.eyeProcessorRight.append(r_pupil, r_eye.getLandmarks())
 
             # This scales pupil move to the screen we observe
-            point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            l_point = np.array((int(intersection_x),point[1]))
-
-            point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            r_point = np.array((int(intersection_x),point[1]))
+            l_point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
+            l_point = np.array((int(intersection_x),l_point[1]))
+            r_point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
+            r_point = np.array((int(intersection_x),r_point[1]))
 
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
 
-            self.point_screen = self.screen_man.process(compound_point)
-
+            # self.point_screen = self.screen_man.process(compound_point)
             fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])        
             
+            blink = l_eye.getBlink() or r_eye.getBlink()
             if blink == True and fixation < fixation_freeze:
                 return None
             
@@ -171,26 +170,26 @@ class GazeTracker:
                 if not isInside(self.freezed_point[0],self.freezed_point[1],r,self.point_screen[0],self.point_screen[1]):
                     self.freezed_point = self.point_screen
 
-                return Gevent(compound_point,
+                event = Gevent(compound_point,
                         self.freezed_point,
                         blink,
                         fixation,
                         l_eye,
                         r_eye,
                         self.screen_man,
-                        context)
+                        context_id)
+            else:
+                self.freezed_point = self.point_screen
+                event = Gevent(compound_point,
+                            self.point_screen,
+                            blink,
+                            fixation,
+                            l_eye,
+                            r_eye,
+                            self.screen_man,
+                            context_id)
 
-            self.freezed_point = self.point_screen
-            return Gevent(compound_point,
-                        self.point_screen,
-                        blink,
-                        fixation,
-                        l_eye,
-                        r_eye,
-                        self.screen_man,
-                        context)
-
-        return None
+        return event
     
     def get_contextes(self):
         return self.finder.get_contextes()
@@ -198,24 +197,12 @@ class GazeTracker:
     def add_offset(self,x,y):
         self.screen_man.push_window(x,y)
 
-    def calibrate(self,calibrationPoint,image):
-
-        features = self.__getFeatures(image)
-
-        if np.isnan(features).any():
-            pass
-        else:
-            self.__debugBuffer.append(features)
-            self.__debugCalibBuffer.append(calibrationPoint)
-
-            self.calibrationData.add(calibrationPoint,features)
-
     def getCalibration(self):
         return self.calibrationData.get()
 
-    def getFeatures(self,image,context):
-        face = self.finder.find(image,context)
-        return face
+    def getFeatures(self,image):
+        face_mesh = self.finder.find(image)
+        return face_mesh
         
     def getHeadDirection(self):
         return self.__headDir        

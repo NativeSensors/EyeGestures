@@ -54,26 +54,24 @@ class Eye:
 
     scale = (150,100)
 
-    def __init__(self,image : np.ndarray, landmarks : list, side : int, offset : np.ndarray):
+    def __init__(self, side : int):
         self.gaze_buff = Buffor(20)
-        self.eyeBuffer = Buffor(2)
         
-        self.image = image
-        self.offset = offset
-        self.landmarks = landmarks
-
         # check if eye is left or right
         if side == 1:
             self.side = "right"
-            self.region = np.array(landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
             self.pupil_index = self.RIGHT_EYE_PUPIL_KEYPOINT
         elif side == 0:
             self.side = "left"
-            self.region = np.array(landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
             self.pupil_index = self.LEFT_EYE_PUPIL_KEYPOINT
         
-        self.pupil = landmarks[self.pupil_index][0]
         # self._process(self.image,self.region)
+
+    def getBuffor(self):
+        return self.gaze_buff.getBuffor()
+
+    def loadBuffor(self,buffor):
+        self.gaze_buff.loadBuffor(buffor)
 
     def update(self,image : np.ndarray, landmarks : list, offset : np.ndarray):
         self.image = image

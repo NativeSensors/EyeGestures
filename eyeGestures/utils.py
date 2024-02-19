@@ -78,6 +78,9 @@ class Buffor:
 
     def getBuffor(self):
         return self.__buffor
+    
+    def loadBuffor(self, buffor):
+        self.__buffor = buffor
 
     def getLast(self):
         return self.__buffor[0]

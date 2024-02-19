@@ -6,9 +6,16 @@ class EyeProcessor:
 
     def __init__(self,scale_w=250,scale_h=250):
         self.pupilBuffor = Buffor(20)
-        self.avgRetBuffor = Buffor(20)
+        # self.avgRetBuffor = Buffor(20)
         self.scale_w = scale_w
         self.scale_h = scale_h
+
+    def getBuffor(self):
+        return self.pupilBuffor.getBuffor()
+
+    def loadBuffor(self,buffor):
+        print(f"loading buffor: {buffor}")
+        self.pupilBuffor.loadBuffor(buffor)
 
     def append(self,pupil : (int,int) ,landmarks : np.ndarray):
         self.pupil = pupil
@@ -73,7 +80,7 @@ class EyeProcessor:
             _retPupil = self.pupilBuffor.getAvg()
 
         # THIS BUFFOR HAS _retPupil and Width
-        self.avgRetBuffor.add(_retPupil)
+        # self.avgRetBuffor.add(_retPupil)
         
         return _retPupil
 
