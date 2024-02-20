@@ -85,6 +85,9 @@ class Buffor:
     def getLast(self):
         return self.__buffor[0]
 
+    def getFirst(self):
+        return self.__buffor[len(self.__buffor) - 1]
+
     def getLen(self):
         return len(self.__buffor)
 

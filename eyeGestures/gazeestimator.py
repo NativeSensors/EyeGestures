@@ -156,7 +156,15 @@ class GazeTracker:
 
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
 
-            # self.point_screen = self.screen_man.process(compound_point)
+            ###########################################################
+            #################### UNDER CONSTRUCTION ###################
+
+
+            self.point_screen = self.screen_man.process(compound_point)
+            
+
+            ###########################################################
+            
             fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])        
             
             blink = l_eye.getBlink() or r_eye.getBlink()
