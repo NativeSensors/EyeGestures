@@ -3,9 +3,9 @@ import numpy as np
 class Heatmap():
 
     def __init__(self,width,height,buffor):
-        self.inc_step = 10
-
         bars = 10
+        self.inc_step = 10
+        self.step = bars
 
         bars_x = int(width/bars)
         bars_y = int(height/bars)
@@ -17,8 +17,8 @@ class Heatmap():
             x = point[0]
             y = point[1]
 
-            self.axis_x[int(x/bars)] += self.inc_step
-            self.axis_y[int(y/bars)] += self.inc_step
+            self.axis_x[int(x/bars % width/bars)] += self.inc_step
+            self.axis_y[int(y/bars % height/bars)] += self.inc_step
 
         self.min_x = self.__getParam((self.axis_x > self.inc_step*2),last=False)
         self.max_x = self.__getParam((self.axis_x > self.inc_step*2),last=True)

@@ -4,7 +4,9 @@ import numpy as np
 from scipy import signal
 from sklearn.cluster import DBSCAN
 
-from clusters import Clusters
+import eyeGestures.screenTracker.dataPoints as dp
+from eyeGestures.screenTracker.clusters import Clusters
+from eyeGestures.screenTracker.heatmap import Heatmap
 
 # THIS FILE IS SLOWLY BECOMING BLACK MAGIC
 
@@ -38,19 +40,21 @@ def detect_edges(screen, display, point_on_screen, point_on_display):
 class ScreenProcessor:
 
     def __init__(self):
-        self.eyeScreen = Screen()   
+        pass
 
     # RUN FEATURE
     def process(self,point,buffor_length,roi,screen,display,heatmap):
         
-        p_on_display = self.eyeScreen.screen2display(point,roi,display)
+        p_on_display = self.screen2display(point,roi,display)
         
+        print(f"1. p_on_display: {p_on_display}")
         if buffor_length > 20:
             new_screen_w,new_screen_h = detect_edges(display, point, p_on_display)
             screen.width = new_screen_w
             screen.height = new_screen_h
         
         p_on_display += (display.offset_x, display.offset_y)
+        print(f"2. p_on_display: {p_on_display}")
 
         # return how close that is hist region
         (_,_,roi_w,roi_h) = heatmap.getBoundaries()
@@ -58,54 +62,61 @@ class ScreenProcessor:
         return (p_on_display,closeness_percentage)
 
     # CALIBRATION FEATURE
-    def update(self, roi, screen, clusters, heatmap):
+    # it should not affect objects but produce new ones
+    def update(self, roi, clusters, heatmap):
 
         (x,y) = heatmap.getCenter()
         # =====================================
         # ---------histogram obtained---------- 
         # =====================================
+        new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
 
-        screen.getCenter().x = x
-        screen.getCenter().y = y
+        new_roi.x = x
+        new_roi.y = y
         # self.eyeScreen.setCenter(x,y) 
-        self.__scale_up_to_cluster(roi, clusters)
+        new_roi = self.__scaleROI2cluster(new_roi, clusters)
+        return new_roi
         
 
-    def __scale_up_to_cluster(self, roi, clusters):
+    def __scaleROI2cluster(self, roi, clusters):
         
         (_,_,cluster_w,cluster_h) = clusters.getMainCluster().getBoundaries()
 
+        new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
+
         if(cluster_w > roi.width):
-            self.eyeScreen.scaleByStep(roi,0.1,0.0)
+            new_scale_w = 1.1
+            new_w = self.rescale_h(roi,new_scale_w,0.1)
+            new_roi.width = new_w
         
         if(cluster_h > roi.height):
-            self.eyeScreen.scaleByStep(roi,0.0,0.1)
+            new_scale_h = 1.1
+            new_h = self.rescale_w(roi,new_scale_h,0.1)
+            new_roi.height = new_h
 
-
-class Screen:
-
-    def __init__(self):
-        pass
-
-    def scale(self, roi, scale_w, scale_h, change = 0.5):
+        return new_roi
+    
+    def rescale_h(self, roi, scale_h, change = 0.5):
+        scale_diff_h = abs(1.0 - scale_h)
         
-        scale_diff_w = abs(roi.scale_w - scale_w)
-        scale_diff_h = abs(roi.scale_h - scale_h)
-        
-        if scale_diff_w > change: 
-            roi.scale_w = scale_w
-            roi.width = roi.width/roi.scale_w * scale_w
+        ret_heigth  = roi.heigth
         
         if scale_diff_h > change: 
-            roi.scale_h = scale_h
-            roi.heigth = roi.heigth/roi.scale_h * scale_h
+            ret_heigth = roi.heigth/roi.scale_h * scale_h
+
+        return ret_heigth
         
-    def scaleByStep(self, roi, step_w=0.1, step_h=0.1):
-        roi.scale_w = 1.0
-        roi.scale_h = 1.0
-        new_scale_w = float(roi.scale_w + step_w)
-        new_scale_h = float(roi.scale_h + step_h)
-        self.scale(roi, new_scale_w, new_scale_h, 0.0)
+    def rescale_w(self, roi, scale_w, change = 0.5):
+        scale_diff_w = abs(1.0 - scale_w)
+        
+        ret_width   = roi.width
+
+        if scale_diff_w > change: 
+            ret_width = roi.width/roi.scale_w * scale_w
+
+        return ret_width
+
+        
 
     def screen2display(self, screen_point, screen, display):
         s_x,s_y = screen_point[0],screen_point[1]
@@ -127,13 +138,21 @@ class ScreenManager:
         self.screen_processor = ScreenProcessor()
    
 
-    def process(self, buffor, roi, screen, display, heatmap, calibration):
+    def process(self, buffor, roi, screen, display, calibration):
 
+        print("before heatmap")
+        heatmap = Heatmap(screen.width,screen.height,buffor)
+        
+        print("before cluster")
         cluster = Clusters(buffor).getMainCluster()
+        
+        print("cluster and heatmap obtained")
+
+
         if cluster is not None:
 
             if calibration:
-                self.screen_processor.update(roi, screen, cluster, heatmap)
+                roi = self.screen_processor.update(roi, screen, cluster, heatmap)
    
             p, _ = self.screen_processor.process(
                 buffor[len(buffor)-1],
@@ -143,5 +162,5 @@ class ScreenManager:
                 display,
                 heatmap)
    
-            return p
-        return [0,0]
+            return (p, roi)
+        return ([0,0], roi)

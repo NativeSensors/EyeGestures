@@ -65,12 +65,10 @@ class Lab:
 
         self.eye_screen_w = 500
         self.eye_screen_h = 500
-        self.gestures = EyeGestures(self.monitor.width,
-                                    self.monitor.height,
-                                    self.eye_screen_w,
+        self.gestures = EyeGestures(self.eye_screen_w,
                                     self.eye_screen_h,
-                                    self.monitor.x,
-                                    self.monitor.y)
+                                    250,
+                                    250)
 
         self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.dot_widget.show()
@@ -190,7 +188,17 @@ class Lab:
     def __display_eye(self,frame):
         
         frame = cv2.flip(frame, 1)
-        event = self.gestures.estimate(frame,"main",0.8)
+
+        self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+        event = self.gestures.estimate(
+            frame,
+            "main",
+            self.monitor.width,
+            self.monitor.height,
+            self.monitor.x,
+            self.monitor.y,
+            0.8)
+
         self.prev_event = event    
 
         if not event is None:
@@ -212,30 +220,30 @@ class Lab:
             # self.__display_hist(whiteboardPupil,
             #                     event.screen_man.getHist())
             
-            self.__display_clusters(whiteboardPupil, 
-                                    event.screen_man.getClusters())
+            # self.__display_clusters(whiteboardPupil, 
+            #                         event.screen_man.getClusters())
 
 
-            self.__display_screen(whiteboardPupil, 
-                                # event.screen_man.getHist(), 
-                                event.screen_man.getScreen(),
-                                event.screen_man.getScreenBackup(), 
-                                event.screen_man.getEdgeDetector())
+            # self.__display_screen(whiteboardPupil, 
+            #                     # event.screen_man.getHist(), 
+            #                     event.screen_man.getScreen(),
+            #                     event.screen_man.getScreenBackup(), 
+            #                     event.screen_man.getEdgeDetector())
 
-            self.__display_eyeTracker(whiteboardPupil, 
-                                      event.screen_man, 
-                                      event.point, 
-                                      event.point_screen, 
-                                      self.dot_widget)
+            # self.__display_eyeTracker(whiteboardPupil, 
+            #                           event.screen_man, 
+            #                           event.point, 
+            #                           event.point_screen, 
+            #                           self.dot_widget)
 
 
-            self.__display_extended_gaze(frame,
-                                         event.l_eye,
-                                         10)
+            # self.__display_extended_gaze(frame,
+            #                              event.l_eye,
+            #                              10)
 
-            self.__display_extended_gaze(frame,
-                                         event.r_eye,
-                                         10)
+            # self.__display_extended_gaze(frame,
+            #                              event.r_eye,
+            #                              10)
 
             self.worker.imshow("frame",frame)
             self.worker.imshow("whitebaord",whiteboardPupil)

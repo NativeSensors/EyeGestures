@@ -1,5 +1,5 @@
-import screen_tracker.dataPoints
-
+import eyeGestures.screenTracker.dataPoints as dp
+from eyeGestures.utils import Buffor
 class Contexter:
 
     def __init__(self):
@@ -32,7 +32,44 @@ class Contexter:
     def getNumberContextes(self):
         return len(self.context.keys())
     
-class gazeContext:
+class Gcontext:
 
-    def __init__(self,,):
+    def __init__(self,
+                 display,
+                 roi,
+                 gazeBuffor,
+                 l_pupil,
+                 r_pupil):
+        
+        self.roi = roi
+        self.gazeBuffor = gazeBuffor
+        self.l_pupil = l_pupil
+        self.r_pupil = r_pupil
+        self.display = display
+
+class GazeContext:
+
+    def __init__(self):
+        self.contexter = Contexter()
         pass
+
+    def get(self,
+                id,
+                display,
+                roi = dp.ScreenROI(0,0,50,50),
+                buffor  = Buffor(20),
+                l_pupil = Buffor(20),
+                r_pupil = Buffor(20)):
+
+        context = Gcontext(display,roi,buffor,l_pupil,r_pupil)
+
+        if self.contexter.addContext(id,context):
+            return context
+        else:
+            return self.contexter.getContext(id)
+        
+    def update(self,
+                id,
+                context):
+        
+        self.contexter.updateContext(id,context)

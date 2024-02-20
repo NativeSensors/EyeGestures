@@ -4,8 +4,9 @@ from eyeGestures.nose import NoseDirection
 from eyeGestures.face import FaceFinder, Face
 from eyeGestures.calibration   import GazePredictor, CalibrationData
 from eyeGestures.processing    import EyeProcessor
-from eyeGestures.screenTracker import ScreenManager
-from eyeGestures.contexter     import Contexter 
+from eyeGestures.gazeContexter import GazeContext 
+from eyeGestures.screenTracker.screenTracker import ScreenManager
+import eyeGestures.screenTracker.dataPoints as dp
 
 def isInside(circle_x, circle_y, r, x, y):
      
@@ -69,29 +70,19 @@ class GazeTracker:
                  monitor_offset_x = 0,
                  monitor_offset_y = 0):
 
+        self.screen = dp.Screen(screen_width,screen_heigth)
+
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
 
         self.eyeProcessorLeft  = EyeProcessor(eye_screen_w,eye_screen_h)
         self.eyeProcessorRight = EyeProcessor(eye_screen_w,eye_screen_h)
 
-        self.screen_man = ScreenManager(screen_width,
-                                        screen_heigth,
-                                        self.eye_screen_w,
-                                        self.eye_screen_h,
-                                        monitor_offset_x,
-                                        monitor_offset_y)
+        self.screen_man = ScreenManager()
 
-        self.noseDirection = NoseDirection()
-        self.predictor = GazePredictor()
         self.finder = FaceFinder()
 
         self.gazeFixation = Fixation(0,0,100)
-
-        self.calibrationData = CalibrationData()
-
-        self.buffor = []
-        self.bufforLength = 10
 
         # those are used for analysis
         self.__headDir = [0.5,0.5]
@@ -99,8 +90,8 @@ class GazeTracker:
         self.point_screen = [0.0,0.0]
         self.freezed_point = [0.0,0.0]
 
-        self.contexter = Contexter()
         self.face = Face()
+        self.GContext = GazeContext()
 
     def freeze_calibration(self):
         pass
@@ -129,44 +120,63 @@ class GazeTracker:
         i_x = (r_b - l_b)/(l_m - r_m)
         i_y = r_m * i_x + r_b
         return (i_x,i_y)
+    
+    def __pupil(self, eye, eyeProcessor, intersection_x, buffor):
+        eyeProcessor.loadBuffor(buffor)
 
-    def estimate(self,image,context_id,fixation_freeze = 0.7, freeze_radius=20):
+        eyeProcessor.append( eye.getPupil(), eye.getLandmarks())
+        point = eyeProcessor.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
+        point = np.array((int(intersection_x),point[1]))
+        
+        return point,eyeProcessor.dumpBuffor()
+    
+    def estimate(self,
+                 image,
+                 display,
+                 context_id,
+                 fixation_freeze = 0.7, 
+                 freeze_radius=20):
 
         event = None
         face_mesh = self.getFeatures(image)
-    
-        self.face.process(image,face_mesh)
+        self.face.process(image, face_mesh)
+
+        context = self.GContext.get(context_id,display)
+        
         if not self.face is None:
             
-            l_eye = self.face.getLeftEye()
-            r_eye = self.face.getRightEye()
-            l_pupil = l_eye.getPupil()
-            r_pupil = r_eye.getPupil()
+            l_eye   = self.face.getLeftEye()
+            r_eye   = self.face.getRightEye()
             
-            intersection_x,_ = self.__gaze_intersection(l_eye,r_eye)
             # TODO: check what happens here before with l_pupil
-            self.eyeProcessorLeft.append( l_pupil, l_eye.getLandmarks())
-            self.eyeProcessorRight.append(r_pupil, r_eye.getLandmarks())
-
-            # This scales pupil move to the screen we observe
-            l_point = self.eyeProcessorLeft.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            l_point = np.array((int(intersection_x),l_point[1]))
-            r_point = self.eyeProcessorRight.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
-            r_point = np.array((int(intersection_x),r_point[1]))
-
-            compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
+            intersection_x,_ = self.__gaze_intersection(l_eye,r_eye)
+            l_point, l_buffor = self.__pupil(l_eye,self.eyeProcessorLeft,  intersection_x, context.l_pupil)
+            r_point, r_buffor = self.__pupil(r_eye,self.eyeProcessorRight, intersection_x, context.r_pupil)
+            
+            context.l_pupil = l_buffor
+            context.r_pupil = r_buffor
 
             ###########################################################
             #################### UNDER CONSTRUCTION ###################
+            compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
 
+            context.gazeBuffor.add(compound_point)
 
-            self.point_screen = self.screen_man.process(compound_point)
+            print("screen manager processing")
+            self.point_screen, roi = self.screen_man.process(context.gazeBuffor.getBuffor(),
+                                                        context.roi,
+                                                        self.screen,
+                                                        context.display,
+                                                        True
+                                                        )
+            print("after screen manager processing")
             
+            context.roi = roi
+            self.GContext.update(context_id,context)
 
             ###########################################################
             
-            fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])        
-            
+            fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])
             blink = l_eye.getBlink() or r_eye.getBlink()
             if blink == True and fixation < fixation_freeze:
                 return None
@@ -204,9 +214,6 @@ class GazeTracker:
 
     def add_offset(self,x,y):
         self.screen_man.push_window(x,y)
-
-    def getCalibration(self):
-        return self.calibrationData.get()
 
     def getFeatures(self,image):
         face_mesh = self.finder.find(image)

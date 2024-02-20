@@ -14,8 +14,10 @@ class EyeProcessor:
         return self.pupilBuffor.getBuffor()
 
     def loadBuffor(self,buffor):
-        print(f"loading buffor: {buffor}")
-        self.pupilBuffor.loadBuffor(buffor)
+        self.pupilBuffor = buffor
+
+    def dumpBuffor(self):
+        return self.pupilBuffor
 
     def append(self,pupil : (int,int) ,landmarks : np.ndarray):
         self.pupil = pupil
@@ -31,39 +33,21 @@ class EyeProcessor:
         assert(self.pupil[0] > self.min_x)
         assert(self.pupil[1] > self.min_y)
 
-        self.width  = self.max_x - self.min_x
-        self.height = (self.max_y - self.min_y)/2
+        width  = self.max_x - self.min_x
+        height = (self.max_y - self.min_y)/2
 
-        self.center = self.__convertPoint(
-                        ((self.min_x + self.max_x)/2,
-                        (self.min_y + self.max_y)/2),
-                        width = self.scale_w, height = self.scale_h,
-                        scale_w = self.width, scale_h = self.height,
-                        offset = (self.min_x, self.min_y))
         
         self.pupilBuffor.add(
             self.__convertPoint(self.pupil,
                         width = self.scale_w, height = self.scale_h,
-                        scale_w = self.width, scale_h = self.height,
+                        scale_w = width, scale_h = height,
                         offset = (self.min_x, self.min_y)))
-
-        # do I need that?
-        self.height_1 = 20
-
 
     def getWidth(self):
         return self.width
 
     def getHeight(self):
         return self.height
-
-    def getCenter(self,width = None, height = None):
-        if not width is None and not height is None:
-            return self.__convertPoint(self.center,
-                        width = width,height = height,
-                        scale_w = self.scale_w, scale_h = self.scale_h)
-        else:
-            return self.center
 
     def __convertPoint(self, point, width=1.0, height=1.0, scale_w = 1.0, scale_h = 1.0, offset = (0.0,0.0)):
         (min_x, min_y) = offset

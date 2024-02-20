@@ -5,11 +5,14 @@ class Cluster:
 
     def __init__(self, label, points):
         
+        print(f"Creating cluster")
         self.label    = label
         self.points   = np.array(points)
         self.weight   = len(self.points)
+        print(f"Getting centroid")
         self.__centroid = self.centroid(points)
 
+        print(f"Getting boundaries")
         x,y,w,h = self.boundaries(points)
 
         self.x =  x
@@ -46,7 +49,8 @@ class Cluster:
 class Clusters:
 
     def __init__(self,buffer):
-
+        buffer = np.array(buffer)
+        
         self.head = len(buffer) - 1
         self.main_cluster = None
         self.clusters = []
@@ -58,15 +62,18 @@ class Clusters:
         unique_labels = set(labels) - {-1}
 
         for u_label in unique_labels:
-
-            cluster_points = buffer[clustering.core_sample_indices_][labels[clustering.core_sample_indices_] == u_label]
+            core_sample_indices = clustering.core_sample_indices_
+            cluster_points = buffer[core_sample_indices][labels[clustering.core_sample_indices_] == u_label]
             self.clusters.append(Cluster(u_label,cluster_points))
 
         # return sorted(self.clusters, key=lambda cluster: cluster.weight)[-1]
-        self.main_cluster = self.clusters[
-                labels[self.head]
-            ]
-    
+        if len(self.clusters) > 0:
+            self.main_cluster = self.clusters[
+                    labels[self.head]
+                ]
+        else:
+            self.main_cluster = None
+
     def clearPoints(self):
         self.head = 0
 
