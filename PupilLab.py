@@ -110,21 +110,11 @@ class Lab:
 
 
 
-    def __display_clusters(self,whiteboardPupil,clusters):
-        colours = {0:(255,0,0),1:(0,255,0),2:(0,0,255),3:(255,0,255),4:(255,255,155),5:(155,255,255),6:(255,255,255),7:(155,155,155)}
+    def __display_clusters(self,whiteboardPupil,buffor):
+        
+        for point in buffor.getBuffor():
+            cv2.circle(whiteboardPupil,(int(point[0]),int(point[1])),3,(255,255,0),-1)
 
-        for cluster in clusters:
-            points = cluster.points
-            colour = cluster.label % 8
-
-            for point in points:
-                if colour >= 0:
-                    x,y = point
-                    cv2.circle(whiteboardPupil,(int(x),int(y)),3,colours[colour],-1)
-
-            x,y,w,h = cluster.getBoundaries()
-
-            cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x+w),int(y+h)),colours[colour],1)
 
     def __display_hist(self,whiteboardPupil,hist):
         x_axis,y_axis = hist.getHist()
@@ -137,7 +127,7 @@ class Lab:
                 y_val = min(y_axis[m],255)
                 cv2.rectangle(whiteboardPupil,(self.step*n,self.step*m),(self.step*n + self.step,self.step*m + self.step),(255,255-x_val,255-y_val,50),-1)
 
-    def __display_screen(self,whiteboardPupil,screen,backup_screen,edges):
+    def __display_screen(self,whiteboardPupil,roi,edges,cluster):
 
         # (x_min,x_max,y_min,y_max) = hist.getLims()
         # (x,y) = (x_min, y_min)
@@ -145,22 +135,27 @@ class Lab:
         # cv2.rectangle(whiteboardPupil,(x,y),(x + w,y + h),(0,0,255),2)
         # cv2.putText(whiteboardPupil, f'{w,h}', (x,y), cv2.FONT_HERSHEY_SIMPLEX,  
         #            0.5, (0,0,0), 2, cv2.LINE_AA) 
-   
-        (x,y) = screen.getCenter()
-        (w,h) = screen.getWH()  
+
+        (x,y) = (edges.x,edges.y)
+        (w,h) = (edges.width,edges.height)  
+        cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(0,255,0),2)
+        cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
+                   0.5, (0,0,0), 2, cv2.LINE_AA) 
+
+        (x,y) = (roi.x,roi.y)
+        (w,h) = (roi.width,roi.height)  
         cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(255,0,0),2)
         cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
                    0.5, (0,0,0), 2, cv2.LINE_AA) 
-   
-        (x,y) = backup_screen.getCenter()
-        (w,h) = backup_screen.getWH()  
-        cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(255,255,0),2)
+        
+
+        (x,y) = (cluster.x,cluster.y)
+        (w,h) = (cluster.width,cluster.height)  
+        cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(0,0,255),2)
         cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
                    0.5, (0,0,0), 2, cv2.LINE_AA) 
-
-        (x,y,w,h) = edges.getBoundingBox()
-        cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(255,125,0),2)    
-
+   
+        
     def __display_eyeTracker(self, whiteboardPupil, screen_man, point, point_screen, dot_widget):
 
         cv2.circle(whiteboardPupil,point,5,(0,0,255),-1)            
@@ -220,15 +215,15 @@ class Lab:
             # self.__display_hist(whiteboardPupil,
             #                     event.screen_man.getHist())
             
-            # self.__display_clusters(whiteboardPupil, 
-            #                         event.screen_man.getClusters())
+            self.__display_clusters(whiteboardPupil, 
+                                    event.screen_man.gazeBuffor)
 
 
-            # self.__display_screen(whiteboardPupil, 
-            #                     # event.screen_man.getHist(), 
-            #                     event.screen_man.getScreen(),
-            #                     event.screen_man.getScreenBackup(), 
-            #                     event.screen_man.getEdgeDetector())
+            self.__display_screen(whiteboardPupil, 
+                                # event.screen_man.getHist(), 
+                                event.screen_man.roi,
+                                event.screen_man.edges,
+                                event.screen_man.cluster_boundaries)
 
             self.__display_eyeTracker(whiteboardPupil, 
                                       event.screen_man, 

@@ -43,18 +43,18 @@ class ScreenProcessor:
         pass
 
     # RUN FEATURE
-    def process(self,point,buffor_length,roi,screen,display,heatmap):
+    def process(self,point,buffor_length,roi,edges,screen,display,heatmap):
         
         p_on_display = self.screen2display(point,roi,display)
         
         print(f"1. p_on_display: {p_on_display}")
         if buffor_length > 20:
-            new_screen_w,new_screen_h = detect_edges(display, point, p_on_display)
-            screen.width = new_screen_w
-            screen.height = new_screen_h
+            new_screen_w,new_screen_h = detect_edges(roi, display, point, p_on_display)
+            edges.width = new_screen_w
+            edges.height = new_screen_h
         
-        p_on_display += (display.offset_x, display.offset_y)
-        print(f"2. p_on_display: {p_on_display}")
+        p_on_display = (p_on_display[0] + display.offset_x, p_on_display[1] + display.offset_y)
+        print(f"2. p_on_display: {p_on_display} point: {point} roi: {roi.x, roi.y}")
 
         # return how close that is hist region
         (_,_,roi_w,roi_h) = heatmap.getBoundaries()
@@ -63,35 +63,59 @@ class ScreenProcessor:
 
     # CALIBRATION FEATURE
     # it should not affect objects but produce new ones
-    def update(self, roi, clusters, heatmap):
+    def update(self, roi, edges, cluster, heatmap):
 
         (x,y) = heatmap.getCenter()
         # =====================================
         # ---------histogram obtained---------- 
         # =====================================
         new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
-
-        new_roi.x = x
-        new_roi.y = y
+        new_roi.setCenter(x,y)
+        edges.setCenter(x,y)
         # self.eyeScreen.setCenter(x,y) 
-        new_roi = self.__scaleROI2cluster(new_roi, clusters)
+        new_roi = self.__scaleUp(new_roi, edges, scale = 0.1)
+
+        # =====================================
+        # if screen is bigger than edges make it smaller
+        # =====================================
+        new_roi = self.__scaleDown(new_roi, cluster, scale = -0.1)
         return new_roi
         
-
-    def __scaleROI2cluster(self, roi, cluster):
+    def __scaleDown(self, roi, edge, scale):
         
-        (_,_,cluster_w,cluster_h) = cluster.getBoundaries()
+        (_,_,cluster_w,cluster_h) = edge.getBoundaries()
+
+        new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
+        print(f"{roi.width,roi.height}")
+        print(f"{cluster_w,cluster_h}")
+        if(cluster_w < roi.width):
+            print("scale down")
+            new_scale_w = 1.0 + scale
+            new_w = self.rescale_h(roi,new_scale_w,scale)
+            new_roi.width = new_w
+        
+        if(cluster_h < roi.height):
+            new_scale_h = 1.0 + scale
+            new_h = self.rescale_w(roi,new_scale_h,scale)
+            new_roi.height = new_h
+
+        return new_roi
+
+    def __scaleUp(self, roi, roi2, scale):
+        
+        (_,_,roi2_w,roi2_h) = roi2.getBoundaries()
 
         new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
 
-        if(cluster_w > roi.width):
-            new_scale_w = 1.1
-            new_w = self.rescale_h(roi,new_scale_w,0.1)
+        if(roi2_w > roi.width):
+            print("scale up")
+            new_scale_w = 1.0 + scale
+            new_w = self.rescale_h(roi,new_scale_w,scale)
             new_roi.width = new_w
         
-        if(cluster_h > roi.height):
-            new_scale_h = 1.1
-            new_h = self.rescale_w(roi,new_scale_h,0.1)
+        if(roi2_h > roi.height):
+            new_scale_h = 1.0 + scale
+            new_h = self.rescale_w(roi,new_scale_h,scale)
             new_roi.height = new_h
 
         return new_roi
@@ -136,23 +160,24 @@ class ScreenManager:
         self.screen_processor = ScreenProcessor()
    
 
-    def process(self, buffor, roi, screen, display, calibration):
+    def process(self, buffor, roi, edges, screen, display, calibration):
 
         heatmap = Heatmap(screen.width,screen.height,buffor)
         cluster = Clusters(buffor).getMainCluster()
-        
+
         if cluster is not None:
 
             if calibration:
-                roi = self.screen_processor.update(roi, cluster, heatmap)
+                roi = self.screen_processor.update(roi, edges, cluster, heatmap)
    
             p, _ = self.screen_processor.process(
                 buffor[len(buffor)-1],
                 len(buffor),
                 roi,
+                edges,
                 screen,
                 display,
                 heatmap)
    
-            return (p, roi)
-        return ([0,0], roi)
+            return (p, roi, cluster)
+        return ([0,0], roi, cluster)

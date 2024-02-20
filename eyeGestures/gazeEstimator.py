@@ -163,8 +163,9 @@ class GazeTracker:
             context.gazeBuffor.add(compound_point)
 
             print("screen manager processing")
-            self.point_screen, roi = self.screen_man.process(context.gazeBuffor.getBuffor(),
+            self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor.getBuffor(),
                                                         context.roi,
+                                                        context.edges,
                                                         self.screen,
                                                         context.display,
                                                         True
@@ -172,6 +173,11 @@ class GazeTracker:
             print("after screen manager processing")
             
             context.roi = roi
+            x,y,width,height = cluster.getBoundaries()
+            context.cluster_boundaries.x = x
+            context.cluster_boundaries.y = y
+            context.cluster_boundaries.width = width
+            context.cluster_boundaries.height = height
             self.GContext.update(context_id,context)
 
             ###########################################################
@@ -194,7 +200,7 @@ class GazeTracker:
                         fixation,
                         l_eye,
                         r_eye,
-                        self.screen_man,
+                        context,
                         context_id)
             else:
                 self.freezed_point = self.point_screen
@@ -204,7 +210,7 @@ class GazeTracker:
                             fixation,
                             l_eye,
                             r_eye,
-                            self.screen_man,
+                            context,
                             context_id)
 
         return event

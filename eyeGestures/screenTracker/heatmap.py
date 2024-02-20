@@ -3,12 +3,16 @@ import numpy as np
 class Heatmap():
 
     def __init__(self,width,height,buffor):
-        bars = 10
+        print(width,height)
         self.inc_step = 10
-        self.step = bars
+        self.step = 10
+        bars = self.step
 
-        bars_x = int(width/bars)
-        bars_y = int(height/bars)
+        self.width = width
+        self.height = height
+
+        bars_x = int(width/self.step)
+        bars_y = int(height/self.step)
 
         self.axis_x = np.zeros((bars_x))
         self.axis_y = np.zeros((bars_y))
@@ -17,13 +21,15 @@ class Heatmap():
             x = point[0]
             y = point[1]
 
-            self.axis_x[int(x/bars % width/bars)] += self.inc_step
-            self.axis_y[int(y/bars % height/bars)] += self.inc_step
+            print(x,y,int(x/bars),int(y/bars),self.axis_x.shape,self.axis_y.shape)
+            self.axis_x[int(x/bars)] += self.inc_step
+            self.axis_y[int(y/bars)] += self.inc_step
 
-        self.min_x = self.__getParam((self.axis_x > self.inc_step*2),last=False)
-        self.max_x = self.__getParam((self.axis_x > self.inc_step*2),last=True)
-        self.min_y = self.__getParam((self.axis_y > self.inc_step*2),last=False)
-        self.max_y = self.__getParam((self.axis_y > self.inc_step*2),last=True)
+        self.min_x = self.__getParam((self.axis_x > self.inc_step*4),last=False)
+        self.max_x = self.__getParam((self.axis_x > self.inc_step*4),last=True)
+        self.min_y = self.__getParam((self.axis_y > self.inc_step*4),last=False)
+        self.max_y = self.__getParam((self.axis_y > self.inc_step*4),last=True)
+        print(self.min_x,self.max_x,self.min_y,self.max_y)
 
     def __getParam(self,param,last : bool = False):
         ret = 0
@@ -31,6 +37,7 @@ class Heatmap():
         
         if len(retArray[0]) > 0:
             ret = retArray[0][- int(last)] * self.step
+            print(ret,retArray[0][- int(last)])
 
             if not ret == np.NAN:
                 ret = int(ret)
@@ -47,7 +54,7 @@ class Heatmap():
     def getCenter(self):
         center_x = int((self.max_x - self.min_x)/2 + self.min_x)
         center_y = int((self.max_y - self.min_y)/2 + self.min_y)
-        return (center_x,center_x)
+        return (center_x,center_y)
     
     def getPeak(self):
         x = int(np.argmax(self.axis_x)*self.inc_step)

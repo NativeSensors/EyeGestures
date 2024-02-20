@@ -16,8 +16,7 @@ class Screen():
         self.height= height
 
     def getCenter(self):
-        return Center(self.width, self.height)
-
+        return Center(self.x,self.y,self.width, self.height)
 
 class ScreenROI():
 
@@ -27,8 +26,16 @@ class ScreenROI():
         self.width = width
         self.height= height
 
+    def setCenter(self,x, y):
+        self.x = x - self.width/2
+        self.y = y - self.height/2
+
     def getCenter(self):
         return Center(self.x, self.y, self.width, self.height)
+    
+    def getBoundaries(self):
+        return (self.x,self.y,self.width, self.height)
+
 
 class Display():
 
