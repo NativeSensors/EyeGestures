@@ -230,11 +230,11 @@ class Lab:
             #                     event.screen_man.getScreenBackup(), 
             #                     event.screen_man.getEdgeDetector())
 
-            # self.__display_eyeTracker(whiteboardPupil, 
-            #                           event.screen_man, 
-            #                           event.point, 
-            #                           event.point_screen, 
-            #                           self.dot_widget)
+            self.__display_eyeTracker(whiteboardPupil, 
+                                      event.screen_man, 
+                                      event.point, 
+                                      event.point_screen, 
+                                      self.dot_widget)
 
 
             # self.__display_extended_gaze(frame,
