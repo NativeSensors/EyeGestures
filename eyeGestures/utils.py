@@ -9,6 +9,14 @@ from typing import Callable, Tuple
 
 # Make predictions for new data points
 
+def timeit(func):
+    def inner(*args, **kwargs):
+        start = time.time()
+        ret = func(*args, **kwargs)
+        print(f"Elapsed time: {time.time() - start}")
+        return ret 
+    return inner
+
 def shape_to_np(shape, dtype="int"):
     coords = np.zeros((68, 2), dtype=dtype)
     for i in range(0, 68):

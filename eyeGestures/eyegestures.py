@@ -1,7 +1,8 @@
 
 from eyeGestures.gazeEstimator import GazeTracker
-from eyeGestures.calibration import Calibration
+# from eyeGestures.calibration import Calibration
 import eyeGestures.screenTracker.dataPoints as dp
+from eyeGestures.utils import timeit 
 
 VERSION = "1.0.0"
 class EyeGestures:
@@ -35,6 +36,8 @@ class EyeGestures:
     def getHeadDirection(self):
         return self.gaze.getHeadDirection()
 
+    # @timeit 
+    # 0.011 - 0.015 s for execution
     def estimate(self,image,
                 context,
                 calibration,
@@ -61,12 +64,6 @@ class EyeGestures:
 
     def add_offset(self,x,y):
         self.gaze.add_offset(x,y)
-
-    # def stop_calibration(self):
-    #     self.gaze.freeze_calibration()
-
-    # def start_calibration(self):
-    #     self.gaze.unfreeze_calibration()
     
     def get_contextes(self):
         return self.gaze.contextes()

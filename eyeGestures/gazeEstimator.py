@@ -2,7 +2,6 @@
 import numpy as np
 from eyeGestures.nose import NoseDirection
 from eyeGestures.face import FaceFinder, Face
-from eyeGestures.calibration   import GazePredictor, CalibrationData
 from eyeGestures.processing    import EyeProcessor
 from eyeGestures.gazeContexter import GazeContext 
 from eyeGestures.screenTracker.screenTracker import ScreenManager
