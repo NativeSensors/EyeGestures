@@ -69,30 +69,3 @@ class EyeProcessor:
         return _retPupil
 
 ## main code:
-
-# self.eyeDisplay.update(face,250,250)
-# self.eyeDisplay.draw(whiteboard,image,250,250)
-# self.pupilLab.imshow(
-#     self.__convertFrame(whiteboard))
-
-###################################################################################3
-# get center: 
-# whiteboardAdj = np.full((250,250,3),255.0,dtype = np.uint8)
-
-
-# point = self.pupilBuffor.getAvg()
-# x = int(((point[0])/30 - 3.5)*1920)
-# y = int(((point[1])/30)*1080)
-# self.red_dot_widget.move(x,y)
-# print(f"move: {x,y} offset: {min_x,width}")
-
-# # openness need to be calculated relatively to 250x250 frame
-# print(f"openness of the eyes: {height} width: {width} scale: {height/width - 0.25}")
-# # 0.40 > wide open
-# # 0.30 > normally open - looking up or so
-# # 0.20 > sligthly closed - looking down
-
-# print(f"vision map: {vision_map_start} {vision_map_wh} {vision_map_end}")
-# cv2.rectangle(whiteboardAdj,vision_map_start,vision_map_end,(255,0,0),1)
-
-            

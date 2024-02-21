@@ -18,6 +18,71 @@ from pynput import keyboard
 
 from screeninfo import get_monitors
 
+class Calibrator:
+
+    def __init__(self):
+        self.calibrator = dict()
+        pass
+
+    def get(self, id):
+        if id not in self.calibrator.keys():
+            return False
+        return self.calibrator[id]["calibration"]
+        pass
+
+    def create(self,id,monitor):
+        if id not in self.calibrator.keys():
+            self.calibrator[id] = {
+                "calibration": False ,
+                "monitor" : monitor ,
+                "left"  : 0 ,
+                "right" : 0 ,
+                "up"    : 0 ,
+                "down"  : 0 
+            }
+
+    def check(self,id,screen_point):
+        margin = 5
+        width  = self.calibrator[id]["monitor"].width
+        height = self.calibrator[id]["monitor"].height
+        x = screen_point[0] - self.calibrator[id]["monitor"].x
+        y = screen_point[1] - self.calibrator[id]["monitor"].y
+
+        print(f"{x} {y} {width} {height}")
+        if x <= margin:
+            self.calibrator[id]["left"] += 1
+        else:
+            self.calibrator[id]["left"] = 0
+        
+        if width - margin <= x:
+            self.calibrator[id]["right"] += 1
+        else:
+            self.calibrator[id]["right"] = 0
+
+        if y <= margin:
+            self.calibrator[id]["up"] += 1
+        else:
+            self.calibrator[id]["up"] = 0
+        
+        if height - margin <= y:
+            self.calibrator[id]["down"] += 1
+        else:
+            self.calibrator[id]["down"] = 0
+
+
+        if (self.calibrator[id]["left"] > 20 or 
+            self.calibrator[id]["right"] > 20 or
+            self.calibrator[id]["up"] > 20 or
+            self.calibrator[id]["down"] > 20):
+            self.calibrator[id]["left"]  = 0  
+            self.calibrator[id]["right"] = 0 
+            self.calibrator[id]["up"]    = 0 
+            self.calibrator[id]["down"]  = 0
+            self.calibrator[id]["calibration"] = True
+        else:
+            self.calibrator[id]["calibration"] = False
+            
+
 def rotate(point,face):
 
     (x,y) = point
@@ -82,7 +147,8 @@ class Lab:
 
         self.worker = Worker(self.run)
         self.prev_event = None
-        self.calibration = False
+
+        self.calibrator = Calibrator()
 
     def on_button(self,key):
         if not hasattr(key,'char'):
@@ -93,13 +159,13 @@ class Lab:
             self.dot_widget.close_event()
             self.cap.close()
 
-        if key.char == 'c':
-            print("Calibration stop")
-            self.calibration = False
+        # if key.char == 'c':
+        #     print("Calibration stop")
+        #     self.calibration = False
 
-        if key.char == 's':
-            print("Calibration start")
-            self.calibration = True
+        # if key.char == 's':
+        #     print("Calibration start")
+        #     self.calibration = True
 
     def __display_clusters(self,whiteboardPupil,buffor):
         
@@ -176,10 +242,14 @@ class Lab:
         frame = cv2.flip(frame, 1)
 
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+
+        self.calibrator.create("main",self.monitor)
+        calibration = self.calibrator.get("main")
+        
         event = self.gestures.estimate(
             frame,
             "main",
-            self.calibration,
+            calibration ,
             self.monitor.width,
             self.monitor.height,
             self.monitor.x,
@@ -189,6 +259,8 @@ class Lab:
         self.prev_event = event    
 
         if not event is None:
+            self.calibrator.check("main",event.point_screen)
+
             print(f"event.point_screen: {event.point_screen}")
             self.frame_counter += 1
 

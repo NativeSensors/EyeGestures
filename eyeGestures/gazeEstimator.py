@@ -7,8 +7,7 @@ from eyeGestures.gazeContexter import GazeContext
 from eyeGestures.screenTracker.screenTracker import ScreenManager
 import eyeGestures.screenTracker.dataPoints as dp
 
-def isInside(circle_x, circle_y, r, x, y):
-     
+def isInside(circle_x, circle_y, r, x, y):     
     # Compare radius of circle
     # with distance of its center
     # from given point
@@ -40,7 +39,6 @@ class Gevent:
         self.r_eye = r_eye
         self.screen_man = screen_man
         self.context = context
-
 class Fixation:
 
     def __init__(self,x,y,radius = 100):
@@ -92,16 +90,6 @@ class GazeTracker:
         self.face = Face()
         self.GContext = GazeContext()
     #     self.calibration = False
-
-    # def freeze_calibration(self):
-    #     self.calibration = False
-    #     pass
-    #     # self.screen_man.freeze_calibration()
-
-    # def unfreeze_calibration(self):
-    #     self.calibration = True
-    #     pass
-    #     # self.screen_man.unfreeze_calibration()
 
     def __gaze_intersection(self,l_eye,r_eye):
         l_pupil = l_eye.getPupil()
