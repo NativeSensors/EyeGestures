@@ -101,16 +101,6 @@ class Lab:
             print("Calibration start")
             self.calibration = True
 
-        # if key.char == 'w' and self.prev_event:
-        #     print("Pushing on width")
-        #     self.gestures.start_calibration()
-
-        # if key.char == 'e' and self.prev_event:
-        #     print("Pushing on height")
-        #     self.gestures.add_offset()
-
-
-
     def __display_clusters(self,whiteboardPupil,buffor):
         
         for point in buffor.getBuffor():
@@ -199,8 +189,9 @@ class Lab:
         self.prev_event = event    
 
         if not event is None:
+            print(f"event.point_screen: {event.point_screen}")
             self.frame_counter += 1
-            
+
             if not event.blink:
                 self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
             else:

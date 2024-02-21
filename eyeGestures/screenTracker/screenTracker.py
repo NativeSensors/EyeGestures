@@ -10,31 +10,31 @@ from eyeGestures.screenTracker.heatmap import Heatmap
 
 # THIS FILE IS SLOWLY BECOMING BLACK MAGIC
 
-def detect_edges(screen, display, point_on_screen, point_on_display):
+def detect_edges(roi, display, point_on_screen, point_on_display):
     (s_x,s_y) = point_on_screen 
     (d_x,d_y) = point_on_display
 
-    new_w = screen.width
-    margin = 5
-    # TODO: fix this to estimate w and h
-    if(d_x <= 0 or d_x >= display.width):
-        new_w = abs(screen.getCenter().x - s_x) * 1 + margin
-        
-        if screen.width < new_w:
-            pass
-        else:
-            new_w = screen.width
-
-    new_h = screen.height
-    if(d_y <= 0 or d_y >= display.height):
-        new_h = abs(screen.getCenter().y - s_y) * 1 + margin
-        
-        if screen.height < new_h:
-            pass
-        else:
-            new_h = screen.height
+    x,y,width,height = roi.getBoundaries() 
+    new_roi = dp.ScreenROI(x,y,width,height)
     
-    return (new_w,new_h) 
+    # new_w = screen.width
+    # margin = 5
+    # TODO: fix this to estimate w and h
+    if(d_x <= 0):
+        new_roi.width = new_roi.width + abs(new_roi.x - s_x)
+        new_roi.x = s_x
+        
+    if(d_x >= display.width):
+        new_roi.width = abs(new_roi.x - s_x)
+
+    if(d_y <= 0):
+        new_roi.height = new_roi.height + abs(new_roi.y - s_y)
+        new_roi.y = s_y
+        
+    if(d_y >= display.height):
+        new_roi.height = abs(new_roi.y - s_y)
+    
+    return new_roi 
 
 def rescale_h(roi, scale_h, change = 0.5):
     scale_diff_h = abs(1.0 - scale_h)
@@ -104,9 +104,11 @@ class ScreenProcessor:
         p_on_display = self.screen2display(point,roi,display)
         
         if buffor_length > 20:
-            new_screen_w,new_screen_h = detect_edges(roi, display, point, p_on_display)
-            edges.width = new_screen_w
-            edges.height = new_screen_h
+            new_edges = detect_edges(roi, display, point, p_on_display)
+            edges.x      = new_edges.x
+            edges.y      = new_edges.y
+            edges.width  = new_edges.width
+            edges.height = new_edges.height
         
         p_on_display = (p_on_display[0] + display.offset_x, p_on_display[1] + display.offset_y)
         
