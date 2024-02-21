@@ -36,6 +36,62 @@ def detect_edges(screen, display, point_on_screen, point_on_display):
     
     return (new_w,new_h) 
 
+def rescale_h(roi, scale_h, change = 0.5):
+    scale_diff_h = abs(1.0 - scale_h)
+    
+    ret_heigth  = roi.height
+    
+    if scale_diff_h > change: 
+        ret_heigth = roi.height/1.0 * scale_h
+
+    return ret_heigth
+    
+def rescale_w(roi, scale_w, change = 0.5):
+    scale_diff_w = abs(1.0 - scale_w)
+    
+    ret_width   = roi.width
+
+    if scale_diff_w > change: 
+        ret_width = roi.width/1.0 * scale_w
+
+    return ret_width
+
+
+def scaleDown(roi, edge, scale):
+    
+    (_,_,cluster_w,cluster_h) = edge.getBoundaries()
+
+    new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
+    if(cluster_w < roi.width):
+        new_scale_w = 1.0 + scale
+        new_w = rescale_w(roi,new_scale_w,scale)
+        new_roi.width = new_w
+    
+    if(cluster_h < roi.height):
+        new_scale_h = 1.0 + scale
+        new_h = rescale_h(roi,new_scale_h,scale)
+        new_roi.height = new_h
+
+    return new_roi
+
+def scaleUp(roi, roi2, scale):
+    
+    (_,_,roi2_w,roi2_h) = roi2.getBoundaries()
+
+    new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
+
+    if(roi2_w > roi.width):
+        new_scale_w = 1.0 + scale
+        new_w = rescale_w(roi,new_scale_w,scale)
+        new_roi.width = new_w
+       
+    if(roi2_h > roi.height):
+        new_scale_h = 1.0 + scale
+        new_h = rescale_h(roi,new_scale_h,scale)
+        new_roi.height = new_h
+
+    return new_roi
+
 
 class ScreenProcessor:
 
@@ -73,73 +129,15 @@ class ScreenProcessor:
         new_roi.setCenter(x,y)
         edges.setCenter(x,y)
         # self.eyeScreen.setCenter(x,y) 
-        new_roi = self.__scaleUp(new_roi, edges, scale = 0.1)
+        new_roi = scaleUp(new_roi, edges, scale = 0.1)
 
         # =====================================
         # if screen is bigger than edges make it smaller
         # =====================================
-        new_roi = self.__scaleDown(new_roi, cluster, scale = -0.1)
+        new_roi = scaleDown(new_roi, cluster, scale = -0.1)
         return new_roi
         
-    def __scaleDown(self, roi, edge, scale):
-        
-        (_,_,cluster_w,cluster_h) = edge.getBoundaries()
-
-        new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
-        print(f"{roi.width,roi.height}")
-        print(f"{cluster_w,cluster_h}")
-        if(cluster_w < roi.width):
-            print("scale down")
-            new_scale_w = 1.0 + scale
-            new_w = self.rescale_h(roi,new_scale_w,scale)
-            new_roi.width = new_w
-        
-        if(cluster_h < roi.height):
-            new_scale_h = 1.0 + scale
-            new_h = self.rescale_w(roi,new_scale_h,scale)
-            new_roi.height = new_h
-
-        return new_roi
-
-    def __scaleUp(self, roi, roi2, scale):
-        
-        (_,_,roi2_w,roi2_h) = roi2.getBoundaries()
-
-        new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
-
-        if(roi2_w > roi.width):
-            print("scale up")
-            new_scale_w = 1.0 + scale
-            new_w = self.rescale_h(roi,new_scale_w,scale)
-            new_roi.width = new_w
-        
-        if(roi2_h > roi.height):
-            new_scale_h = 1.0 + scale
-            new_h = self.rescale_w(roi,new_scale_h,scale)
-            new_roi.height = new_h
-
-        return new_roi
     
-    def rescale_h(self, roi, scale_h, change = 0.5):
-        scale_diff_h = abs(1.0 - scale_h)
-        
-        ret_heigth  = roi.height
-        
-        if scale_diff_h > change: 
-            ret_heigth = roi.height/1.0 * scale_h
-
-        return ret_heigth
-        
-    def rescale_w(self, roi, scale_w, change = 0.5):
-        scale_diff_w = abs(1.0 - scale_w)
-        
-        ret_width   = roi.width
-
-        if scale_diff_w > change: 
-            ret_width = roi.width/1.0 * scale_w
-
-        return ret_width
-
     def screen2display(self, screen_point, screen, display):
         s_x,s_y = screen_point[0],screen_point[1]
 
@@ -162,8 +160,8 @@ class ScreenManager:
 
     def process(self, buffor, roi, edges, screen, display, calibration):
 
-        heatmap = Heatmap(screen.width,screen.height,buffor)
-        cluster = Clusters(buffor).getMainCluster()
+        heatmap = Heatmap(screen.width,screen.height,buffor.getBuffor())
+        cluster = Clusters(buffor.getBuffor()).getMainCluster()
 
         if cluster is not None:
 
@@ -171,8 +169,8 @@ class ScreenManager:
                 roi = self.screen_processor.update(roi, edges, cluster, heatmap)
    
             p, _ = self.screen_processor.process(
-                buffor[len(buffor)-1],
-                len(buffor),
+                buffor.getAvg(20),
+                len(buffor.getBuffor()),
                 roi,
                 edges,
                 screen,

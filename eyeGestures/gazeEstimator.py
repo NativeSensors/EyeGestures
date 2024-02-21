@@ -163,7 +163,7 @@ class GazeTracker:
             context.gazeBuffor.add(compound_point)
 
             print("screen manager processing")
-            self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor.getBuffor(),
+            self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                         context.roi,
                                                         context.edges,
                                                         self.screen,

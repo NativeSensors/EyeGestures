@@ -73,8 +73,8 @@ class Buffor:
 
         self.__buffor.append(var)
 
-    def getAvg(self):
-        return np.sum(self.__buffor, axis=0) / self.length
+    def getAvg(self,lenght=0):
+        return np.sum(self.__buffor[-lenght:], axis=0) / len(self.__buffor[-lenght:])
 
     def getBuffor(self):
         return self.__buffor

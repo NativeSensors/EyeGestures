@@ -60,10 +60,10 @@ class GazeContext:
     def get(self,
                 id,
                 display,
-                roi = dp.ScreenROI(225,225,20,20),
+                roi = dp.ScreenROI(225,225,5,20),
                 edges = dp.ScreenROI(225,225,20,20),
                 cluster_boundaries = dp.ScreenROI(225,225,20,20),
-                buffor  = Buffor(200),
+                buffor  = Buffor(500),
                 l_pupil = Buffor(20),
                 r_pupil = Buffor(20)):
 
