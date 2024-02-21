@@ -3,7 +3,6 @@ import numpy as np
 class Heatmap():
 
     def __init__(self,width,height,buffor):
-        print(width,height)
         self.inc_step = 10
         self.step = 10
         bars = self.step
@@ -21,7 +20,6 @@ class Heatmap():
             x = point[0]
             y = point[1]
 
-            print(x,y,int(x/bars),int(y/bars),self.axis_x.shape,self.axis_y.shape)
             self.axis_x[int(x/bars)] += self.inc_step
             self.axis_y[int(y/bars)] += self.inc_step
 
@@ -29,7 +27,6 @@ class Heatmap():
         self.max_x = self.__getParam((self.axis_x > self.inc_step*4),last=True)
         self.min_y = self.__getParam((self.axis_y > self.inc_step*4),last=False)
         self.max_y = self.__getParam((self.axis_y > self.inc_step*4),last=True)
-        print(self.min_x,self.max_x,self.min_y,self.max_y)
 
     def __getParam(self,param,last : bool = False):
         ret = 0
@@ -37,7 +34,6 @@ class Heatmap():
         
         if len(retArray[0]) > 0:
             ret = retArray[0][- int(last)] * self.step
-            print(ret,retArray[0][- int(last)])
 
             if not ret == np.NAN:
                 ret = int(ret)

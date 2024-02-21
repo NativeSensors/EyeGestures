@@ -92,17 +92,17 @@ class GazeTracker:
 
         self.face = Face()
         self.GContext = GazeContext()
-        self.calibration = True
+    #     self.calibration = False
 
-    def freeze_calibration(self):
-        self.calibration = False
-        pass
-        # self.screen_man.freeze_calibration()
+    # def freeze_calibration(self):
+    #     self.calibration = False
+    #     pass
+    #     # self.screen_man.freeze_calibration()
 
-    def unfreeze_calibration(self):
-        self.calibration = True
-        pass
-        # self.screen_man.unfreeze_calibration()
+    # def unfreeze_calibration(self):
+    #     self.calibration = True
+    #     pass
+    #     # self.screen_man.unfreeze_calibration()
 
     def __gaze_intersection(self,l_eye,r_eye):
         l_pupil = l_eye.getPupil()
@@ -137,6 +137,7 @@ class GazeTracker:
                  image,
                  display,
                  context_id,
+                 calibration,
                  fixation_freeze = 0.7, 
                  freeze_radius=20):
 
@@ -145,6 +146,7 @@ class GazeTracker:
         self.face.process(image, face_mesh)
 
         context = self.GContext.get(context_id,display)
+        context.calibration = calibration
         
         if not self.face is None:
             
@@ -159,21 +161,17 @@ class GazeTracker:
             context.l_pupil = l_buffor
             context.r_pupil = r_buffor
 
-            ###########################################################
-            #################### UNDER CONSTRUCTION ###################
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
 
             context.gazeBuffor.add(compound_point)
 
-            print("screen manager processing")
             self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                         context.roi,
                                                         context.edges,
                                                         self.screen,
                                                         context.display,
-                                                        self.calibration
+                                                        context.calibration
                                                         )
-            print("after screen manager processing")
             
             context.roi = roi
             x,y,width,height = cluster.getBoundaries()

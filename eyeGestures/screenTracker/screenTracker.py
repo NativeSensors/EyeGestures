@@ -25,14 +25,14 @@ def detect_edges(screen, display, point_on_screen, point_on_display):
         else:
             new_w = screen.width
 
-    new_h = screen.width
+    new_h = screen.height
     if(d_y <= 0 or d_y >= display.height):
         new_h = abs(screen.getCenter().y - s_y) * 1 + margin
         
         if screen.height < new_h:
             pass
         else:
-            new_h = screen.width
+            new_h = screen.height
     
     return (new_w,new_h) 
 
@@ -174,8 +174,7 @@ class ScreenManager:
                 screen,
                 display,
                 heatmap)
-            
-            print(percentage,roi.width,roi.height)
-   
+               
+            print(p,percentage)
             return (p, roi, cluster)
         return ([0,0], roi, cluster)

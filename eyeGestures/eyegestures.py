@@ -37,6 +37,7 @@ class EyeGestures:
 
     def estimate(self,image,
                 context,
+                calibration,
                 display_width, 
                 display_height,
                 display_offset_x = 0,
@@ -53,17 +54,19 @@ class EyeGestures:
     
         return self.gaze.estimate(image,
                                 display,
+                                context,
+                                calibration,
                                 fixation_freeze, 
                                 freeze_radius)
 
     def add_offset(self,x,y):
         self.gaze.add_offset(x,y)
 
-    def stop_calibration(self):
-        self.gaze.freeze_calibration()
+    # def stop_calibration(self):
+    #     self.gaze.freeze_calibration()
 
-    def start_calibration(self):
-        self.gaze.unfreeze_calibration()
+    # def start_calibration(self):
+    #     self.gaze.unfreeze_calibration()
     
     def get_contextes(self):
         return self.gaze.contextes()

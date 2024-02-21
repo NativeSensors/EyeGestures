@@ -35,13 +35,14 @@ class Contexter:
 class Gcontext:
 
     def __init__(self,
-                 display,
-                 roi,
-                 edges,
-                 cluster_boundaries,
-                 gazeBuffor,
-                 l_pupil,
-                 r_pupil):
+                display,
+                roi,
+                edges,
+                cluster_boundaries,
+                gazeBuffor,
+                l_pupil,
+                r_pupil,
+                calibration):
         
         self.roi = roi
         self.edges = edges
@@ -50,6 +51,7 @@ class Gcontext:
         self.l_pupil = l_pupil
         self.r_pupil = r_pupil
         self.display = display
+        self.calibration = calibration
 
 class GazeContext:
 
@@ -60,12 +62,13 @@ class GazeContext:
     def get(self,
                 id,
                 display,
-                roi = dp.ScreenROI(225,225,100,10),
-                edges = dp.ScreenROI(225,225,100,10),
-                cluster_boundaries = dp.ScreenROI(225,225,20,20),
-                buffor  = Buffor(500),
+                roi = dp.ScreenROI(245,105,60,30),
+                edges = dp.ScreenROI(245,105,60,30),
+                cluster_boundaries = dp.ScreenROI(225,125,20,20),
+                buffor  = Buffor(200),
                 l_pupil = Buffor(20),
-                r_pupil = Buffor(20)):
+                r_pupil = Buffor(20),
+                calibration = False):
 
         context = Gcontext(display,
                            roi,
@@ -73,7 +76,8 @@ class GazeContext:
                            cluster_boundaries,
                            buffor,
                            l_pupil,
-                           r_pupil)
+                           r_pupil,
+                           calibration)
 
         if self.contexter.addContext(id,context):
             return context

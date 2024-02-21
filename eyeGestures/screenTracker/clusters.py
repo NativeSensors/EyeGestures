@@ -5,14 +5,11 @@ class Cluster:
 
     def __init__(self, label, points):
         
-        print(f"Creating cluster")
         self.label    = label
         self.points   = np.array(points)
         self.weight   = len(self.points)
-        print(f"Getting centroid")
         self.__centroid = self.centroid(points)
 
-        print(f"Getting boundaries")
         x,y,w,h = self.boundaries(points)
 
         self.x =  x

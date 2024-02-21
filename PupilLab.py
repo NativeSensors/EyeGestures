@@ -82,6 +82,7 @@ class Lab:
 
         self.worker = Worker(self.run)
         self.prev_event = None
+        self.calibration = False
 
     def on_button(self,key):
         if not hasattr(key,'char'):
@@ -94,19 +95,19 @@ class Lab:
 
         if key.char == 'c':
             print("Calibration stop")
-            self.gestures.stop_calibration()
+            self.calibration = False
 
         if key.char == 's':
             print("Calibration start")
-            self.gestures.start_calibration()
+            self.calibration = True
 
-        if key.char == 'w' and self.prev_event:
-            print("Pushing on width")
-            self.gestures.start_calibration()
+        # if key.char == 'w' and self.prev_event:
+        #     print("Pushing on width")
+        #     self.gestures.start_calibration()
 
-        if key.char == 'e' and self.prev_event:
-            print("Pushing on height")
-            self.gestures.add_offset()
+        # if key.char == 'e' and self.prev_event:
+        #     print("Pushing on height")
+        #     self.gestures.add_offset()
 
 
 
@@ -139,14 +140,14 @@ class Lab:
         (x,y) = (edges.x,edges.y)
         (w,h) = (edges.width,edges.height)  
         cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(0,255,0),2)
-        cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
-                   0.5, (0,0,0), 2, cv2.LINE_AA) 
+        # cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
+        #            0.5, (0,0,0), 2, cv2.LINE_AA) 
 
         (x,y) = (roi.x,roi.y)
         (w,h) = (roi.width,roi.height)  
         cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(255,0,0),2)
-        # cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
-        #            0.5, (0,0,0), 2, cv2.LINE_AA) 
+        cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
+                   0.5, (0,0,0), 2, cv2.LINE_AA) 
         
 
         (x,y) = (cluster.x,cluster.y)
@@ -188,6 +189,7 @@ class Lab:
         event = self.gestures.estimate(
             frame,
             "main",
+            self.calibration,
             self.monitor.width,
             self.monitor.height,
             self.monitor.x,
