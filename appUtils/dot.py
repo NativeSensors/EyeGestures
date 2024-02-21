@@ -27,17 +27,10 @@ class DotWidget(QWidget):
 
         self.color = color
 
-        self.position_label = QLabel(self)
-
         self.move(500,500)
 
     def moveEvent(self, event):
-        self.update_position_label()  # Update the position label when the widget is moved
         super().moveEvent(event)
-
-    def update_position_label(self):
-        x, y = self.pos().x(), self.pos().y()
-        self.position_label.setText(f'{x},{y}') 
 
     def update_orbits(self):
         self.angles = [(angle + 2 * random.random()*2) % 360 for angle in self.angles]  # Increment the angles
@@ -51,33 +44,24 @@ class DotWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
 
         path = QPainterPath()
-        path.setFillRule(Qt.WindingFill) 
+        path.setFillRule(Qt.WindingFill)
 
-        # Draw the large red circle
-        R,G,B = self.color
-        # painter.setBrush(QColor(R,G,B, 100))
-        # painter.setPen(QColor(R,G,B, 0))
+        # Draw the large semitransparent circle with a white thick border
+        R, G, B = self.color
+        outer_circle_radius = self.outer_radius/2
+        outer_circle_center = self.rect().center()
 
-        # Draw the smaller orbiting circles
-        for n, (radius, distance, angle) in enumerate(zip(self.inner_radii, self.orbit_distances, self.angles)):
+        gradient = QRadialGradient(outer_circle_center, outer_circle_radius)
+        gradient.setColorAt(0, QColor(205, 255, 255, 50))  # Semitransparent at center
+        gradient.setColorAt(1, QColor(205, 255, 255, 50))  # Semitransparent at edges
 
-            rad_angle = math.radians(angle)
-            center_x = self.rect().center().x() + distance * math.cos(rad_angle)
-            center_y = self.rect().center().y() + distance * math.sin(rad_angle)
+        # Set the brush to the radial gradient
+        painter.setBrush(QBrush(gradient))
+        painter.setPen(QPen(QColor(205, 255, 255), 2))  # White thick border
 
-            gradient = QRadialGradient(QPointF(center_x, center_y), 20)
-            gradient.setColorAt(0, QColor(255, 255, 255, 200))  # Bright and opaque at center
-            gradient.setColorAt(0.2, QColor(R, G, B, 200))    # Transparent at edges
-            gradient.setColorAt(1, QColor(R, G, B, 20))    # Transparent at edges
-
-            # Set the brush to the radial gradient
-            painter.setBrush(QBrush(gradient))
-            painter.setPen(Qt.NoPen)
-
-            path.addEllipse(QPointF(center_x, center_y), radius, radius)
-
+        path.addEllipse(outer_circle_center, outer_circle_radius, outer_circle_radius)
         painter.drawPath(path)
-
+    
     def close_event(self):
         self.timer.stop()
         self.close() 

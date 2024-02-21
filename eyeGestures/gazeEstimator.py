@@ -35,7 +35,7 @@ class Gevent:
         self.blink = blink
         self.fixation = fixation
         self.point_screen = point_screen
-        
+
         ## ALL DEBUG DATA
         self.l_eye = l_eye
         self.r_eye = r_eye
@@ -92,12 +92,15 @@ class GazeTracker:
 
         self.face = Face()
         self.GContext = GazeContext()
+        self.calibration = True
 
     def freeze_calibration(self):
+        self.calibration = False
         pass
         # self.screen_man.freeze_calibration()
 
     def unfreeze_calibration(self):
+        self.calibration = True
         pass
         # self.screen_man.unfreeze_calibration()
 
@@ -168,7 +171,7 @@ class GazeTracker:
                                                         context.edges,
                                                         self.screen,
                                                         context.display,
-                                                        True
+                                                        self.calibration
                                                         )
             print("after screen manager processing")
             

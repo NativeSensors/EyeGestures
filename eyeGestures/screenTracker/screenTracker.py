@@ -103,15 +103,13 @@ class ScreenProcessor:
         
         p_on_display = self.screen2display(point,roi,display)
         
-        print(f"1. p_on_display: {p_on_display}")
         if buffor_length > 20:
             new_screen_w,new_screen_h = detect_edges(roi, display, point, p_on_display)
             edges.width = new_screen_w
             edges.height = new_screen_h
         
         p_on_display = (p_on_display[0] + display.offset_x, p_on_display[1] + display.offset_y)
-        print(f"2. p_on_display: {p_on_display} point: {point} roi: {roi.x, roi.y}")
-
+        
         # return how close that is hist region
         (_,_,roi_w,roi_h) = heatmap.getBoundaries()
         closeness_percentage = (roi_w * roi_h)/(screen.width * screen.height)
@@ -168,7 +166,7 @@ class ScreenManager:
             if calibration:
                 roi = self.screen_processor.update(roi, edges, cluster, heatmap)
    
-            p, _ = self.screen_processor.process(
+            p, percentage = self.screen_processor.process(
                 buffor.getAvg(20),
                 len(buffor.getBuffor()),
                 roi,
@@ -176,6 +174,8 @@ class ScreenManager:
                 screen,
                 display,
                 heatmap)
+            
+            print(percentage,roi.width,roi.height)
    
             return (p, roi, cluster)
         return ([0,0], roi, cluster)
