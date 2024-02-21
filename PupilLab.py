@@ -145,15 +145,15 @@ class Lab:
         (x,y) = (roi.x,roi.y)
         (w,h) = (roi.width,roi.height)  
         cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(255,0,0),2)
-        cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
-                   0.5, (0,0,0), 2, cv2.LINE_AA) 
+        # cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
+        #            0.5, (0,0,0), 2, cv2.LINE_AA) 
         
 
         (x,y) = (cluster.x,cluster.y)
         (w,h) = (cluster.width,cluster.height)  
         cv2.rectangle(whiteboardPupil,(int(x),int(y)),(int(x + w),int(y + h)),(0,0,255),2)
-        cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
-                   0.5, (0,0,0), 2, cv2.LINE_AA) 
+        # cv2.putText(whiteboardPupil, f'{w,h}',(int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX,  
+        #            0.5, (0,0,0), 2, cv2.LINE_AA) 
    
         
     def __display_eyeTracker(self, whiteboardPupil, screen_man, point, point_screen, dot_widget):
