@@ -48,7 +48,6 @@ class Calibrator:
         x = screen_point[0] - self.calibrator[id]["monitor"].x
         y = screen_point[1] - self.calibrator[id]["monitor"].y
 
-        print(f"{x} {y} {width} {height}")
         if x <= margin:
             self.calibrator[id]["left"] += 1
         else:
@@ -260,8 +259,6 @@ class Lab:
 
         if not event is None:
             self.calibrator.check("main",event.point_screen)
-
-            print(f"event.point_screen: {event.point_screen}")
             self.frame_counter += 1
 
             if not event.blink:

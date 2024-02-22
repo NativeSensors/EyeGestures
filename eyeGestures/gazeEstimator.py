@@ -156,7 +156,7 @@ class GazeTracker:
             blink = l_eye.getBlink() or r_eye.getBlink()
             if blink != True:
                 context.gazeBuffor.add(compound_point)
-
+    
             self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                         context.roi,
                                                         context.edges,

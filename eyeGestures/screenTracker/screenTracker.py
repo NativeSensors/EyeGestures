@@ -164,7 +164,7 @@ class ScreenManager:
         cluster = Clusters(buffor.getBuffor()).getMainCluster()
 
         if cluster is not None:
-
+            
             if calibration:
                 roi = self.screen_processor.update(roi, edges, cluster, heatmap)
    
@@ -177,6 +177,5 @@ class ScreenManager:
                 display,
                 heatmap)
                
-            print(p,percentage)
             return (p, roi, cluster)
         return ([0,0], roi, cluster)

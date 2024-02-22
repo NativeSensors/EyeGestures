@@ -20,8 +20,8 @@ class Heatmap():
             x = point[0]
             y = point[1]
 
-            self.axis_x[int(x/bars)] += self.inc_step
-            self.axis_y[int(y/bars)] += self.inc_step
+            self.axis_x[min(abs(int(x/bars)),bars_x - 1)] += self.inc_step
+            self.axis_y[min(abs(int(y/bars)),bars_x - 1)] += self.inc_step
 
         self.min_x = self.__getParam((self.axis_x > self.inc_step*4),last=False)
         self.max_x = self.__getParam((self.axis_x > self.inc_step*4),last=True)
