@@ -64,11 +64,14 @@ class GazeTracker:
 
     def __init__(self,screen_width,screen_heigth,
                  eye_screen_w,eye_screen_h,
+                 roi_x,roi_y,
                  monitor_offset_x = 0,
                  monitor_offset_y = 0):
 
         self.screen = dp.Screen(screen_width,screen_heigth)
 
+        self.roi_x = roi_x 
+        self.roi_y = roi_y
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
 
@@ -132,7 +135,7 @@ class GazeTracker:
         face_mesh = self.getFeatures(image)
         self.face.process(image, face_mesh)
 
-        context = self.GContext.get(context_id,display)
+        context = self.GContext.get(context_id,display,roi = dp.ScreenROI(self.roi_x,self.roi_y,80,30))
         context.calibration = calibration
         
         if not self.face is None:
@@ -150,7 +153,9 @@ class GazeTracker:
 
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
 
-            context.gazeBuffor.add(compound_point)
+            blink = l_eye.getBlink() or r_eye.getBlink()
+            if blink != True:
+                context.gazeBuffor.add(compound_point)
 
             self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                         context.roi,
@@ -171,11 +176,7 @@ class GazeTracker:
             ###########################################################
             
             fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])
-            blink = l_eye.getBlink() or r_eye.getBlink()
-            if blink == True and fixation < fixation_freeze:
-                return None
-            
-            blink = blink and (fixation > fixation_freeze)
+            # this should prevent of sudden movement down when blinking - not perfect yet
             
             if fixation > fixation_freeze:
                 r = freeze_radius

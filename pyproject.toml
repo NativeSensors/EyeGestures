@@ -5,6 +5,7 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.sdist]
 include = [
   "eyeGestures/*.py",
+  "eyeGestures/screenTracker/*.py",
   "eyeGestures/eyegestures.py"
 ]
 

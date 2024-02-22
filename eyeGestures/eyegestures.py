@@ -11,7 +11,9 @@ class EyeGestures:
                  screen_width,
                  screen_height,
                  height,
-                 width):
+                 width,
+                 roi_x = 225,
+                 roi_y = 105):
 
         self.screen_width  = screen_width
         self.screen_height = screen_height
@@ -23,11 +25,9 @@ class EyeGestures:
         self.gaze = GazeTracker(screen_width,
                                 screen_height,
                                 width,
-                                height)
-
-        # self.calibrated = False
-
-        # self.calibration = Calibration(self.height, self.width, 60)
+                                height,
+                                roi_x,
+                                roi_y)
         pass
 
     def getFeatures(self,image):
