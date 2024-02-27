@@ -13,7 +13,9 @@ class EyeGestures:
                  height,
                  width,
                  roi_x = 225,
-                 roi_y = 105):
+                 roi_y = 105,
+                 roi_width = 80,
+                 roi_height = 15):
 
         self.screen_width  = screen_width
         self.screen_height = screen_height
@@ -27,7 +29,9 @@ class EyeGestures:
                                 width,
                                 height,
                                 roi_x,
-                                roi_y)
+                                roi_y,
+                                roi_width,
+                                roi_height)
         pass
 
     def getFeatures(self,image):

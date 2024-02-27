@@ -65,6 +65,7 @@ class GazeTracker:
     def __init__(self,screen_width,screen_heigth,
                  eye_screen_w,eye_screen_h,
                  roi_x,roi_y,
+                 roi_width, roi_height,
                  monitor_offset_x = 0,
                  monitor_offset_y = 0):
 
@@ -72,6 +73,9 @@ class GazeTracker:
 
         self.roi_x = roi_x 
         self.roi_y = roi_y
+        self.roi_width = roi_width 
+        self.roi_height = roi_height
+        
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
 
@@ -135,7 +139,11 @@ class GazeTracker:
         face_mesh = self.getFeatures(image)
         self.face.process(image, face_mesh)
 
-        context = self.GContext.get(context_id,display,roi = dp.ScreenROI(self.roi_x,self.roi_y,80,30))
+        context = self.GContext.get(context_id,display,roi = dp.ScreenROI(
+            self.roi_x,
+            self.roi_y,
+            self.roi_width,
+            self.roi_height))
         context.calibration = calibration
         
         if not self.face is None:
