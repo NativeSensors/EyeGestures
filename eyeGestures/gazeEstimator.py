@@ -6,6 +6,8 @@ from eyeGestures.processing    import EyeProcessor
 from eyeGestures.gazeContexter import GazeContext 
 from eyeGestures.screenTracker.screenTracker import ScreenManager
 import eyeGestures.screenTracker.dataPoints as dp
+from eyeGestures.utils import Buffor
+
 
 def isInside(circle_x, circle_y, r, x, y):     
     # Compare radius of circle
@@ -98,12 +100,12 @@ class GazeTracker:
         self.GContext = GazeContext()
     #     self.calibration = False
 
-    def __gaze_intersection(self,l_eye,r_eye):
+    def __gaze_intersection(self,l_eye,r_eye, l_buff, r_buff):
         l_pupil = l_eye.getPupil()
-        l_gaze  = l_eye.getGaze()
+        l_gaze  = l_eye.getGaze(l_buff)
         
         r_pupil = r_eye.getPupil()        
-        r_gaze  = r_eye.getGaze()
+        r_gaze  = r_eye.getGaze(r_buff)
 
         l_end = l_gaze + l_pupil
         r_end = r_gaze + r_pupil
@@ -119,13 +121,12 @@ class GazeTracker:
         return (i_x,i_y)
     
     def __pupil(self, eye, eyeProcessor, intersection_x, buffor):
-        eyeProcessor.loadBuffor(buffor)
 
-        eyeProcessor.append( eye.getPupil(), eye.getLandmarks())
-        point = eyeProcessor.getAvgPupil(self.eye_screen_w,self.eye_screen_h)
+        eyeProcessor.append( eye.getPupil(), eye.getLandmarks(), buffor)
+        point = eyeProcessor.getAvgPupil(self.eye_screen_w,self.eye_screen_h,buffor)
         point = np.array((int(intersection_x),point[1]))
         
-        return point,eyeProcessor.dumpBuffor()
+        return point, buffor
     
     def estimate(self,
                  image,
@@ -133,7 +134,9 @@ class GazeTracker:
                  context_id,
                  calibration,
                  fixation_freeze = 0.7, 
-                 freeze_radius=20):
+                 freeze_radius=20,
+                 offset_x = 0,
+                 offset_y = 0):
 
         event = None
         face_mesh = self.getFeatures(image)
@@ -143,24 +146,31 @@ class GazeTracker:
             self.roi_x,
             self.roi_y,
             self.roi_width,
-            self.roi_height))
+            self.roi_height),
+            edges = dp.ScreenROI(285,105,80,15),
+            cluster_boundaries = dp.ScreenROI(225,125,20,20),
+            buffor  = Buffor(200),
+            l_pupil = Buffor(20),
+            r_pupil = Buffor(20),
+            l_eye_buff = Buffor(20),
+            r_eye_buff = Buffor(20))
         context.calibration = calibration
         
         if not self.face is None:
             
             l_eye   = self.face.getLeftEye()
             r_eye   = self.face.getRightEye()
-            
+
             # TODO: check what happens here before with l_pupil
-            intersection_x,_ = self.__gaze_intersection(l_eye,r_eye)
-            l_point, l_buffor = self.__pupil(l_eye,self.eyeProcessorLeft,  intersection_x, context.l_pupil)
-            r_point, r_buffor = self.__pupil(r_eye,self.eyeProcessorRight, intersection_x, context.r_pupil)
+            intersection_x,_ = self.__gaze_intersection(l_eye,r_eye, context.l_eye_buff, context.r_eye_buff)
+            l_point, l_buffor = self.__pupil(l_eye, self.eyeProcessorLeft,  intersection_x, context.l_pupil)
+            r_point, r_buffor = self.__pupil(r_eye, self.eyeProcessorRight, intersection_x, context.r_pupil)
             
             context.l_pupil = l_buffor
             context.r_pupil = r_buffor
 
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
-
+        
             blink = l_eye.getBlink() or r_eye.getBlink()
             if blink != True:
                 context.gazeBuffor.add(compound_point)
@@ -170,15 +180,18 @@ class GazeTracker:
                                                         context.edges,
                                                         self.screen,
                                                         context.display,
-                                                        context.calibration
+                                                        context.calibration,
+                                                        (offset_x,offset_y)
                                                         )
             
             context.roi = roi
-            x,y,width,height = cluster.getBoundaries()
-            context.cluster_boundaries.x = x
-            context.cluster_boundaries.y = y
-            context.cluster_boundaries.width = width
-            context.cluster_boundaries.height = height
+            if cluster:
+                x,y,width,height = cluster.getBoundaries()
+                context.cluster_boundaries.x = x
+                context.cluster_boundaries.y = y
+                context.cluster_boundaries.width = width
+                context.cluster_boundaries.height = height
+
             self.GContext.update(context_id,context)
 
             ###########################################################

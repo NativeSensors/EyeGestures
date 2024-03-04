@@ -50,7 +50,9 @@ class EyeGestures:
                 display_offset_x = 0,
                 display_offset_y = 0,
                 fixation_freeze = 0.7,
-                freeze_radius=20):
+                freeze_radius=20,
+                offset_x = 0,
+                offset_y = 0):
 
         display = dp.Display(
             display_width,
@@ -64,7 +66,9 @@ class EyeGestures:
                                 context,
                                 calibration,
                                 fixation_freeze, 
-                                freeze_radius)
+                                freeze_radius,
+                                offset_x,
+                                offset_y)
 
     def add_offset(self,x,y):
         self.gaze.add_offset(x,y)

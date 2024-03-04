@@ -55,7 +55,6 @@ class Eye:
     scale = (150,100)
 
     def __init__(self, side : int):
-        self.gaze_buff = Buffor(20)
         
         # check if eye is left or right
         if side == 1:
@@ -66,12 +65,6 @@ class Eye:
             self.pupil_index = self.LEFT_EYE_PUPIL_KEYPOINT
         
         # self._process(self.image,self.region)
-
-    def getBuffor(self):
-        return self.gaze_buff.getBuffor()
-
-    def loadBuffor(self,buffor):
-        self.gaze_buff.loadBuffor(buffor)
 
     def update(self,image : np.ndarray, landmarks : list, offset : np.ndarray):
         self.image = image
@@ -106,7 +99,7 @@ class Eye:
         # TODO: draw additional parameters
         return self.cut_image
 
-    def getGaze(self,y_correction=0,x_correction=0):
+    def getGaze(self,gaze_buffor,y_correction=0,x_correction=0):
         # pupilCoords = self.pupil.getCoords()
         center = np.array((self.center_x,self.center_y)) - self.offset
         
@@ -123,8 +116,8 @@ class Eye:
         gaze_vector[0] = -np.sum(vectors, axis=0)[0] * 10 - x_correction
         
         # print("gaze_vector: ",gaze_vector)
-        self.gaze_buff.add(gaze_vector)   
-        return self.gaze_buff.getAvg()
+        gaze_buffor.add(gaze_vector)   
+        return gaze_buffor.getAvg()
         
     def getOpenness(self):
         return self.height/2 

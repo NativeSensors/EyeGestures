@@ -3,6 +3,7 @@ import sys
 import math
 import time
 import numpy as np
+import random
 
 import pyautogui
 
@@ -17,6 +18,8 @@ from appUtils.dot import DotWidget
 from pynput import keyboard
 
 from screeninfo import get_monitors
+
+id = random.getrandbits(6)
 
 class Calibrator:
 
@@ -148,6 +151,8 @@ class Lab:
         self.prev_event = None
 
         self.calibrator = Calibrator()
+        self.direction_y = 0
+        self.direction_x = 0
 
     def on_button(self,key):
         if not hasattr(key,'char'):
@@ -158,13 +163,17 @@ class Lab:
             self.dot_widget.close_event()
             self.cap.close()
 
-        # if key.char == 'c':
-        #     print("Calibration stop")
-        #     self.calibration = False
+        if key.char == 'e':
+            self.direction_y += 10
 
-        # if key.char == 's':
-        #     print("Calibration start")
-        #     self.calibration = True
+        if key.char == 'd':
+            self.direction_y -= 10
+
+        if key.char == 's':
+            self.direction_x -= 10
+
+        if key.char == 'f':
+            self.direction_x += 10
 
     def __display_clusters(self,whiteboardPupil,buffor):
         
@@ -242,23 +251,27 @@ class Lab:
 
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
-        self.calibrator.create("main",self.monitor)
-        calibration = self.calibrator.get("main")
+        main_id = f"main_{id}"
+        self.calibrator.create(main_id,self.monitor)
+        calibration = self.calibrator.get(main_id)
         
         event = self.gestures.estimate(
             frame,
-            "main",
+            main_id,
             calibration ,
             self.monitor.width,
             self.monitor.height,
             self.monitor.x,
             self.monitor.y,
-            0.8)
+            1.0,
+            1,
+            self.direction_x,
+            self.direction_y)
 
         self.prev_event = event    
 
         if not event is None:
-            self.calibrator.check("main",event.point_screen)
+            self.calibrator.check(main_id,event.point_screen)
             self.frame_counter += 1
 
             if not event.blink:

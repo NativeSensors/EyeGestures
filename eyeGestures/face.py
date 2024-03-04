@@ -31,16 +31,6 @@ class Face:
     def __init__(self):
         self.eyeLeft  = eye.Eye(0)
         self.eyeRight = eye.Eye(1)
-        
-    def dump_context(self):
-        return {
-                "l_eye":self.eyeLeft.getBuffor(),
-                "r_eye":self.eyeRight.getBuffor()
-            } 
-
-    def load_context(self,context_payload):
-        self.eyeLeft.loadBuffor(context_payload["l_eye"])
-        self.eyeRight.loadBuffor(context_payload["l_eye"])
 
     def getBoundingBox(self):
         margin = 0

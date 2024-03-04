@@ -99,9 +99,11 @@ class ScreenProcessor:
         pass
 
     # RUN FEATURE
-    def process(self,point,buffor_length,roi,edges,screen,display,heatmap):
+    def process(self,point,point_offset,buffor_length,roi,edges,screen,display,heatmap):
         
-        p_on_display = self.screen2display(point,roi,display)
+        s_point_offset = self.display2screen(point_offset,screen,display)
+        p_on_display = self.screen2display([point[0] + s_point_offset[0],point[1] + s_point_offset[1]],roi,display)
+        # p_on_display = self.screen2display(point,roi,display)
         
         if buffor_length > 20:
             new_edges = detect_edges(roi, display, point, p_on_display)
@@ -150,7 +152,15 @@ class ScreenProcessor:
         d_y = min(d_y,display.height)
 
         return (d_x,d_y)
+    
+    def display2screen(self, display_point, screen, display):
+        d_x,d_y = display_point[0],display_point[1]
 
+        s_x = int((d_x)/display.width  * screen.width)
+        s_y = int((d_y)/display.height * screen.height)
+
+
+        return (s_x,s_y)
 
 class ScreenManager:
 
@@ -158,7 +168,7 @@ class ScreenManager:
         self.screen_processor = ScreenProcessor()
    
 
-    def process(self, buffor, roi, edges, screen, display, calibration):
+    def process(self, buffor, roi, edges, screen, display, calibration, offset):
 
         heatmap = Heatmap(screen.width,screen.height,buffor.getBuffor())
         cluster = Clusters(buffor.getBuffor()).getMainCluster()
@@ -167,9 +177,10 @@ class ScreenManager:
             
             if calibration:
                 roi = self.screen_processor.update(roi, edges, cluster, heatmap)
-   
+
             p, percentage = self.screen_processor.process(
                 buffor.getAvg(20),
+                (offset[0],offset[1]),
                 len(buffor.getBuffor()),
                 roi,
                 edges,

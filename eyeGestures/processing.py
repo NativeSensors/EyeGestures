@@ -5,21 +5,11 @@ from eyeGestures.utils import Buffor
 class EyeProcessor:
 
     def __init__(self,scale_w=250,scale_h=250):
-        self.pupilBuffor = Buffor(20)
-        # self.avgRetBuffor = Buffor(20)
         self.scale_w = scale_w
         self.scale_h = scale_h
 
-    def getBuffor(self):
-        return self.pupilBuffor.getBuffor()
 
-    def loadBuffor(self,buffor):
-        self.pupilBuffor = buffor
-
-    def dumpBuffor(self):
-        return self.pupilBuffor
-
-    def append(self,pupil : (int,int) ,landmarks : np.ndarray):
+    def append(self,pupil : (int,int) ,landmarks : np.ndarray, pupilBuffor):
         self.pupil = pupil
         self.landmarks = landmarks
 
@@ -37,7 +27,7 @@ class EyeProcessor:
         height = (self.max_y - self.min_y)/2
 
         
-        self.pupilBuffor.add(
+        pupilBuffor.add(
             self.__convertPoint(self.pupil,
                         width = self.scale_w, height = self.scale_h,
                         scale_w = width, scale_h = height,
@@ -55,13 +45,13 @@ class EyeProcessor:
         y = int(((point[1]-min_y)/scale_h)*height)
         return (x,y)
 
-    def getAvgPupil(self,width = None, height = None):
+    def getAvgPupil(self, width, height, pupilBuffor):
         if not width is None and not height is None:
-            _retPupil = self.__convertPoint(self.pupilBuffor.getAvg(),
+            _retPupil = self.__convertPoint(pupilBuffor.getAvg(),
                             width = width,height = height,
                             scale_w = self.scale_w, scale_h = self.scale_h)
         else:
-            _retPupil = self.pupilBuffor.getAvg()
+            _retPupil = pupilBuffor.getAvg()
 
         # THIS BUFFOR HAS _retPupil and Width
         # self.avgRetBuffor.add(_retPupil)

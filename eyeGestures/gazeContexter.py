@@ -5,7 +5,7 @@ class Contexter:
     def __init__(self):
         self.context = dict()
 
-    def addContext(self,context_id, object):
+    def addContext(self, context_id, object):
         if context_id not in self.context.keys(): 
             self.context[context_id] = object
             return True
@@ -42,6 +42,8 @@ class Gcontext:
                 gazeBuffor,
                 l_pupil,
                 r_pupil,
+                l_eye_buff,
+                r_eye_buff,
                 calibration):
         
         self.roi = roi
@@ -50,6 +52,8 @@ class Gcontext:
         self.gazeBuffor = gazeBuffor
         self.l_pupil = l_pupil
         self.r_pupil = r_pupil
+        self.l_eye_buff = l_eye_buff
+        self.r_eye_buff = r_eye_buff
         self.display = display
         self.calibration = calibration
 
@@ -60,15 +64,17 @@ class GazeContext:
         pass
 
     def get(self,
-                id,
-                display,
-                roi = dp.ScreenROI(285,105,80,15),
-                edges = dp.ScreenROI(285,105,80,15),
-                cluster_boundaries = dp.ScreenROI(225,125,20,20),
-                buffor  = Buffor(200),
-                l_pupil = Buffor(20),
-                r_pupil = Buffor(20),
-                calibration = False):
+            id,
+            display,
+            roi = dp.ScreenROI(285,105,80,15),
+            edges = dp.ScreenROI(285,105,80,15),
+            cluster_boundaries = dp.ScreenROI(225,125,20,20),
+            buffor  = Buffor(200),
+            l_pupil = Buffor(20),
+            r_pupil = Buffor(20),
+            l_eye_buff = Buffor(20),
+            r_eye_buff = Buffor(20),
+            calibration = False):
 
         context = Gcontext(display,
                            roi,
@@ -77,6 +83,8 @@ class GazeContext:
                            buffor,
                            l_pupil,
                            r_pupil,
+                           l_eye_buff,
+                           r_eye_buff,
                            calibration)
 
         if self.contexter.addContext(id,context):
