@@ -2,6 +2,7 @@
 import numpy as np
 from eyeGestures.nose import NoseDirection
 from eyeGestures.face import FaceFinder, Face
+from eyeGestures.Fixation import Fixation 
 from eyeGestures.processing    import EyeProcessor
 from eyeGestures.gazeContexter import GazeContext 
 from eyeGestures.screenTracker.screenTracker import ScreenManager
@@ -41,25 +42,6 @@ class Gevent:
         self.r_eye = r_eye
         self.screen_man = screen_man
         self.context = context
-class Fixation:
-
-    def __init__(self,x,y,radius = 100):
-        self.radius = radius
-        self.fixation = 0.0
-        self.x = x 
-        self.y = y
-        pass
-
-    def process(self,x,y):
-        
-        if (x - self.x)**2 + (y - self.y)**2 < self.radius**2:
-            self.fixation = min(self.fixation + 0.02, 1.0)
-        else:
-            self.x = x
-            self.y = y
-            self.fixation = 0
-
-        return self.fixation
 class GazeTracker:
 
     N_FEATURES = 16
@@ -87,8 +69,6 @@ class GazeTracker:
         self.screen_man = ScreenManager()
 
         self.finder = FaceFinder()
-
-        self.gazeFixation = Fixation(0,0,100)
 
         # those are used for analysis
         self.__headDir = [0.5,0.5]
@@ -153,7 +133,8 @@ class GazeTracker:
             l_pupil = Buffor(20),
             r_pupil = Buffor(20),
             l_eye_buff = Buffor(20),
-            r_eye_buff = Buffor(20))
+            r_eye_buff = Buffor(20),
+            fixation=Fixation(0,0,100))
         context.calibration = calibration
         
         if not self.face is None:
@@ -196,10 +177,10 @@ class GazeTracker:
 
             ###########################################################
             
-            fixation = self.gazeFixation.process(self.point_screen[0],self.point_screen[1])
+            fix = context.fixation.process(self.point_screen[0],self.point_screen[1])
             # this should prevent of sudden movement down when blinking - not perfect yet
             
-            if fixation > fixation_freeze:
+            if fix > fixation_freeze:
                 r = freeze_radius
                 if not isInside(self.freezed_point[0],self.freezed_point[1],r,self.point_screen[0],self.point_screen[1]):
                     self.freezed_point = self.point_screen
@@ -207,7 +188,7 @@ class GazeTracker:
                 event = Gevent(compound_point,
                         self.freezed_point,
                         blink,
-                        fixation,
+                        fix,
                         l_eye,
                         r_eye,
                         context,
@@ -217,7 +198,7 @@ class GazeTracker:
                 event = Gevent(compound_point,
                             self.point_screen,
                             blink,
-                            fixation,
+                            fix,
                             l_eye,
                             r_eye,
                             context,

@@ -1,4 +1,5 @@
 import eyeGestures.screenTracker.dataPoints as dp
+from eyeGestures.Fixation import Fixation 
 from eyeGestures.utils import Buffor
 class Contexter:
 
@@ -44,6 +45,7 @@ class Gcontext:
                 r_pupil,
                 l_eye_buff,
                 r_eye_buff,
+                fixation,
                 calibration):
         
         self.roi = roi
@@ -55,6 +57,7 @@ class Gcontext:
         self.l_eye_buff = l_eye_buff
         self.r_eye_buff = r_eye_buff
         self.display = display
+        self.fixation = fixation
         self.calibration = calibration
 
 class GazeContext:
@@ -74,6 +77,7 @@ class GazeContext:
             r_pupil = Buffor(20),
             l_eye_buff = Buffor(20),
             r_eye_buff = Buffor(20),
+            fixation = Fixation(0,0,100),
             calibration = False):
 
         context = Gcontext(display,
@@ -85,6 +89,7 @@ class GazeContext:
                            r_pupil,
                            l_eye_buff,
                            r_eye_buff,
+                           fixation,
                            calibration)
 
         if self.contexter.addContext(id,context):

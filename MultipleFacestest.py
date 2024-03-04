@@ -27,7 +27,7 @@ if __name__ == '__main__':
             monitor.y,
             0.8)
 
-        print(event.point)
+        print(event.point,event.fixation)
         if(prev_point[0] == 0.0):
             prev_point = event.point
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
             monitor.y,
             0.8)
 
-        print(event.point)
+        print(event.point,event.fixation)
         if(prev_point[0] == 0.0):
             prev_point = event.point
 
@@ -59,6 +59,36 @@ if __name__ == '__main__':
 
         prev_point = event.point
 
+    print("\033[92m=================================================\033[0m")
+    prev_point = [0,0]
+    for n in range(25):
+            
+        monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+        event = gestures.estimate(
+            face_2_img,
+            "main_2",
+            monitor.width,
+            monitor.height,
+            monitor.x,
+            monitor.y,
+            0.8,
+            1)
+            
+        print(event.point,event.fixation)
+        
+        monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
+        event = gestures.estimate(
+            face_1_img,
+            "main_1",
+            monitor.width,
+            monitor.height,
+            monitor.x,
+            monitor.y,
+            0.8,
+            1)
+            
+
+        print(event.point,event.fixation)
     # for n in range(50):
       
     #     monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
