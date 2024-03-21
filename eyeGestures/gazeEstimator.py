@@ -1,5 +1,6 @@
 
 import numpy as np
+from eyeGestures.gevent import Gevent
 from eyeGestures.nose import NoseDirection
 from eyeGestures.face import FaceFinder, Face
 from eyeGestures.Fixation import Fixation 
@@ -19,29 +20,7 @@ def isInside(circle_x, circle_y, r, x, y):
         return True
     else:
         return False
- 
-class Gevent:
 
-    def __init__(self,
-                 point,
-                 point_screen,
-                 blink,
-                 fixation,
-                 l_eye,
-                 r_eye,
-                 screen_man,
-                 context):
-
-        self.point = point
-        self.blink = blink
-        self.fixation = fixation
-        self.point_screen = point_screen
-
-        ## ALL DEBUG DATA
-        self.l_eye = l_eye
-        self.r_eye = r_eye
-        self.screen_man = screen_man
-        self.context = context
 class GazeTracker:
 
     N_FEATURES = 16
