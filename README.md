@@ -1,5 +1,11 @@
 ## EyeGestures
 
+### Web Demos:
+
+-[Main page](https://eyegestures.com/)
+-[Game demo](https://eyegestures.com/game)
+-[Cinema demo](https://eyegestures.com/cinema)
+
 ### How To
 
 1. use `pybuild.sh` to build library,
