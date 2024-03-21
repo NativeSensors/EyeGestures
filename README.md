@@ -18,6 +18,10 @@ With such establish situation, we aim to bring such technology to as many people
 
 Our technology is not perfect, but strive to be.    
 
+### 📢 Announcements:
+
+<a href="https://polar.sh/NativeSensors/posts"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/posts.svg?org=NativeSensors&darkmode"><img alt="Posts on Polar" src="https://polar.sh/embed/posts.svg?org=NativeSensors"></picture></a>
+
 ### 🔥 Web Demos:
 
 - [Main page](https://eyegestures.com/)
@@ -100,4 +104,4 @@ The two lasts numbers are `fixation_threshold` which describes thershold after w
 
 ### 💵 Support the project 
 
-<a href="https://polar.sh/PeterWaIIace/subscriptions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/tiers.svg?org=PeterWaIIace&darkmode"><img alt="Subscription Tiers on Polar" src="https://polar.sh/embed/tiers.svg?org=PeterWaIIace"></picture></a>
+<a href="https://polar.sh/NativeSensors/subscriptions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/tiers.svg?org=NativeSensors&darkmode"><img alt="Subscription Tiers on Polar" src="https://polar.sh/embed/tiers.svg?org=NativeSensors"></picture></a>
