@@ -39,7 +39,7 @@ python3 examples/simple_example.py
 ### 🔧 Develop
 
 Minimalistic example:
-```
+```python
 import VideoCapture #change it to opencv for real applications
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
@@ -73,13 +73,13 @@ while running:
 
 In example above we can distinguish few parts, like initialization of EyeGestures `full of magic number`. Those numbers shortly describe tracking window size and we will going to document them better in more robust documentation. For now **two first** `500` are size of processing window (it is virtual window used for processing tracked points and cluster them), next two `250` are describing initial x and y positions of tracking window on camera screen, and rest of numbers describe width and height of tracking window on camera screen. 
 
-```
+```python
 EyeGestures(500,500,250,250,285,115)
 ```  
 
 Next part is obtaining estimations from camera frames (if you cannot get estimations, you may try to change color coding or rotation of image - check `simple_example.py`).
 
-```
+```python
 event = gestures.estimate(
     frame,
     "main",
