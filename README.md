@@ -1,10 +1,14 @@
+## 👁️ EyeGestures
+
+EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eyetracking and eyedriven interfaces without requirement of obtaining expensive hardware.
+
 <p align="center">
   <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/2ad25252-e96e-47d4-b25f-c47ba7f0f4f3" width="300" height="150">
 <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/f3132843-063a-439a-8e1c-2385ddfdccda" width="300
 " height="150">
 </p>
 
-## ⭐ Mission 
+### ⭐ Mission 
 
 There is no one size fits all solution, and we believe that differentiating interfaces brings accessibility to digital spaces. Desiging eye-driven interfaces gives more control over computers to those who cannot fully enjoy their capabilities due to different disabilities, as well as gives additional way to control your computer for rests. 
 
@@ -13,10 +17,6 @@ Such technology should not be paywalled by expensive eyetrackign hardware, espec
 With such establish situation, we aim to bring such technology to as many people as it is possible. 
 
 Our technology is not perfect, but strive to be.    
-
-## 👁️ EyeGestures
-
-EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eyetracking and eyedriven interfaces without requirement of obtaining expensive hardware.
 
 ### 🔥 Web Demos:
 
