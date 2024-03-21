@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/2ad25252-e96e-47d4-b25f-c47ba7f0f4f3" width="300" height="150">
+<img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/f3132843-063a-439a-8e1c-2385ddfdccda" width="300
+" height="150">
+</p>
+
 ## Mission 
 
 There is no one size fits all solution, and we believe that differentiating interfaces brings accessibility to digital spaces. Desiging eye-driven interfaces gives more control over computers to those who cannot fully enjoy their capabilities due to different disabilities, as well as gives additional way to control your computer for rests. 
