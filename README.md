@@ -18,11 +18,73 @@ EyeGestures is open source eyetracking software/library using native webcams and
 - [Game demo](https://eyegestures.com/game)
 - [Cinema demo](https://eyegestures.com/cinema)
 
-### How To
+### How To check
 
 1. use `pybuild.sh` to build library,
 2. install library with pip `python3 -m pip install dist/eyegestures-1.2.2-py3-none-any.whl`
 3. run `python3 examples/simple_example.py`
+
+## How to use 
+
+Minimalistic example:
+```
+import VideoCapture #change it to opencv for real applications
+from eyeGestures.utils import VideoCapture
+from eyeGestures.eyegestures import EyeGestures
+
+gestures = EyeGestures(500,500,250,250,285,115)
+cap = VideoCapture(0)  
+
+# Main game loop
+running = True
+while running:
+
+    # Generate new random position for the cursor
+    ret, frame = cap.read()     
+
+    try:
+        event = gestures.estimate(
+            frame,
+            "main",
+            True, # set calibration - switch to False to stop calibration
+            screen_width,
+            screen_height,
+            0, 0, 0.8,10)
+    
+        cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+    
+    except Exception as e:
+        print(f"exception: {e}")
+
+
+```
+
+In example above we can distinguish few parts, like initialization of EyeGestures `full of magic number`. Those numbers shortly describe tracking window size and we will going to document them better in more robust documentation. For now **two first** `500` are size of processing window (it is virtual window used for processing tracked points and cluster them), next two `250` are describing initial x and y positions of tracking window on camera screen, and rest of numbers describe width and height of tracking window on camera screen. 
+
+```
+EyeGestures(500,500,250,250,285,115)
+```  
+
+Next part is obtaining estimations from camera frames (if you cannot get estimations, you may try to change color coding or rotation of image - check `simple_example.py`).
+
+```
+event = gestures.estimate(
+    frame,
+    "main",
+    True, # set calibration - switch to False to stop calibration
+    screen_width,
+    screen_height,
+    0, 0, 0.8,10)
+```
+
+Here `frame` is simple camera frame, but `"main"` is name of camera feed - if you have more than one camera feed you can just change that name for each feed to get accurate tracking (tracker needs past information from the feed, so it allows for context switching).
+
+You can set `True` or `False` for calibration. The best technique for calibration is to switch it to true when user reach one of edge of the screen, and calibrate it for 4 edges. 
+
+The `screen_width` and `screen_hieght` are describing current monitor display size/resolution in pixels, and next two numbers display its `offset` if user has more than two screens. 
+
+The two lasts numbers are `fixation_threshold` which describes thershold after which cursor should be frozen, and last number is `fixation_range` which tells cursor how much noise it can accept in radius to reach and keep fixation. 
+
 
 ### Support the project 
 
