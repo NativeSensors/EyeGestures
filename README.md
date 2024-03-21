@@ -18,7 +18,7 @@ Our technology is not perfect, but strive to be.
 
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eyetracking and eyedriven interfaces without requirement of obtaining expensive hardware.
 
-### 👀 Web Demos:
+### 🔥 Web Demos:
 
 - [Main page](https://eyegestures.com/)
 - [Game demo](https://eyegestures.com/game)
