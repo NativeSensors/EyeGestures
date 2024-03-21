@@ -2,9 +2,9 @@
 
 ### Web Demos:
 
--[Main page](https://eyegestures.com/)
--[Game demo](https://eyegestures.com/game)
--[Cinema demo](https://eyegestures.com/cinema)
+- [Main page](https://eyegestures.com/)
+- [Game demo](https://eyegestures.com/game)
+- [Cinema demo](https://eyegestures.com/cinema)
 
 ### How To
 
