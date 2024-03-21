@@ -18,13 +18,19 @@ EyeGestures is open source eyetracking software/library using native webcams and
 - [Game demo](https://eyegestures.com/game)
 - [Cinema demo](https://eyegestures.com/cinema)
 
-### How To check
+### Install
+```
+pybuild.sh ; python3 -m pip install dist/eyegestures-1.2.2-py3-none-any.whl
+```
 
-1. use `pybuild.sh` to build library,
-2. install library with pip `python3 -m pip install dist/eyegestures-1.2.2-py3-none-any.whl`
-3. run `python3 examples/simple_example.py`
+Note: you may need to change version of package `eyegestures-X.X.X`.
 
-## How to use 
+### Run 
+```
+python3 examples/simple_example.py
+```
+
+### Develop
 
 Minimalistic example:
 ```
