@@ -4,7 +4,7 @@
 " height="150">
 </p>
 
-## Mission 
+## ⭐ Mission 
 
 There is no one size fits all solution, and we believe that differentiating interfaces brings accessibility to digital spaces. Desiging eye-driven interfaces gives more control over computers to those who cannot fully enjoy their capabilities due to different disabilities, as well as gives additional way to control your computer for rests. 
 
@@ -14,29 +14,29 @@ With such establish situation, we aim to bring such technology to as many people
 
 Our technology is not perfect, but strive to be.    
 
-## EyeGestures
+## 👁️ EyeGestures
 
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eyetracking and eyedriven interfaces without requirement of obtaining expensive hardware.
 
-### Web Demos:
+### 👀 Web Demos:
 
 - [Main page](https://eyegestures.com/)
 - [Game demo](https://eyegestures.com/game)
 - [Cinema demo](https://eyegestures.com/cinema)
 
-### Install
+### 💻 Install
 ```
 pybuild.sh ; python3 -m pip install dist/eyegestures-1.2.2-py3-none-any.whl
 ```
 
 Note: you may need to change version of package `eyegestures-X.X.X`.
 
-### Run 
+### ⚙️ Run 
 ```
 python3 examples/simple_example.py
 ```
 
-### Develop
+### 🔧 Develop
 
 Minimalistic example:
 ```
@@ -98,6 +98,6 @@ The `screen_width` and `screen_hieght` are describing current monitor display si
 The two lasts numbers are `fixation_threshold` which describes thershold after which cursor should be frozen, and last number is `fixation_range` which tells cursor how much noise it can accept in radius to reach and keep fixation. 
 
 
-### Support the project 
+### 💵 Support the project 
 
 <a href="https://polar.sh/PeterWaIIace/subscriptions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/tiers.svg?org=PeterWaIIace&darkmode"><img alt="Subscription Tiers on Polar" src="https://polar.sh/embed/tiers.svg?org=PeterWaIIace"></picture></a>
