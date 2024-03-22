@@ -93,6 +93,7 @@ event = gestures.estimate(
     0, 0, 0.8,10)
 ```
 
+[NEED UPDATE]
 Here `frame` is simple camera frame, but `"main"` is name of camera feed - if you have more than one camera feed you can just change that name for each feed to get accurate tracking (tracker needs past information from the feed, so it allows for context switching).
 
 You can set `True` or `False` for calibration. The best technique for calibration is to switch it to true when user reach one of edge of the screen, and calibrate it for 4 edges. 
