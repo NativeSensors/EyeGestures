@@ -68,17 +68,18 @@ class Face:
         return np.array(__face_landmarks)
 
     def process(self,image,face):
-        self.face = face
-        self.image_h, self.image_w, _ = image.shape
-        self.landmarks = self._landmarks(self.face)
-        # self.nose = nose.Nose(image,self.landmarks,self.getBoundingBox())
-        
-        x, y, _, _ = self.getBoundingBox()
-        offset = np.array((x,y))
-        # offset = offset - self.nose.getHeadTiltOffset()
+        try:
+            self.face = face
+            self.image_h, self.image_w, _ = image.shape
+            self.landmarks = self._landmarks(self.face)
+            # self.nose = nose.Nose(image,self.landmarks,self.getBoundingBox())
+            
+            x, y, _, _ = self.getBoundingBox()
+            offset = np.array((x,y))
+            # offset = offset - self.nose.getHeadTiltOffset()
 
-        self.eyeLeft.update(image,self.landmarks,offset)
-        self.eyeRight.update(image,self.landmarks,offset)
-
-
+            self.eyeLeft.update(image,self.landmarks,offset)
+            self.eyeRight.update(image,self.landmarks,offset)
+        except Exception as e:
+            return None
         

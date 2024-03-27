@@ -40,22 +40,17 @@ while running:
     # frame = cv2.resize(frame, (360, 640))
 
     cursor_x, cursor_y = 0, 0
-    try:
-        event = gestures.estimate(
-            frame,
-            "main",
-            True, # set calibration - switch to False to stop calibration
-            screen_width,
-            screen_height,
-            0, 0, 0.8,10)
-    
-        cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
-        # frame = pygame.transform.scale(frame, (400, 400))
-    
-        
-    except Exception as e:
-        print(f"exception: {e}")
+    event = gestures.estimate(
+        frame,
+        "main",
+        False, # set calibration - switch to False to stop calibration
+        screen_width,
+        screen_height,
+        0, 0, 0.8,10)
 
+    cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+    # frame = pygame.transform.scale(frame, (400, 400))
+    
     screen.fill((0, 0, 0))
     frame = np.rot90(frame)
     frame = pygame.surfarray.make_surface(frame)

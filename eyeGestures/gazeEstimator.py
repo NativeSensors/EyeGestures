@@ -99,6 +99,9 @@ class GazeTracker:
 
         event = None
         face_mesh = self.getFeatures(image)
+        if not face_mesh:
+            return None 
+
         self.face.process(image, face_mesh)
 
         context = self.GContext.get(context_id,display,roi = dp.ScreenROI(
