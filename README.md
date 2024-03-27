@@ -135,6 +135,8 @@ function onCalibration() {
 </script>    
 ```
 
+### 💻 Contributors
+
 ### 💵 Support the project 
 
 <a href="https://polar.sh/NativeSensors/subscriptions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/tiers.svg?org=NativeSensors&darkmode"><img alt="Subscription Tiers on Polar" src="https://polar.sh/embed/tiers.svg?org=NativeSensors"></picture></a>
