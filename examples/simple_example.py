@@ -43,7 +43,7 @@ while running:
     event = gestures.estimate(
         frame,
         "main",
-        False, # set calibration - switch to False to stop calibration
+        True, # set calibration - switch to False to stop calibration
         screen_width,
         screen_height,
         0, 0, 0.8,10)
