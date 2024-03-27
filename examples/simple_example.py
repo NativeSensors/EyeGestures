@@ -27,6 +27,7 @@ clock = pygame.time.Clock()
 
 # Main game loop
 running = True
+iterator = 0
 while running:
     # Event handling
     for event in pygame.event.get():
@@ -39,11 +40,14 @@ while running:
     frame = cv2.flip(frame,1)
     # frame = cv2.resize(frame, (360, 640))
 
+    calibrate = (iterator <= 100)
+    iterator += 1
+
     cursor_x, cursor_y = 0, 0
     event = gestures.estimate(
         frame,
         "main",
-        True, # set calibration - switch to False to stop calibration
+        calibrate, # set calibration - switch to False to stop calibration
         screen_width,
         screen_height,
         0, 0, 0.8,10)
