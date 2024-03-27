@@ -10,7 +10,7 @@ EyeGestures is open source eyetracking software/library using native webcams and
 
 ### ⭐ Mission 
 
-There is no one size-fits all solution, and we believe that differentiating interfaces brings accessibility to digital spaces. Designing eye-driven interfaces gives more control over computers to those who cannot fully enjoy their capabilities due to different disabilities, as well as an additional way to control your computer for rests. 
+There is no one size-fits all solution, and we believe that differentiating interfaces brings accessibility to digital spaces. Designing eye-driven interfaces gives more control over computers to those who cannot fully enjoy their capabilities due to different disabilities, as well as an additional way to control computer to rests. 
 
 Such technology should not be paywalled by expensive eye-tracking hardware, especially in case when it is needed to exist in the digital world and operate your computer. Most of the current consumer electronics devices have built-in native cameras, and the current state of research indicates that it is achievable to have eye tracking at reasonable accuracy based on those native cameras. 
 
