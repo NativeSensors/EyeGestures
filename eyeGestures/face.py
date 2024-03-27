@@ -78,7 +78,7 @@ class Face:
             offset = np.array((x,y))
             # offset = offset - self.nose.getHeadTiltOffset()
 
-            self.eyeLeft.update(image,self.landmarks,offset)
+            self.eyeLeft.update(image ,self.landmarks,offset)
             self.eyeRight.update(image,self.landmarks,offset)
         except Exception as e:
             return None
