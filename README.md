@@ -40,7 +40,7 @@ Note: you may need to change version of package `eyegestures-X.X.X`.
 python3 examples/simple_example.py
 ```
 
-### 🔧 Develop
+### 🔧 Develop [WiP - needs update removing all magic numbers]
 
 Minimalistic example:
 ```python
@@ -102,6 +102,38 @@ The `screen_width` and `screen_hieght` are describing current monitor display si
 
 The two lasts numbers are `fixation_threshold` which describes thershold after which cursor should be frozen, and last number is `fixation_range` which tells cursor how much noise it can accept in radius to reach and keep fixation. 
 
+### 🌐 Web Embedd [Paid API]
+
+For now more info can be found here: https://eyegestures.com/user_portal
+
+```html
+// ... rest of html client ...
+
+<script>
+// ... your code ...
+
+function onTile(id, fix, blink) {
+  // ... do something here ...
+}
+
+function onCalibration() {
+  // ... do something here ...
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+<script src="https://eyegestures.com/eyeTiles.min.js"></script>
+<script>
+  EyeTilesAPI(
+    key = "YOUR_API_KEY",
+    tiles = [1, 2, 1],
+    fixThresh = 0.1,
+    fixRadius = 500,
+    sightGrid = true,
+    onTile = onTile,
+    onCalibration = onCalibration,
+  );
+</script>    
+```
 
 ### 💵 Support the project 
 
