@@ -52,10 +52,5 @@ class EyeProcessor:
                             scale_w = self.scale_w, scale_h = self.scale_h)
         else:
             _retPupil = pupilBuffor.getAvg()
-
-        # THIS BUFFOR HAS _retPupil and Width
-        # self.avgRetBuffor.add(_retPupil)
         
         return _retPupil
-
-## main code:
