@@ -169,7 +169,9 @@ https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-
 
 ### 💻 Contributors
 
-- [Piotr](https://github.com/PeterWaIIace)
+<a href="https://github.com/OWNER/REPO/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=NativeSensors/EyeGestures" />
+</a>
 
 ### 💵 Support the project 
 
