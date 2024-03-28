@@ -87,22 +87,37 @@ Next part is obtaining estimations from camera frames (if you cannot get estimat
 
 ```python
 event = gestures.estimate(
-    frame,
-    "main",
-    True, # set calibration - switch to False to stop calibration
-    screen_width,
-    screen_height,
-    0, 0, 0.8,10)
+    image = frame,
+    context = "main",
+    calibration = True, # set calibration - switch to False to stop calibration
+    display_width = screen_width,
+    display_height = screen_height,
+    display_offset_x = 0, 
+    display_offset_y = 0, 
+    fixation_freeze = 0.8,
+    freeze_radius = 10)
 ```
 
-[NEED UPDATE]
-Here `frame` is simple camera frame, but `"main"` is name of camera feed - if you have more than one camera feed you can just change that name for each feed to get accurate tracking (tracker needs past information from the feed, so it allows for context switching).
+- `image` - is cv2 image frame
+- `context` - is name given to contect. If name changes then different tracker context is used. Tracker rembers previous points to estimate new one, but those points are assinged to single context. By changing names or passing new ones you can switch and create contextes.
+- `calibration` - if `True` then every few seconds tracker is recalibrating, if `False` then tracker setting is frozen. The best approach is to enable calibration when one of the edges is reached. 
+- `display_width` - width of display/screen used.
+- `display_height` - height of display/screen used.
+- `display_offset_x` - offset of x for display/screen used. Use it when having two displays and app is covering all screens, but you want to limit your cursor tracker to only specific display.
+- `display_offset_y` - offset of y for display/screen used. Use it when having two displays and app is covering all screens, but you want to limit your cursor tracker to only specific display.
+- `fixation_freeze` - threshold of user fixation on one point (it goes from 0.0 to 1.0). If threshold is crossed point is frozen till user breaks `freeze_radius` in pixels.
+- `freeze_radius` - distance cursor can move to reach fixation and freezing, if cursor movements are greater than distance then fixation measurement goes down to `0.0`.
 
-You can set `True` or `False` for calibration. The best technique for calibration is to switch it to true when user reach one of edge of the screen, and calibrate it for 4 edges. 
 
-The `screen_width` and `screen_hieght` are describing current monitor display size/resolution in pixels, and next two numbers display its `offset` if user has more than two screens. 
+```
+Gevent event
+```
 
-The two lasts numbers are `fixation_threshold` which describes thershold after which cursor should be frozen, and last number is `fixation_range` which tells cursor how much noise it can accept in radius to reach and keep fixation. 
+`Gevent` is returned element having all data necessary to use tracker:
+ 
+- `point_screen` is point coordinates on screen
+- `blink` is boolean value describing blink event. If `0` no blink occured, if `1` blink occured.
+- `fixation` value from `0.0` to `1.0` describing level of user fixation.
 
 ### 🌐 Web Embedd [Paid API]
 

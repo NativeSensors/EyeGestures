@@ -43,16 +43,16 @@ class EyeGestures:
     # @timeit 
     # 0.011 - 0.015 s for execution
     def estimate(self,image,
-                context,
-                calibration,
-                display_width, 
-                display_height,
-                display_offset_x = 0,
-                display_offset_y = 0,
-                fixation_freeze = 0.7,
-                freeze_radius=20,
-                offset_x = 0,
-                offset_y = 0):
+                 context,
+                 calibration,
+                 display_width, 
+                 display_height,
+                 display_offset_x = 0,
+                 display_offset_y = 0,
+                 fixation_freeze = 0.7,
+                 freeze_radius=20,
+                 offset_x = 0,
+                 offset_y = 0):
 
         display = dp.Display(
             display_width,
