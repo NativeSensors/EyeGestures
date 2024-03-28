@@ -20,8 +20,10 @@ Our technology is not perfect, but we strive to be.
 
 ### 📇 Find us:
 
-- https://discord.gg/FV3RYTuV
-- contact@eyegestures.com
+- [discord](https://discord.gg/FV3RYTuV)
+- [polar.sh](https://polar.sh/NativeSensors)
+- [twitter](https://twitter.com/PW4ltz)
+- email: contact@eyegestures.com
 
 ### 📢 Announcements:
 
