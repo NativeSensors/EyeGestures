@@ -137,6 +137,19 @@ function onCalibration() {
 </script>    
 ```
 
+### rules of using
+
+If you are building publicly available product, and have no commercial license, please mention us somewhere in your interface. 
+
+**Promo Materials:**
+
+https://github.com/NativeSensors/EyeGestures/assets/40773550/4ca842b9-ba32-4ffd-b2e4-179ff67ee47f
+![PoweredByEyeGestures_small](https://github.com/NativeSensors/EyeGestures/assets/40773550/4ca842b9-ba32-4ffd-b2e4-179ff67ee47f)
+
+https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-bc96-3a6bb4159b37
+![PoweredByEyeGestures_tiny](https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-bc96-3a6bb4159b37)
+
+
 ### 💻 Contributors
 
 - [Piotr](https://github.com/PeterWaIIace)
