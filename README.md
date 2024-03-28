@@ -18,6 +18,11 @@ Our mission is to bring eye-tracking technology to as many people as possible.
 
 Our technology is not perfect, but we strive to be.
 
+### 📇 Find us:
+
+- https://discord.gg/FV3RYTuV
+- contact@eyegestures.com
+
 ### 📢 Announcements:
 
 <a href="https://polar.sh/NativeSensors/posts"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/posts.svg?org=NativeSensors&darkmode"><img alt="Posts on Polar" src="https://polar.sh/embed/posts.svg?org=NativeSensors"></picture></a>
