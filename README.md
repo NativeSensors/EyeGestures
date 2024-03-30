@@ -49,39 +49,7 @@ python3 examples/simple_example.py
 
 ### 🔧 Develop 
 
-Minimalistic example:
-```python
-import VideoCapture #change it to opencv for real applications
-from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures
-
-gestures = EyeGestures(
-  roi_x = 285
-  roi_y = 115
-  roi_width = 80
-  roi_height = 15
-)
-
-cap = VideoCapture(0)  
-
-# Main game loop
-running = True
-while running:
-
-    # Generate new random position for the cursor
-    ret, frame = cap.read()     
-
-    event = gestures.estimate(
-        frame,
-        "main",
-        True, # set calibration - switch to False to stop calibration
-        screen_width,
-        screen_height,
-        0, 0, 0.8,10)
-
-    cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
-
-```
+To begin, you instantiate an EyeGestures object with initial Region of Interest (RoI) parameters. These parameters define a preliminary focus area for the tracker within a virtual 500x500 screen space, which helps in locating the user's gaze more efficiently.
 
 Main `EyeGesture` object provides general configuration initial conditions: 
 
@@ -130,7 +98,6 @@ event = gestures.estimate(
 - `fixation_freeze` - threshold of user fixation on one point (it goes from 0.0 to 1.0). If threshold is crossed point is frozen till user breaks `freeze_radius` in pixels.
 - `freeze_radius` - distance cursor can move to reach fixation and freezing, if cursor movements are greater than distance then fixation measurement goes down to `0.0`.
 
-
 ```
 Gevent event
 ```
@@ -140,6 +107,42 @@ Gevent event
 - `point_screen` is point coordinates on screen
 - `blink` is boolean value describing blink event. If `0` no blink occured, if `1` blink occured.
 - `fixation` value from `0.0` to `1.0` describing level of user fixation.
+
+Entire program: 
+
+```python
+import VideoCapture #change it to opencv for real applications
+from eyeGestures.utils import VideoCapture
+from eyeGestures.eyegestures import EyeGestures
+
+gestures = EyeGestures(
+  roi_x = 285
+  roi_y = 115
+  roi_width = 80
+  roi_height = 15
+)
+
+cap = VideoCapture(0)  
+
+# Main game loop
+running = True
+while running:
+
+    # Generate new random position for the cursor
+    ret, frame = cap.read()     
+
+    event = gestures.estimate(
+        frame,
+        "main",
+        True, # set calibration - switch to False to stop calibration
+        screen_width,
+        screen_height,
+        0, 0, 0.8,10)
+
+    cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+
+```
+
 
 ### 🌐 Web Embedd [Paid API]
 
