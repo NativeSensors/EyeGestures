@@ -55,7 +55,13 @@ import VideoCapture #change it to opencv for real applications
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
 
-gestures = EyeGestures(500,500,250,250,285,115)
+gestures = EyeGestures(
+  roi_x = 285
+  roi_y = 115
+  roi_width = 80
+  roi_height = 15
+)
+
 cap = VideoCapture(0)  
 
 # Main game loop
@@ -77,11 +83,27 @@ while running:
 
 ```
 
-In example above we can distinguish few parts, like initialization of EyeGestures `full of magic number`. Those numbers shortly describe tracking window size and we will going to document them better in more robust documentation. For now **two first** `500` are size of processing window (it is virtual window used for processing tracked points and cluster them), next two `250` are describing initial x and y positions of tracking window on camera screen, and rest of numbers describe width and height of tracking window on camera screen. 
+Main `EyeGesture` object provides general configuration initial conditions: 
 
 ```python
-EyeGestures(500,500,250,250,285,115)
+EyeGestures(  
+  roi_x = 285
+  roi_y = 115
+  roi_width = 80
+  roi_height = 15
+)
 ```  
+
+The tracker operates within a virtual screen measuring 500x500, where it maps the positions of the pupils and other critical facial features to deduce the user's gaze direction. Within this space, the Region of Interest (RoI) serves as a representation of the user's display, inferred through a combination of eye movement and edge detection during calibration.
+
+After locating the RoI within the 500x500 space, its dimensions are adjusted to fit the resolution used in the estimate function, typically described as `display_width` by `display_height`.
+
+Calibration aims to precisely determine the RoI's dimensions. Prior to calibration, the tracker relies on initial optional parameters, including:
+
+- `roi_x`: The initial x-coordinate of the RoI (ranging from 0 to 500).
+- `roi_y`: The initial y-coordinate of the RoI (ranging from 0 to 500).
+- `roi_width`: The initial width of the RoI before calibration (ranging from 0 to 500 - x).
+- `roi_height`: The initial height of the RoI before calibration (ranging from 0 to 500 - x).
 
 Next part is obtaining estimations from camera frames (if you cannot get estimations, you may try to change color coding or rotation of image - check `simple_example.py`).
 

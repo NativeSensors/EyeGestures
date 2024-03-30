@@ -8,15 +8,22 @@ VERSION = "1.0.0"
 class EyeGestures:
 
     def __init__(self,
-                 screen_width,
-                 screen_height,
-                 height,
-                 width,
                  roi_x = 225,
                  roi_y = 105,
                  roi_width = 80,
                  roi_height = 15):
 
+
+        screen_width = 500
+        screen_height= 500
+        height = 250
+        width  = 250
+        
+        roi_x = roi_x % screen_width
+        roi_y = roi_y % screen_height
+        roi_width = roi_width % screen_width
+        roi_height = roi_height % screen_height
+                 
         self.screen_width  = screen_width
         self.screen_height = screen_height
 

@@ -4,7 +4,7 @@ import numpy as np
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
 
-gestures = EyeGestures(500,500,250,250,285,115)
+gestures = EyeGestures(285,115)
 
 cap = VideoCapture(0)  
 

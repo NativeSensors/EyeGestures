@@ -3,12 +3,7 @@ from eyeGestures.eyegestures import EyeGestures
 from screeninfo import get_monitors
 
 if __name__ == '__main__':
-    eye_screen_w = 500
-    eye_screen_h = 500
-    gestures = EyeGestures(eye_screen_w,
-                           eye_screen_h,
-                           250,
-                           250)
+    gestures = EyeGestures(285,115)
     
     cap = VideoCapture(0)
     

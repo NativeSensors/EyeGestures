@@ -132,10 +132,7 @@ class Lab:
 
         self.eye_screen_w = 500
         self.eye_screen_h = 500
-        self.gestures = EyeGestures(self.eye_screen_w,
-                                    self.eye_screen_h,
-                                    250,
-                                    250)
+        self.gestures = EyeGestures(285,115)
 
         self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.dot_widget.show()

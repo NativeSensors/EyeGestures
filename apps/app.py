@@ -19,14 +19,7 @@ class Lab:
         self.step         = 10
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
-        self.eye_screen_w = 500
-        self.eye_screen_h = 500
-        self.gestures = EyeGestures(self.monitor.width,
-                                    self.monitor.height,
-                                    self.eye_screen_w,
-                                    self.eye_screen_h,
-                                    self.monitor.x,
-                                    self.monitor.y)
+        self.gestures = EyeGestures(285,115)
 
         self.calibration_widget = CalibrationWidget()
         self.eyegesture_widget = EyeGestureWidget()
