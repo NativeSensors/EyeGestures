@@ -47,7 +47,7 @@ Note: you may need to change version of package `eyegestures-X.X.X`.
 python3 examples/simple_example.py
 ```
 
-### 🔧 Develop [WiP - needs update removing all magic numbers]
+### 🔧 Develop 
 
 Minimalistic example:
 ```python
