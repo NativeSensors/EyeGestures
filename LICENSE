@@ -1,27 +1,33 @@
-# NativeSensors License
+NativeSensors License
 
-**Version 1.0**
+Version 2.2
 
-This software is provided under the following terms:
+Effective as of March 31, 2024, this License governs your use of the accompanying software ("Software"), and your engagement with the Software indicates your agreement to these terms.
 
-1. **License Grant**: Subject to the terms and conditions of this License, the Licensor hereby grants You a worldwide, royalty-free, non-exclusive, perpetual license to use, copy, modify, and distribute this software for non-profit operations or purposes. In case of profit operations it is required to obtain "for profit license".
+    License Grant: Under the conditions of this License, NativeSensors grants you a global, royalty-free, non-exclusive, perpetual license to use, copy, modify, and distribute the Software, provided that it is integrated or used within non-commercial products or services, or in a free tier of commercial products. You may embed or integrate the Software into other software offerings, provided that the features supplied by the EyeGestures are available to users free of charge and are not behind a paywall or require additional payment specifically for those features.
 
-2. **Modifications**: You may modify the software as necessary for your own use, subject to the conditions outlined in this license.
+    Examples of such usage involve: commercial websites earning on advertisements providing EyeGestures features without the requirement of user payment; apps with different subscription tiers but providing all eyegestures features in a free tier without the requirement for the user to unlock it in any way or form.
 
-3. **Distribution**: You may distribute copies of this software to others, provided that you do so under the terms of this License.
+    Commercial Use:  If your product or software does not have any free tier and requires the user to pay for all its features (or most of them to achieve usability), then your software is considered as commercial operation, and will require an additional commercial license. If your product using our software is free but operates only for employees inside your commercial operation or business, you will be required to obtain a commercial license.
 
-4. **No Warranty**: This software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the Licensor be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
+    For obtaining a commercial license, please contact: contact@eyegestures.com
 
-5. **Changes to this License**: This License may be revised or updated by the Licensor from time to time. Any such changes will be posted at [URL] and will become effective immediately upon posting.
+    Prohibitions: You may not charge users specifically for the use of the features provided by the EyeGestures Software, nor may you place these features behind a paywall. If your application or service charges users for features directly enabled by or dependent on the Software, you must obtain a commercial license.
 
-6. **Governing Law**: This License shall be governed by and construed in accordance with the laws of [Jurisdiction], without regard to its conflict of law provisions.
+    Modifications and Distribution: You are authorized to modify the Software and distribute your modified version or the original Software, under the condition that the distributed Software remains free of charge for the features directly provided by the Software itself. You may not grant broader rights to the Software or derivative works than those provided by this License.
 
-7. **Termination**: This License will terminate automatically if You fail to comply with any term herein. Upon termination, You must destroy any copies of the software in Your possession.
+    Notices: You agree not to remove any copyright, trademark, or other proprietary notices from the Software.
 
-8. **Additional Agreements**: Nothing in this License shall restrict the Licensor from entering into separate agreements with any party regarding the use, modification, or distribution of the software.
+    Disclaimer: The Software is provided "as is," without any warranties, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, or non-infringement. NativeSensors shall not be liable for any claim, damages, or other liability, whether in an action of contract, tort or otherwise, arising from the use of the Software.
 
-By using, copying, modifying, or distributing this software, You indicate Your acceptance of the terms of this License. If You do not agree to the terms of this License, do not use, copy, modify, or distribute the software.
+    License Amendments: NativeSensors reserves the right to modify or replace this License.
 
-For questions regarding this License, please contact contact@eyegestures.com.
+    Termination: This License automatically terminates if you fail to comply with its terms. Upon termination, you must stop all use of the Software and destroy any copies in your possession.
 
-NativeSensors 21.03.2024
+    Separate Agreements: This License does not preclude NativeSensors from entering into different agreements regarding the Software's use, modification, or distribution.
+
+Your use, copying, modifying, or distributing of the Software constitutes acceptance of these terms. If you do not agree, you are not authorized to use, copy, modify, or distribute the Software.
+
+For inquiries about this License or to discuss obtaining a commercial license, please contact contact@eyegestures.com.
+
+NativeSensors 31.03.2024
