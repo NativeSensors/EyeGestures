@@ -15,7 +15,6 @@ EyeGestures is open source eyetracking software/library using native webcams and
 " height="300">
 </p>
 
-
 ### ⭐ Mission 
 
 There is no one size-fits all solution, and we believe that differentiating interfaces brings accessibility to digital spaces. Designing eye-driven interfaces gives more control over computers to those who cannot fully enjoy their capabilities due to different disabilities, as well as an additional way to control computer to rests. 
@@ -33,6 +32,12 @@ Our technology is not perfect, but we strive to be.
 - email: contact@eyegestures.com
 
 <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
+
+### 💜 Sponsors: 
+
+```
+Sponsor us and we can add your link, banner or other promo materials!
+```
 
 ### 📢 Announcements:
 
