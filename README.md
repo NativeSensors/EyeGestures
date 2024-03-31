@@ -1,5 +1,5 @@
 ```
-WARNING: License use for coorporate and business operation my still change. Non-profit and personal use stays free!
+WARNING: License is work in progress, use for coorporate and business operation my still change. Non-profit and personal use stays free!
 ```
 
 ## 👁️ EyeGestures
