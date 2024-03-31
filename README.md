@@ -11,6 +11,11 @@ EyeGestures is open source eyetracking software/library using native webcams and
 <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/f3132843-063a-439a-8e1c-2385ddfdccda" width="300
 " height="150">
 </p>
+<p align="center">
+<img src="https://github.com/NativeSensors/EyeGestures/assets/40773550/84aa7436-6153-49bc-b8e6-ccda535f25e6)" width="600
+" height="300">
+</p>
+
 
 ### ⭐ Mission 
 
