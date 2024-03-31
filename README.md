@@ -210,3 +210,23 @@ https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-
 ### 💵 Support the project 
 
 <a href="https://polar.sh/NativeSensors/subscriptions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/tiers.svg?org=NativeSensors&darkmode"><img alt="Subscription Tiers on Polar" src="https://polar.sh/embed/tiers.svg?org=NativeSensors"></picture></a>
+
+<picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="
+      https://api.star-history.com/svg?repos=NativeSensors/EyeGestures&type=Date&theme=dark
+    "
+  />
+  <source
+    media="(prefers-color-scheme: light)"
+    srcset="
+      https://api.star-history.com/svg?repos=NativeSensors/EyeGestures&type=Date
+    "
+  />
+  <img
+    alt="Star History Chart"
+    src="https://api.star-history.com/svg?repos=NativeSensors/EyeGestures&type=Date"
+  />
+</picture>
+
