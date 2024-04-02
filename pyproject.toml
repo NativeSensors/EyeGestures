@@ -21,18 +21,24 @@ exclude = [
 
 [project]
 name = "eyeGestures"
-version = "1.3.2"
+version = "1.3.3"
 authors = [
-  { name="Piotr Walas", email="walas.piotr.prywatny@gmail.com" },
+  { name="Piotr Walas", email="piotr.walas@eyegestures.com" },
+]
+maintainers = [
+  { name="Piotr Walas", email="piotr.walas@eyegestures.com" }
 ]
 description = "Package for eye tracking algorithm allowing for development of gaze controlled computer interface"
 readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">=3.8"
+keywords = ["eyetracking", "eye", "gaze", "tracking", "gazetracking"]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
 ]
 
 [project.urls]
-Homepage = "https://github.com/PeterWaIIace/EyeGestures"
-Issues = "https://github.com/PeterWaIIace/EyeGestures/Issues"
+Homepage = "https://github.com/NativeSensors/EyeGestures"
+Issues = "https://github.com/NativeSensors/EyeGestures/Issues"
