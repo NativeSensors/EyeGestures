@@ -31,6 +31,8 @@ Our technology is not perfect, but we strive to be.
 - [twitter](https://twitter.com/PW4ltz)
 - email: contact@eyegestures.com
 
+Follow us on polar (it costs nothing but you help project!):
+
 <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 
 ### 💜 Sponsors: 
