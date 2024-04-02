@@ -1,5 +1,5 @@
 ```
-WARNING: License is work in progress, use for coorporate and business operation my still change. Non-profit and personal use stays free!
+Non-profit work can use that project under GPL3, for enterprise wanting more freedom in licensing there is commercial license!
 ```
 ## 👁️ EyeGestures
 
