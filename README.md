@@ -53,7 +53,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 
 ### 💻 Install
 ```
-pybuild.sh ; python3 -m pip install dist/eyegestures-1.2.2-py3-none-any.whl
+python3 -m pip install eyeGestures
 ```
 
 Note: you may need to change version of package `eyegestures-X.X.X`.
