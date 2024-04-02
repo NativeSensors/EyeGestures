@@ -1,5 +1,5 @@
 ```
-For enterprise wanting more freedom in licensing there is commercial license!
+For enterprise avoiding GPL3 licensing there is commercial license!
 ```
 ## 👁️ EyeGestures
 
