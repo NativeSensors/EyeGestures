@@ -1,5 +1,5 @@
 ```
-Non-profit work can use that project under GPL3, for enterprise wanting more freedom in licensing there is commercial license!
+For enterprise wanting more freedom in licensing there is commercial license!
 ```
 ## 👁️ EyeGestures
 
