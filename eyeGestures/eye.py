@@ -5,49 +5,6 @@ import numpy as np
 import mediapipe as mp
 from scipy.optimize import fsolve
 
-# Function to fit a quadratic curve and find intersections
-def fit_curve(p1, p2):
-    """Function finding polynomial between two points p1 and p2."""
-
-    # Fit a quadratic curve (ax^2 + bx + c) through the points
-    coefficients = np.polyfit([p1[0], p2[0]], [p1[1], p2[1]], 2)
-    curve = np.poly1d(coefficients)
-
-    return curve
-
-# Function to find intersections with y = 0
-def find_intersections(curve, points):
-    """Function finding intersection between curve and point ."""
-
-    def intersection(x):
-        return curve(x)
-
-    intersection_points = fsolve(intersection, 0)
-    return (intersection_points,0)
-
-def get_curves(points, reference_point):
-    """Function finding curve for points and reference point."""
-
-    segments = []
-    intersection_points = []
-    for i,_ in enumerate(points):
-        p1, p2 = points[i], points[(i + 1 ) % len(points)]
-        if (p1[1] - reference_point) * (p2[1] - reference_point) < 0:
-            curve = fit_curve(p1, p2)
-
-            segment_x_range = np.linspace(p1[0], p2[0], 100)
-            segments.append((curve,segment_x_range))
-            x = find_intersections(curve,np.array([p1, p2]))
-            intersection_points.append(x)
-
-    return segments,intersection_points
-
-def get_intersections(points, reference_point):
-    """Function intersection between point and reference point."""
-
-    _, intersetions = get_curves(points, reference_point)
-    return np.array(intersetions)
-
 class Eye:
     """Class storing data related and representing a eye"""     
     LEFT_EYE_KEYPOINTS  = np.array(list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:,0]
@@ -190,7 +147,6 @@ class Eye:
         # HACKETY_HACK: 
         self.pupil[1] = np.min(region[:,1])
 
-        # self.intersection = get_intersections(region,self.center_y)
         self.cut_image = masked_image[min_y:max_y,min_x:max_x]
         # print(f"here: {self.cut_image.shape,min_y,max_y,min_x,max_x}")
         self.cut_image = cv2.cvtColor(self.cut_image, cv2.COLOR_GRAY2BGR)
