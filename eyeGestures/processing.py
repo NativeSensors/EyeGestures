@@ -12,6 +12,8 @@ class EyeProcessor:
         self.max_x = 0
         self.min_y = 0
         self.max_y = 0
+        self.pupil = None
+        self.landmarks = None
 
 
     def append(self,pupil : (int,int) ,landmarks : np.ndarray, pupilBuffor):
@@ -27,8 +29,8 @@ class EyeProcessor:
         self.min_y = np.min(self.landmarks[:,1]) - margin
         self.max_y = np.max(self.landmarks[:,1]) + margin
 
-        assert(self.pupil[0] > self.min_x)
-        assert(self.pupil[1] > self.min_y)
+        assert self.pupil[0] > self.min_x
+        assert self.pupil[1] > self.min_y
 
         width  = self.max_x - self.min_x
         height = (self.max_y - self.min_y)/2
@@ -40,7 +42,12 @@ class EyeProcessor:
                         scale_w = width, scale_h = height,
                         offset = (self.min_x, self.min_y)))
 
-    def __convertPoint(self, point, width=1.0, height=1.0, scale_w = 1.0, scale_h = 1.0, offset = (0.0,0.0)):
+    def __convertPoint(self, point,
+                        width=1.0,
+                        height=1.0,
+                        scale_w = 1.0,
+                        scale_h = 1.0,
+                        offset = (0.0,0.0)):
         (min_x, min_y) = offset
         x = int(((point[0]-min_x)/scale_w)*width)
         y = int(((point[1]-min_y)/scale_h)*height)
