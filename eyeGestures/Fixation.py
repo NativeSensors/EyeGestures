@@ -1,3 +1,5 @@
+"""Module providing a fixation detection."""
+
 class Fixation:
     """Class performing Fixation"""     
 

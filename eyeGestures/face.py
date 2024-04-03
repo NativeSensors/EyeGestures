@@ -1,8 +1,9 @@
+"""Module providing finding and extraction of face from image."""
+
 import cv2
 import numpy as np
 import mediapipe as mp
 import eyeGestures.eye as eye
-import eyeGestures.nose as nose
 
 class FaceFinder:
 

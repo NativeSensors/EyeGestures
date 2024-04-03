@@ -1,3 +1,5 @@
+"""Module providing a core tracking features."""
+
 import eyeGestures.screenTracker.dataPoints as dp
 from eyeGestures.Fixation import Fixation
 from eyeGestures.utils import Buffor
@@ -10,7 +12,7 @@ class Contexter:
     def addContext(self, context_id, object):
         """Function allowing to add new context to contexter"""     
 
-        if context_id not in self.context.keys(): 
+        if context_id not in self.context.keys():
             self.context[context_id] = object
             return True
         return False
@@ -18,7 +20,7 @@ class Contexter:
     def rmContext(self,context_id):
         """Function allowing to removes context from contexter"""
 
-        if context_id in self.context.keys(): 
+        if context_id in self.context.keys():
             del self.context[context_id]
             return True
         return False
@@ -26,24 +28,24 @@ class Contexter:
     def getContext(self,context_id):
         """Function returning context based on id"""
 
-        if context_id in self.context.keys(): 
+        if context_id in self.context.keys():
             return self.context[context_id]
         return None
 
     def updateContext(self,context_id,data):
         """Function updating context with new data"""
 
-        if context_id in self.context.keys(): 
+        if context_id in self.context.keys():
             self.context[context_id] = data
             return True
         self.addContext(context_id,data)
         return True
-    
+
     def getNumberContextes(self):
         """Function returning number of contextes"""
 
         return len(self.context.keys())
-    
+
 class Gcontext:
     """Helper class for Gcontext"""
 
@@ -77,7 +79,6 @@ class GazeContext:
 
     def __init__(self):
         self.contexter = Contexter()
-        pass
 
     def get(self,
             id,
@@ -111,10 +112,10 @@ class GazeContext:
             return context
         else:
             return self.contexter.getContext(id)
-        
+
     def update(self,
                 id,
                 context):
         """Function updating existing context"""
-        
+
         self.contexter.updateContext(id,context)

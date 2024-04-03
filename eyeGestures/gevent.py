@@ -1,5 +1,6 @@
- 
+"""Module providing a Gaze Events."""
 class Gevent:
+    """Class representing gaze event, with tracked points scaled to screen, blink and fixation."""
 
     def __init__(self,
                  point,

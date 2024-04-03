@@ -3,7 +3,6 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-from scipy.optimize import fsolve
 
 class Eye:
     """Class storing data related and representing a eye"""     
