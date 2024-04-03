@@ -1,30 +1,29 @@
 
-import time 
-import math
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
+import time
 
 class Calibrator:
+    """Class representing a calibration process"""
 
-    def __init__(self,width,height,time = 60):
+    def __init__(self,width,height,_time = 60):
         self.width = width
         self.height = height
-        self.time = time
+        self.time = _time
 
         self.run = False
         self.t_start = 0
 
-        self.onFinish = None
+        self.on_finish = None
+        self.points = []
 
-    def start(self,onFinish):
+    def start(self,on_finish):
+        """Function starting calibration."""
         self.t_start = time.time()
         self.run = True
 
-        self.onFinish = onFinish
+        self.on_finish = on_finish
 
-    def getTrainingPoint(self):
+    def get_training_point(self):
+        """Returns training point for calibration."""
 
         if not self.run:
             return self.points[0]
@@ -36,8 +35,8 @@ class Calibrator:
             if(index < 0 or index >= len(self.points)):
                 self.run = False
 
-                if not self.onFinish is None:
-                    self.onFinish()
+                if not self.on_finish is None:
+                    self.on_finish()
                     return self.points[0]
                 
             return self.points[index]
