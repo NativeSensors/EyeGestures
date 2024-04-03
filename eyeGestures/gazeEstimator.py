@@ -1,17 +1,18 @@
 
 import numpy as np
 from eyeGestures.gevent import Gevent
-from eyeGestures.nose import NoseDirection
 from eyeGestures.face import FaceFinder, Face
 from eyeGestures.Fixation import Fixation 
 from eyeGestures.processing    import EyeProcessor
-from eyeGestures.gazeContexter import GazeContext 
+from eyeGestures.gazeContexter import GazeContext
 from eyeGestures.screenTracker.screenTracker import ScreenManager
 import eyeGestures.screenTracker.dataPoints as dp
 from eyeGestures.utils import Buffor
 
 
-def isInside(circle_x, circle_y, r, x, y):     
+def isInside(circle_x, circle_y, r, x, y):
+    """Function checking if points are inside the circle"""
+
     # Compare radius of circle
     # with distance of its center
     # from given point
@@ -22,6 +23,7 @@ def isInside(circle_x, circle_y, r, x, y):
         return False
 
 class GazeTracker:
+    """Class processing images and returning gaze tracker"""
 
     N_FEATURES = 16
 
@@ -34,11 +36,11 @@ class GazeTracker:
 
         self.screen = dp.Screen(screen_width,screen_heigth)
 
-        self.roi_x = roi_x 
+        self.roi_x = roi_x
         self.roi_y = roi_y
-        self.roi_width = roi_width 
+        self.roi_width = roi_width
         self.roi_height = roi_height
-        
+
         self.eye_screen_w = eye_screen_w
         self.eye_screen_h = eye_screen_h
 
@@ -62,7 +64,7 @@ class GazeTracker:
     def __gaze_intersection(self,l_eye,r_eye, l_buff, r_buff):
         l_pupil = l_eye.getPupil()
         l_gaze  = l_eye.getGaze(l_buff)
-        
+
         r_pupil = r_eye.getPupil()        
         r_gaze  = r_eye.getGaze(r_buff)
 
@@ -78,24 +80,25 @@ class GazeTracker:
         i_x = (r_b - l_b)/(l_m - r_m)
         i_y = r_m * i_x + r_b
         return (i_x,i_y)
-    
+
     def __pupil(self, eye, eyeProcessor, intersection_x, buffor):
 
         eyeProcessor.append( eye.getPupil(), eye.getLandmarks(), buffor)
         point = eyeProcessor.getAvgPupil(self.eye_screen_w,self.eye_screen_h,buffor)
         point = np.array((int(intersection_x),point[1]))
-        
+
         return point, buffor
-    
+
     def estimate(self,
                  image,
                  display,
                  context_id,
                  calibration,
-                 fixation_freeze = 0.7, 
+                 fixation_freeze = 0.7,
                  freeze_radius=20,
                  offset_x = 0,
                  offset_y = 0):
+        """Function estimating gaze and returning gaze event based on image"""
 
         event = None
         face_mesh = self.getFeatures(image)
@@ -118,9 +121,9 @@ class GazeTracker:
             r_eye_buff = Buffor(20),
             fixation=Fixation(0,0,100))
         context.calibration = calibration
-        
+
         if not self.face is None:
-            
+
             l_eye   = self.face.getLeftEye()
             r_eye   = self.face.getRightEye()
 
@@ -128,16 +131,16 @@ class GazeTracker:
             intersection_x,_ = self.__gaze_intersection(l_eye,r_eye, context.l_eye_buff, context.r_eye_buff)
             l_point, l_buffor = self.__pupil(l_eye, self.eyeProcessorLeft,  intersection_x, context.l_pupil)
             r_point, r_buffor = self.__pupil(r_eye, self.eyeProcessorRight, intersection_x, context.r_pupil)
-            
+
             context.l_pupil = l_buffor
             context.r_pupil = r_buffor
 
             compound_point = np.array(((l_point + r_point)/2),dtype=np.uint32)
-        
+
             blink = l_eye.getBlink() or r_eye.getBlink()
             if blink != True:
                 context.gazeBuffor.add(compound_point)
-    
+
             self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                         context.roi,
                                                         context.edges,
@@ -146,7 +149,7 @@ class GazeTracker:
                                                         context.calibration,
                                                         (offset_x,offset_y)
                                                         )
-            
+
             context.roi = roi
             if cluster:
                 x,y,width,height = cluster.getBoundaries()
@@ -158,10 +161,10 @@ class GazeTracker:
             self.GContext.update(context_id,context)
 
             ###########################################################
-            
+
             fix = context.fixation.process(self.point_screen[0],self.point_screen[1])
             # this should prevent of sudden movement down when blinking - not perfect yet
-            
+
             if fix > fixation_freeze:
                 r = freeze_radius
                 if not isInside(self.freezed_point[0],self.freezed_point[1],r,self.point_screen[0],self.point_screen[1]):
@@ -187,16 +190,19 @@ class GazeTracker:
                             context_id)
 
         return event
-    
-    def get_contextes(self):
-        return self.finder.get_contextes()
 
-    def add_offset(self,x,y):
-        self.screen_man.push_window(x,y)
+    # def get_contextes(self):
+    #     """Function returning contextes"""
+        
+    #     return self.GContext.get_contextes()
+
+    # def add_offset(self,x,y):
+    #     """Function adding offsets to tracker"""
+
+    #     self.screen_man.push_window(x,y)
 
     def getFeatures(self,image):
+        """Function returning face landmarks"""
+
         face_mesh = self.finder.find(image)
-        return face_mesh
-        
-    def getHeadDirection(self):
-        return self.__headDir        
+        return face_mesh  
