@@ -1,3 +1,7 @@
+
+
+![PyPI - Downloads](https://img.shields.io/pypi/dm/eyeGestures)
+
 ```
 For enterprise avoiding GPL3 licensing there is commercial license!
 ```
