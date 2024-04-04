@@ -1,27 +1,39 @@
-import cv2
 import time
-import pickle
-import numpy as np
 import queue
+import pickle
 import platform
 import threading
-from typing import Callable, Tuple
+
+import cv2
+import numpy as np
 
 # Make predictions for new data points
 
+
 def timeit(func):
+    """
+    timeit
+    """
     def inner(*args, **kwargs):
+        """
+        inner
+        """
         start = time.time()
         ret = func(*args, **kwargs)
         print(f"Elapsed time: {time.time() - start}")
-        return ret 
+        return ret
     return inner
 
+
 def shape_to_np(shape, dtype="int"):
+    """
+    shape_to_np
+    """
     coords = np.zeros((68, 2), dtype=dtype)
     for i in range(0, 68):
         coords[i] = (shape.part(i).x, shape.part(i).y)
     return coords
+
 
 def make_image_grid(images, rows, cols):
     """
@@ -43,7 +55,8 @@ def make_image_grid(images, rows, cols):
 
     if len(images[0].shape) > 2:
         # Create a black canvas to draw the grid on
-        grid_image = np.zeros((img_h * rows, img_w * cols, images[0].shape[2]), dtype=np.uint8)
+        grid_image = np.zeros(
+            (img_h * rows, img_w * cols, images[0].shape[2]), dtype=np.uint8)
     else:
         grid_image = np.zeros((img_h * rows, img_w * cols), dtype=np.uint8)
 
@@ -53,21 +66,23 @@ def make_image_grid(images, rows, cols):
             break  # Stop if we have filled the grid
         row = i // cols
         col = i % cols
-        grid_image[row * img_h:(row + 1) * img_h, col * img_w:(col + 1) * img_w] = img
+        grid_image[row * img_h:(row + 1) * img_h, col *
+                   img_w:(col + 1) * img_w] = img
 
     return grid_image
 
 
 class var:
 
-    def __init__(self,var):
+    def __init__(self, var):
         self.__var = var
 
-    def set(self,var):
+    def set(self, var):
         self.__var = var
 
     def get(self):
         return self.__var
+
 
 class Buffor:
 
@@ -75,18 +90,18 @@ class Buffor:
         self.length = length
         self.__buffor = []
 
-    def add(self,var):
+    def add(self, var):
         if len(self.__buffor) >= self.length:
             self.__buffor.pop(0)
 
         self.__buffor.append(var)
 
-    def getAvg(self,lenght=0):
+    def getAvg(self, lenght=0):
         return np.sum(self.__buffor[-lenght:], axis=0) / len(self.__buffor[-lenght:])
 
     def getBuffor(self):
         return self.__buffor
-    
+
     def loadBuffor(self, buffor):
         self.__buffor = buffor
 
@@ -100,13 +115,16 @@ class Buffor:
         return len(self.__buffor)
 
 # Bufforless
-class VideoCapture:
 
-    def __init__(self, name, bufforless = True):
+
+class VideoCapture:
+    """Wrapper on openCV2 stream making it bufforless and adding camera search"""
+
+    def __init__(self, name, bufforless=True):
         self.bufforless = bufforless
         self.run = True
 
-        if isinstance(name,str):
+        if isinstance(name, str):
             if ".pkl" in name:
                 self.stream = False
             else:
@@ -126,8 +144,8 @@ class VideoCapture:
             with open(name, 'rb') as file:
                 self.frames = pickle.load(file)
 
-    def __openCam(self,name):
-        if isinstance(name,int):
+    def __openCam(self, name):
+        if isinstance(name, int):
             if "Windows" in platform.system():
                 self.cap = cv2.VideoCapture(name, cv2.CAP_DSHOW)
             else:
@@ -151,11 +169,12 @@ class VideoCapture:
                     self.q.get_nowait()
                 except queue.Empty:
                     pass
-            self.q.put((ret,frame))
+            self.q.put((ret, frame))
 
         self.run = False
 
     def read(self):
+        """Function returning latest frame"""
         if self.stream:
             return self.q.get()
         else:
@@ -164,4 +183,5 @@ class VideoCapture:
             return ((len(self.frames) >= 1), frame)
 
     def close(self):
+        """Function closing stream"""
         self.run = False

@@ -3,6 +3,8 @@
 import eyeGestures.screenTracker.dataPoints as dp
 from eyeGestures.Fixation import Fixation
 from eyeGestures.utils import Buffor
+
+
 class Contexter:
     """Class storing contextes"""
 
@@ -10,14 +12,14 @@ class Contexter:
         self.context = dict()
 
     def addContext(self, context_id, object):
-        """Function allowing to add new context to contexter"""     
+        """Function allowing to add new context to contexter"""
 
         if context_id not in self.context.keys():
             self.context[context_id] = object
             return True
         return False
 
-    def rmContext(self,context_id):
+    def rmContext(self, context_id):
         """Function allowing to removes context from contexter"""
 
         if context_id in self.context.keys():
@@ -25,20 +27,20 @@ class Contexter:
             return True
         return False
 
-    def getContext(self,context_id):
+    def getContext(self, context_id):
         """Function returning context based on id"""
 
         if context_id in self.context.keys():
             return self.context[context_id]
         return None
 
-    def updateContext(self,context_id,data):
+    def updateContext(self, context_id, data):
         """Function updating context with new data"""
 
         if context_id in self.context.keys():
             self.context[context_id] = data
             return True
-        self.addContext(context_id,data)
+        self.addContext(context_id, data)
         return True
 
     def getNumberContextes(self):
@@ -46,21 +48,22 @@ class Contexter:
 
         return len(self.context.keys())
 
+
 class Gcontext:
     """Helper class for Gcontext"""
 
     def __init__(self,
-                display,
-                roi,
-                edges,
-                cluster_boundaries,
-                gazeBuffor,
-                l_pupil,
-                r_pupil,
-                l_eye_buff,
-                r_eye_buff,
-                fixation,
-                calibration):
+                 display,
+                 roi,
+                 edges,
+                 cluster_boundaries,
+                 gazeBuffor,
+                 l_pupil,
+                 r_pupil,
+                 l_eye_buff,
+                 r_eye_buff,
+                 fixation,
+                 calibration):
 
         self.roi = roi
         self.edges = edges
@@ -74,6 +77,7 @@ class Gcontext:
         self.fixation = fixation
         self.calibration = calibration
 
+
 class GazeContext:
     """Context wrapper for gaze tracker application"""
 
@@ -83,18 +87,17 @@ class GazeContext:
     def get(self,
             id,
             display,
-            roi = dp.ScreenROI(285,105,80,15),
-            edges = dp.ScreenROI(285,105,80,15),
-            cluster_boundaries = dp.ScreenROI(225,125,20,20),
-            buffor  = Buffor(200),
-            l_pupil = Buffor(20),
-            r_pupil = Buffor(20),
-            l_eye_buff = Buffor(20),
-            r_eye_buff = Buffor(20),
-            fixation = Fixation(0,0,100),
-            calibration = False):
+            roi=dp.ScreenROI(285, 105, 80, 15),
+            edges=dp.ScreenROI(285, 105, 80, 15),
+            cluster_boundaries=dp.ScreenROI(225, 125, 20, 20),
+            buffor=Buffor(200),
+            l_pupil=Buffor(20),
+            r_pupil=Buffor(20),
+            l_eye_buff=Buffor(20),
+            r_eye_buff=Buffor(20),
+            fixation=Fixation(0, 0, 100),
+            calibration=False):
         """Function creating new context or returning if id already exists"""
-
 
         context = Gcontext(display,
                            roi,
@@ -108,14 +111,14 @@ class GazeContext:
                            fixation,
                            calibration)
 
-        if self.contexter.addContext(id,context):
+        if self.contexter.addContext(id, context):
             return context
         else:
             return self.contexter.getContext(id)
 
     def update(self,
-                id,
-                context):
+               id,
+               context):
         """Function updating existing context"""
 
-        self.contexter.updateContext(id,context)
+        self.contexter.updateContext(id, context)

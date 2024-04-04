@@ -2,6 +2,7 @@ from sklearn.cluster import DBSCAN
 import numpy as np
 
 class Cluster:
+    """Class representing one ROI cluster"""
 
     def __init__(self, label, points):
         
@@ -18,6 +19,8 @@ class Cluster:
         self.h =  h
 
     def centroid(self,points):
+        """Function calculating and returning center of ROI"""
+        
         x,y,w,h = self.boundaries(points)
 
         c_x, c_y = (x+w/2,y+h/2)
@@ -28,6 +31,7 @@ class Cluster:
         return (c_x, c_y)
 
     def boundaries(self,points):
+        """Function calculating and returning boundaries of cluster"""
 
         x = np.min(points[:,0]) 
         width = abs(np.max(points[:,0]) - x) 
@@ -38,12 +42,15 @@ class Cluster:
         return (x,y,width,height)
     
     def getBoundaries(self):
+        """Function returning boundaries of cluster"""
         return (self.x,self.y,self.w,self.h)
     
     def getCenter(self):
+        """Function returning center of ROI"""
         return (self.__centroid)
     
 class Clusters:
+    """Algorithm dividing tracked points into clusters so it can be estimated were is center of ROI"""
 
     def __init__(self,buffer):
         buffer = np.array(buffer)
@@ -72,10 +79,13 @@ class Clusters:
             self.main_cluster = None
 
     def clearPoints(self):
+        """[Possibly dead code] Function reseting cluster"""
         self.head = 0
 
     def getClusters(self):
+        """Function returning all clusters"""
         return self.clusters
     
     def getMainCluster(self):
+        """Function returning main clusters"""
         return self.main_cluster

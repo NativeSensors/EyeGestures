@@ -1,4 +1,6 @@
 """Module providing a Gaze Events."""
+
+
 class Gevent:
     """Class representing gaze event, with tracked points scaled to screen, blink and fixation."""
 
@@ -17,7 +19,7 @@ class Gevent:
         self.fixation = fixation
         self.point_screen = point_screen
 
-        ## ALL DEBUG DATA
+        # ALL DEBUG DATA
         self.l_eye = l_eye
         self.r_eye = r_eye
         self.screen_man = screen_man
