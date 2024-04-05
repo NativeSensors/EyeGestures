@@ -1,15 +1,18 @@
+import os
+import cv2
 import sys
 
 import pyautogui
 from screeninfo import get_monitors
 from PySide2.QtWidgets import QApplication
-from lab.pupillab import Worker
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(f'{dir_path}\\..')
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
 from appUtils.EyeGestureWidget import EyeGestureWidget
 from appUtils.CalibrationWidget import CalibrationWidget
-
-import cv2
+from lab.pupillab import Worker
 
 from appUtils.dot_windows import WindowsCursor
 
@@ -50,23 +53,23 @@ class Lab:
         self.calibrate_right = False
         self.calibrate_top = False
         self.calibrate_bottom = False
-        self.calibrated = False
+        self.calibration = False
 
     def calibrate(self,x,y,fix):
         fix_thresh = 0.4
 
-        if x <= self.monitor.x + 30 and not self.calibrated and fix_thresh < fix:
+        if x <= self.monitor.x + 30 and not self.calibration and fix_thresh < fix:
             self.calibrate_left = True
             self.calibration_widget.disappear_pill("left")
-        if x >= self.monitor.width + self.monitor.x - 30 and not self.calibrated and fix_thresh < fix:
+        if x >= self.monitor.width + self.monitor.x - 30 and not self.calibration and fix_thresh < fix:
             self.calibrate_right = True
             self.calibration_widget.disappear_pill("right")
 
 
-        if y <= self.monitor.y + 30 and not self.calibrated and fix_thresh < fix:
+        if y <= self.monitor.y + 30 and not self.calibration and fix_thresh < fix:
             self.calibrate_top = True
             self.calibration_widget.disappear_pill("top")
-        if y >= self.monitor.height + self.monitor.y - 30 and not self.calibrated and fix_thresh < fix:
+        if y >= self.monitor.height + self.monitor.y - 30 and not self.calibration and fix_thresh < fix:
             self.calibrate_bottom = True
             self.calibration_widget.disappear_pill("bottom")
 
@@ -75,9 +78,9 @@ class Lab:
             and self.calibrate_top
             and self.calibrate_left
             and self.calibrate_right
-            and not self.calibrated):
+            and not self.calibration):
 
-            self.calibrated = True
+            self.calibration = True
             self.calibrate_bottom = False
             self.calibrate_top = False
             self.calibrate_left = False
@@ -86,15 +89,11 @@ class Lab:
             self.stopCalibration()
 
     def startCalibration(self):
-        self.calibrated = False
-        self.gestures.start_calibration()
-        self.calibration_widget.show_again()
-        self.eyegesture_widget.set_calibrate()
+        self.calibration = True
         pass
 
     def stopCalibration(self):
-        self.gestures.stop_calibration()
-        self.calibration_widget.disappear()
+        self.calibration = False
         pass
 
     def on_quit(self):
@@ -110,7 +109,7 @@ class Lab:
             radius = int(60 - (50 * event.fixation))
             self.dot_widget.set_radius(radius)
 
-            if self.calibrated:
+            if self.calibration:
                 if event.fixation > 0.7:
                     pyautogui.moveTo(event.point_screen[0] + radius/2, event.point_screen[1] + radius/2)
 
