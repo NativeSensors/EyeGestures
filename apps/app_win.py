@@ -101,7 +101,17 @@ class Lab:
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)
-        event = self.gestures.estimate(frame, 0.7, 200)
+        cursor_x, cursor_y = 0, 0
+        event = self.gestures.estimate(
+            frame,
+            "main",
+            self.calibrate, # set calibration - switch to False to stop calibration
+            self.monitor.width,
+            self.monitor.height,
+            0, 0, 0.8,10)
+
+        cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+        # frame = pygame.transform.scale(frame, (400, 400))
 
         if not event is None:
 
@@ -111,14 +121,13 @@ class Lab:
 
             if self.calibration:
                 if event.fixation > 0.7:
-                    pyautogui.moveTo(event.point_screen[0] + radius/2, event.point_screen[1] + radius/2)
+                    pyautogui.moveTo(cursor_x + radius/2,  cursor_y + radius/2)
 
                 if event.blink:
-                    pyautogui.moveTo(event.point_screen[0] + radius/2, event.point_screen[1] + radius/2)
+                    pyautogui.moveTo(cursor_x + radius/2,  cursor_y + radius/2)
                     pyautogui.click()
 
-            self.dot_widget.move(int(event.point_screen[0] ),int(event.point_screen[1]))
-            self.calibrate(event.point_screen[0], event.point_screen[1], event.fixation)
+            self.dot_widget.move(int(cursor_x),int(cursor_y))
 
     def run(self):
         ret = True
