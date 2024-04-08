@@ -13,8 +13,97 @@ from eyeGestures.eyegestures import EyeGestures
 from appUtils.EyeGestureWidget import EyeGestureWidget
 from appUtils.CalibrationWidget import CalibrationWidget
 from lab.pupillab import Worker
-
 from appUtils.dot_windows import WindowsCursor
+
+class CalibrationTypes:
+    LEFT = "left"
+    RIGHT = "right"
+    TOP = "top"
+    BOTTOM = "bottom"
+
+class Calibrator:
+
+    def __init__(self,width,height,start_x, start_y, show, disappear):
+        self.width = width
+        self.height = height
+        self.start_x = start_x
+        self.start_y = start_y
+        self.calibration_margin = 20
+        self.calibration_steps = []
+        self.__set_order()
+        self.show = show
+        self.disappear = disappear
+
+        self.calibrate_left = False
+        self.calibrate_right = False
+        self.calibrate_top = False
+        self.calibrate_bottom = False
+
+        self.calibration = False
+        self.drawn = False
+        pass
+
+    def display_next_calibration_target(self):
+        if len(self.calibration_steps) > 0 and not self.drawn:
+            self.drawn = True
+            self.show(self.calibration_steps[0])
+
+    def __add_left(self):
+        self.calibration_steps.append(CalibrationTypes.LEFT)
+        return self
+    def __add_right(self):
+        self.calibration_steps.append(CalibrationTypes.RIGHT)
+        return self
+
+    def __add_top(self):
+        self.calibration_steps.append(CalibrationTypes.TOP)
+        return self
+
+    def __add_bottom(self):
+        self.calibration_steps.append(CalibrationTypes.BOTTOM)
+        return self
+
+    def __set_order(self):
+        if self.start_x < self.width/2 and CalibrationTypes.LEFT not in self.calibration_steps:
+            self.__add_left().__add_right()
+        elif self.start_x > self.width/2 and CalibrationTypes.RIGHT not in self.calibration_steps:
+            self.__add_right().__add_left()
+
+        if self.start_y < self.height/2 and CalibrationTypes.TOP not in self.calibration_steps:
+            self.__add_top().__add_bottom()
+        elif self.start_y > self.height/2 and CalibrationTypes.BOTTOM not in self.calibration_steps:
+            self.__add_bottom().__add_top()
+
+    def calibrate(self,x,y,fix):
+
+        if len(self.calibration_steps) <= 0:
+            return False
+
+        self.display_next_calibration_target()
+        fixation_thresh = 0.7
+        if CalibrationTypes.LEFT == self.calibration_steps[0] and x < self.calibration_margin and fix > fixation_thresh:
+            self.disappear(self.calibration_steps[0])
+            self.calibration_steps.pop(0)
+            self.drawn = False
+            return True
+        elif CalibrationTypes.RIGHT == self.calibration_steps[0] and x > self.width - self.calibration_margin and fix > fixation_thresh:
+            self.disappear(self.calibration_steps[0])
+            self.calibration_steps.pop(0)
+            self.drawn = False
+            return True
+        elif CalibrationTypes.TOP == self.calibration_steps[0] and y < self.calibration_margin and fix > fixation_thresh:
+            self.disappear(self.calibration_steps[0])
+            self.calibration_steps.pop(0)
+            self.drawn = False
+            return True
+        elif CalibrationTypes.BOTTOM == self.calibration_steps[0] and y > self.height - self.calibration_margin and fix > fixation_thresh:
+            self.disappear(self.calibration_steps[0])
+            self.calibration_steps.pop(0)
+            self.drawn = False
+            return True
+
+        return False
+
 
 class Lab:
 
@@ -25,9 +114,9 @@ class Lab:
         self.gestures = EyeGestures(285,115)
 
         self.calibration_widget = CalibrationWidget()
+        self.calibration_widget.disappear()
         self.eyegesture_widget = EyeGestureWidget()
         self.eyegesture_widget.show()
-        self.startCalibration()
 
         self.dot_widget = WindowsCursor(50, 2)
 
@@ -39,62 +128,19 @@ class Lab:
         self.eyegesture_widget.add_close_event(self.dot_widget.close_event)
 
         self.eyegesture_widget.set_disable_btn(
-            self.stopCalibration
+            None
         )
         self.eyegesture_widget.set_calibrate_btn(
-            self.startCalibration
+            None
         )
 
         self.__run = True
 
         self.worker = Worker(self.run)
 
-        self.calibrate_left = False
-        self.calibrate_right = False
-        self.calibrate_top = False
-        self.calibrate_bottom = False
+        self.calibrator = None
         self.calibration = False
-
-    def calibrate(self,x,y,fix):
-        fix_thresh = 0.4
-
-        if x <= self.monitor.x + 30 and not self.calibration and fix_thresh < fix:
-            self.calibrate_left = True
-            self.calibration_widget.disappear_pill("left")
-        if x >= self.monitor.width + self.monitor.x - 30 and not self.calibration and fix_thresh < fix:
-            self.calibrate_right = True
-            self.calibration_widget.disappear_pill("right")
-
-
-        if y <= self.monitor.y + 30 and not self.calibration and fix_thresh < fix:
-            self.calibrate_top = True
-            self.calibration_widget.disappear_pill("top")
-        if y >= self.monitor.height + self.monitor.y - 30 and not self.calibration and fix_thresh < fix:
-            self.calibrate_bottom = True
-            self.calibration_widget.disappear_pill("bottom")
-
-
-        if( self.calibrate_bottom
-            and self.calibrate_top
-            and self.calibrate_left
-            and self.calibrate_right
-            and not self.calibration):
-
-            self.calibration = True
-            self.calibrate_bottom = False
-            self.calibrate_top = False
-            self.calibrate_left = False
-            self.calibrate_right = False
-
-            self.stopCalibration()
-
-    def startCalibration(self):
-        self.calibration = True
-        pass
-
-    def stopCalibration(self):
-        self.calibration = False
-        pass
+        self.iterations = 0
 
     def on_quit(self):
         self.__run = False
@@ -105,12 +151,22 @@ class Lab:
         event = self.gestures.estimate(
             frame,
             "main",
-            self.calibrate, # set calibration - switch to False to stop calibration
+            self.calibration, # set calibration - switch to False to stop calibration
             self.monitor.width,
             self.monitor.height,
             0, 0, 0.8,10)
 
         cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+
+        if self.iterations < 3:
+            self.iterations += 1
+            return None
+
+        if self.calibrator:
+            self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
+        else:
+            self.calibrator = Calibrator(self.monitor.width,self.monitor.height,cursor_x,cursor_y,self.calibration_widget.show_pill,self.calibration_widget.disappear_pill)
+            self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
         # frame = pygame.transform.scale(frame, (400, 400))
 
         if not event is None:

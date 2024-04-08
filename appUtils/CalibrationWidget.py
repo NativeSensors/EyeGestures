@@ -9,7 +9,7 @@ from screeninfo import get_monitors
 class WarningPill(QWidget):
     def __init__(self, position, text, angle = 0):
         super(WarningPill, self).__init__()
-        
+
         width = 150
         height= 40
 
@@ -71,6 +71,10 @@ class CalibrationWidget():
         for pill in self.warning_pills:
             pill.disappear()
 
+    def show_pill(self,pill):
+        self.warning_pills[
+            self.dict[pill]].show()
+
     def show_again(self):
         for pill in self.warning_pills:
-            pill.show()
+            pill.show_again()
