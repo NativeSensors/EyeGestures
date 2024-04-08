@@ -18,7 +18,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pylint
-        pip install beautifulsoup4 keyboard matplotlib mediapipe numpy Pillow PyAutoGUI pycocotools pygame pynput PySide2 pytest scikit_learn scipy screeninfo setuptools skimage xlwt
+        pip install beautifulsoup4 keyboard matplotlib mediapipe numpy Pillow PyAutoGUI pycocotools pygame pynput PySide2 pytest scikit_learn scipy screeninfo setuptools scikit-image xlwt
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files 'eyeGestures/*.py')
