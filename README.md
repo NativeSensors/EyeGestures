@@ -69,6 +69,11 @@ Note: you may need to change version of package `eyegestures-X.X.X`.
 python3 examples/simple_example.py
 ```
 
+### 🪟 Run Windows App 
+```
+python3 apps/win_app.py
+```
+
 ### 🔧 Develop 
 
 To begin, you instantiate an EyeGestures object with initial Region of Interest (RoI) parameters. These parameters define a preliminary focus area for the tracker within a virtual 500x500 screen space, which helps in locating the user's gaze more efficiently.
