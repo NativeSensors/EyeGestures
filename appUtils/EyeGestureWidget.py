@@ -1,25 +1,11 @@
 import sys
-from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel
+from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar
 from PySide2.QtGui import QPixmap, QPalette, QColor, QPainterPath, QRegion, QMouseEvent
 from PySide2.QtCore import Qt, QRectF, QMargins, QPoint
 from PySide2.QtGui import QPainter
 from PySide2.QtCore import QByteArray
 from PySide2.QtSvg import QSvgRenderer
 from screeninfo   import get_monitors
-
-class SvgWidget(QWidget):
-    def __init__(self, svg_data, parent=None):
-        super(SvgWidget, self).__init__(parent)
-        self.svg_renderer = QSvgRenderer(QByteArray(svg_data.encode()))
-
-    def set_svg_data(self, svg_data):
-        self.svg_renderer.load(QByteArray(svg_data.encode()))
-        self.update()
-
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        self.svg_renderer.render(painter)
 
 class EyeGestureWidget(QWidget):
     def __init__(self):
@@ -31,8 +17,6 @@ class EyeGestureWidget(QWidget):
         postion_x = int(self.monitor.width/2) + self.monitor.x - 110
         postion_y = 45 + self.monitor.y
 
-        # Set window flags to remove title bar and make the window frameless
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
         # Set dark theme
         palette = QPalette()
@@ -51,53 +35,76 @@ class EyeGestureWidget(QWidget):
         self.setPalette(palette)
 
         # Window positioning
-        self.setGeometry(100, 100, 1000, 100)  # Adjust size as needed
+        self.setGeometry(100, 100, 1000, 700)  # Adjust size as needed
         self.move_to_center()
 
+        self.setWindowTitle("EyeGestures")
         # Buttons
-        self.calibrate_btn = QPushButton('Calibrate')
-        self.disable_btn = QPushButton('Disable')
         self.close_btn = QPushButton('Close')
         self.close_btn.clicked.connect(self.close_event)
 
-        main_layout = QHBoxLayout()
+        self.label_name = QLabel("EyeGestures")
+        # Set text alignment to center
+        self.label_name.setAlignment(Qt.AlignCenter)
+
+        info_params_container = QWidget()
+        info_params_container_layout = QHBoxLayout()
+        info_params_container_layout.setAlignment(Qt.AlignHCenter)
+        info_params_container.setLayout(info_params_container_layout)
+
+        self.label_fixation_threshold = QLabel("Fixation: 0.8")
+        self.label_fixation_radius  = QLabel("Distance: 500px")
+
+        info_params_container_layout.addWidget(self.label_fixation_threshold)
+        info_params_container_layout.addWidget(self.label_fixation_radius)
+
+
+        progress_bar_container = QWidget()
+        progress_bar_container_layout = QHBoxLayout()
+        progress_bar_container_layout.setAlignment(Qt.AlignHCenter)
+        progress_bar_container.setLayout(progress_bar_container_layout)
+
+        self.fixation_bar = QProgressBar()
+        self.fixation_bar.setValue(40)  # Set initial value
+        self.fixation_bar.setFixedHeight(100)
+        self.fixation_bar.setOrientation(Qt.Orientation.Vertical)
+        self.fixation_bar.setTextVisible(False)
+        self.fixation_bar.setStyleSheet("""
+                                        QProgressBar {
+                                            background-color: #06020f;
+                                            border-radius: 10px; /* Adjust this value to change the roundness */
+                                        }
+                                        QProgressBar::chunk {
+                                            background-color: #8b125c;
+                                            border-radius: 10px; /* Adjust this value to change the roundness */
+                                        }
+                                        """)
+
+        self.label_fixation  = QLabel("Fixation")
+        self.label_fixation_level  = QLabel("40")
+        progress_bar_container_layout.addWidget(self.fixation_bar)
+        progress_bar_container_layout.addWidget(self.label_fixation)
+        progress_bar_container_layout.addWidget(self.label_fixation_level)
+
+
+        # Set font size
+        font = self.label_name.font()
+        font.setPointSize(20) # You can adjust the font size as per your requirement
+        self.label_name.setFont(font)
+
+        main_layout = QVBoxLayout()
         self.setLayout(main_layout)
-        # Image
-        self.image_label = QLabel(self)
 
-        red = "#ac5453"
-        self.color = red
-        svg_data =  f"""
-            <svg width="15" height="15" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <radialGradient id="iris-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                <!-- Gradient stops for the iris -->
-                </radialGradient>
-            </defs>
-            <circle cx="7.5" cy="7.5" r="6" fill="#c5c5c5" /> <!-- Sclera -->
-            <circle cx="7.5" cy="7.5" r="5.2" fill="#141415" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="4.8" fill="{self.color}" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="3.5" fill="#c5c5c5" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="3" fill="#141415" /> <!-- Pupil -->
-            <circle cx="10" cy="6" r="1.5" fill="#c5c5c5" /> <!-- Light -->
-            </svg>
-            """
-        
-        self.svgWidget = SvgWidget(svg_data)
-        print(f"self.svgWidget: {self.svgWidget}")
         # self.image_label.setPixmap(scaled_pixmap)
-
-        main_layout.addWidget(self.svgWidget)
-        main_layout.addWidget(self.calibrate_btn)
-        main_layout.addWidget(self.disable_btn)
+        main_layout.addWidget(self.label_name)
+        main_layout.addWidget(info_params_container)
+        main_layout.addWidget(progress_bar_container)
         main_layout.addWidget(self.close_btn)
 
-        self.style_buttons(self.calibrate_btn
-                           ,self.disable_btn
-                           ,self.close_btn
-                           )
 
-        self.adjustSize()
+        self.style_buttons(self.close_btn)
+
+        # this sets windows frameless
         self.resize(400,self.frameGeometry().height())
         radius = 10.0
         path = QPainterPath()
@@ -113,7 +120,7 @@ class EyeGestureWidget(QWidget):
         self.close_events.append(clsoe_callback)
 
     def close_event(self):
-    
+
         for event in self.close_events:
             event()
 
@@ -162,41 +169,9 @@ class EyeGestureWidget(QWidget):
     def mouseReleaseEvent(self, event: QMouseEvent):
         self.oldPos = None
 
-    def updateEye(self):
-        svg_data =  f"""
-            <svg width="15" height="15" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <radialGradient id="iris-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                <!-- Gradient stops for the iris -->
-                </radialGradient>
-            </defs>
-            <circle cx="7.5" cy="7.5" r="6" fill="#c5c5c5" /> <!-- Sclera -->
-            <circle cx="7.5" cy="7.5" r="5.2" fill="#141415" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="4.8" fill="{self.color}" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="3.5" fill="#c5c5c5" /> <!-- Iris -->
-            <circle cx="7.5" cy="7.5" r="3" fill="#141415" /> <!-- Pupil -->
-            <circle cx="10" cy="6" r="1.5" fill="#c5c5c5" /> <!-- Light -->
-            </svg>
-            """
-        self.svgWidget.set_svg_data(svg_data)
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    eyegesture_widget = EyeGestureWidget()
+    eyegesture_widget.show()
 
-    def set_calibrate_btn(self,callback):
-        self.calibrate_btn.clicked.connect(callback)
-
-    def set_disable_btn(self,callback):
-        self.disable_btn.clicked.connect(callback)
-
-    def set_calibrate(self):
-        yellow = "#e6b505"
-        self.color = yellow
-        self.updateEye()
-        
-    def set_ready(self):
-        green = "#0e6711"
-        self.color = green
-        self.updateEye()
-        
-    def set_disconnected(self):
-        red = "#ac5453"
-        self.color = red
-        self.updateEye()
+    sys.exit(app.exec_())

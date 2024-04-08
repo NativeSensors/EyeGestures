@@ -127,13 +127,6 @@ class Lab:
         self.eyegesture_widget.add_close_event(self.cap.close)
         self.eyegesture_widget.add_close_event(self.dot_widget.close_event)
 
-        self.eyegesture_widget.set_disable_btn(
-            None
-        )
-        self.eyegesture_widget.set_calibrate_btn(
-            None
-        )
-
         self.__run = True
 
         self.worker = Worker(self.run)
