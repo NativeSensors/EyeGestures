@@ -5,6 +5,8 @@
 ```
 For enterprise avoiding GPL3 licensing there is commercial license!
 ```
+We offer custom integration and managed services. For businesses requiring invoices message us `contact@eyegestures.com`.
+
 ## 👁️ EyeGestures
 
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eyetracking and eyedriven interfaces without requirement of obtaining expensive hardware.
