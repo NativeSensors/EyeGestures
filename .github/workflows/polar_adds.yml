@@ -26,7 +26,7 @@ polarify:
 
     steps:
     - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout
 
     - name: Polarify
         uses: polarsource/actions/polarify@main
