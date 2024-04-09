@@ -46,7 +46,11 @@ Follow us on polar (it costs nothing but you help project!):
 ```
 Sponsor us and we can add your link, banner or other promo materials!
 ```
-<!-- POLAR type=ads subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+
+
+
+<!-- POLAR-END id=eizdelwu -->
 
 ### 📢 Announcements:
 
