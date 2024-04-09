@@ -37,5 +37,6 @@ jobs:
     
         - uses: stefanzweifel/git-auto-commit-action@v4
           with:
+            token: ${{ secrets.PAT_EYEGESTURES }}
             commit_message: Update polar comments
             branch: main
