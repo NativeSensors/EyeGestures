@@ -57,6 +57,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 - [Main page](https://eyegestures.com/)
 - [Game demo](https://eyegestures.com/game)
 - [Cinema demo](https://eyegestures.com/cinema)
+- [Restaurant](https://eyegestures.com/restaurant)
 
 ### 💻 Install
 ```
