@@ -26,7 +26,9 @@ jobs:
     
         steps:
         - name: Check out code
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
+          with:
+            token: ${{ secrets.PAT_EYEGESTURES }}
     
         - name: Polarify
           uses: polarsource/actions/polarify@main
@@ -35,7 +37,7 @@ jobs:
           env:
             POLAR_API_TOKEN: ${{ secrets.POLAR_API_TOKEN }}
     
-        - uses: stefanzweifel/git-auto-commit-action@v4
+        - uses: stefanzweifel/git-auto-commit-action@v5
           with:
             token: ${{ secrets.PAT_EYEGESTURES }}
             commit_message: Update polar comments
