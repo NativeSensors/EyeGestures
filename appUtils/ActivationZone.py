@@ -378,8 +378,8 @@ class ROI:
         else:
             if event.x < self.x + margin:
                 self.clean_up(self.canvas,*self.rectangle_params)
-                self.x -= dx
-                self.width += dx
+                self.x += dx
+                self.width -= dx
                 self.update_dimensions(
                     self.x,
                     self.y,
@@ -395,8 +395,8 @@ class ROI:
                     self.height)
             if event.y < self.y + margin:
                 self.clean_up(self.canvas,*self.rectangle_params)
-                self.y -= dy
-                self.width += dx
+                self.y += dy
+                self.height -= dy
                 self.update_dimensions(
                     self.x,
                     self.y,
@@ -435,6 +435,7 @@ class RoIMan:
         self.root.title("Rounded Rectangle")
         self.root.attributes("-alpha", 0.5)
         self.root.attributes("-transparentcolor","white")
+        self.root.attributes('-topmost',True)
         monitor = get_monitors()[0]
         self.canvas = tk.Canvas(self.root, width=monitor.width-5, height=monitor.height-5, bg="white")
         self.canvas.pack(fill="both", expand=True)
