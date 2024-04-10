@@ -211,6 +211,10 @@ class ROI:
 
         self.canvas = canvas
         self.root = root
+        self.resizing = False
+
+    def get_rectangle(self):
+        return self.x,self.y,self.width,self.height
 
     def update_position(self,x,y):
         self.x = x
@@ -230,12 +234,6 @@ class ROI:
             self.border_radius,
             fill="lightblue")
         self.rectangle = self.rectangle_params[0]
-        self.canvas.tag_bind(self.rectangle, "<Enter>", self.on_hover)
-        self.canvas.tag_bind(self.rectangle, "<Leave>", self.on_leave)
-        self.canvas.tag_bind(self.rectangle, "<Button-1>", self.on_click)
-        self.canvas.tag_bind(self.rectangle, "<ButtonPress-1>", self.on_drag_start)
-        self.canvas.tag_bind(self.rectangle, "<B1-Motion>", self.on_drag)
-        self.canvas.bind("<Motion>", self.on_hover)
 
     def remove(self):
         if self.rectangle_params != ():
@@ -278,6 +276,15 @@ class ROI:
 
         # Create the rectangle
         rectangle = canvas.create_polygon(points, **kwargs, smooth=True)
+
+        canvas.tag_bind(rectangle, "<Enter>", self.on_hover)
+        canvas.tag_bind(rectangle, "<Leave>", self.on_leave)
+        # canvas.tag_bind(rectangle, "<ButtonPress-1>", self.on_drag_start)
+        canvas.bind("<B1-Motion>", self.on_drag)
+        canvas.bind("<ButtonPress-1>", self.on_drag_start)
+        canvas.bind("<ButtonRelease-1>", self.on_release)
+        canvas.bind("<Motion>", self.on_hover)
+
         return (rectangle, arc1, arc2, arc3, arc4)
 
     def on_hover(self,event):
@@ -314,20 +321,109 @@ class ROI:
     def on_leave(self,event):
         self.canvas.itemconfig(self.rectangle, fill="lightblue")
 
-    def on_click(self,event):
-        pass
+    def on_release(self,event):
+        self.resizing = False
 
     def on_drag_start(self,event):
         self.drag_start_x = event.x
         self.drag_start_y = event.y
 
+        margin = 50
+        if (self.x < event.x and event.x < self.x  + margin) \
+            and \
+            (self.y < event.y and event.y < self.y  + margin):
+            self.resizing = True
+        elif (self.x < event.x and event.x < self.x  + margin) \
+            and \
+            (self.y + self.height - margin < event.y and event.y < self.y + self.height):
+            self.resizing = True
+        elif (self.x + self.width - margin < event.x and event.x < self.x + self.width) \
+            and \
+            (self.y < event.y and event.y < self.y  + margin):
+            self.resizing = True
+        elif (self.x + self.width - margin < event.x and event.x < self.x + self.width) \
+            and \
+            (self.y + self.height - margin < event.y and event.y < self.y + self.height):
+            self.resizing = True
+        elif self.x < event.x and event.x < self.x  + margin:
+            self.resizing = True
+        elif self.x + self.width - margin < event.x and event.x < self.x + self.width:
+            self.resizing = True
+        elif self.y < event.y and event.y < self.y  + margin:
+            self.resizing = True
+        elif self.y + self.height - margin < event.y and event.y < self.y + self.height:
+            self.resizing = True
+        print(f"self.resizing: {self.resizing}")
+
+
+    def resize_rectangle(self, event, handle):
+        pass
+
     def on_drag(self,event):
+        print("pressing down")
+        margin = 50
         dx = event.x - self.drag_start_x
         dy = event.y - self.drag_start_y
-        self.canvas.move(self.rectangle, dx, dy)
-        self.update_position(self.x + dx,self.y + dy)
+
+        if not self.resizing:
+            self.canvas.move(self.rectangle, dx, dy)
+            self.update_position(self.x + dx,self.y + dy)
+        else:
+            print(f"dx: {dx} dy: {dy}")
+            if event.x < self.x + margin:
+                self.clean_up(self.canvas,*self.rectangle_params)
+                self.x -= dx
+                self.width += dx
+                self.rectangle_params = self.create_rounded_rectangle(
+                    self.canvas,
+                    self.x,
+                    self.y,
+                    self.width,
+                    self.height,
+                    self.border_radius,
+                    fill="lightblue")
+                self.rectangle = self.rectangle_params[0]
+            elif self.x + self.width - margin < event.x:
+                self.clean_up(self.canvas,*self.rectangle_params)
+                self.width += dx
+                self.rectangle_params = self.create_rounded_rectangle(
+                    self.canvas,
+                    self.x,
+                    self.y,
+                    self.width,
+                    self.height,
+                    self.border_radius,
+                    fill="lightblue")
+                self.rectangle = self.rectangle_params[0]
+            if event.y < self.y + margin:
+                self.clean_up(self.canvas,*self.rectangle_params)
+                self.y -= dy
+                self.width += dx
+                self.rectangle_params = self.create_rounded_rectangle(
+                    self.canvas,
+                    self.x,
+                    self.y,
+                    self.width,
+                    self.height,
+                    self.border_radius,
+                    fill="lightblue")
+                self.rectangle = self.rectangle_params[0]
+            elif self.y + self.height - margin < event.y:
+                self.clean_up(self.canvas,*self.rectangle_params)
+                self.height += dy
+                self.rectangle_params = self.create_rounded_rectangle(
+                    self.canvas,
+                    self.x,
+                    self.y,
+                    self.width,
+                    self.height + dy,
+                    self.border_radius,
+                    fill="lightblue")
+                self.rectangle = self.rectangle_params[0]
+
         self.drag_start_x = event.x
         self.drag_start_y = event.y
+
 
 class RoIPainter:
 
