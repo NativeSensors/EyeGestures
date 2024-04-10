@@ -124,17 +124,17 @@ class RegionOfInterest(QWidget):
 
 
 class AceeptRemoveWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, clear_up_cb = lambda: None):
         super().__init__()
 
         self.x = 0
         self.y = 0
+        self.clear_up_cb = clear_up_cb
 
         # Set up the window attributes
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-        # self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-
+    
         layout = QHBoxLayout(self)
         layout.setSpacing(0)
 
@@ -177,7 +177,7 @@ class AceeptRemoveWidget(QWidget):
 
         # Create Close button with close icon
         close_button = QPushButton(QtGui.QIcon.fromTheme("dialog-close"), "❌")
-        close_button.clicked.connect(self.close)
+        close_button.clicked.connect(self.clear_up)
         close_button.setStyleSheet(
             """
             QPushButton {
@@ -195,10 +195,14 @@ class AceeptRemoveWidget(QWidget):
             """)  # Remove padding and margin
         layout.addWidget(close_button)
 
+    def clear_up(self):
+        self.clear_up_cb()
+        print("cleared up")
+        self.close()
 
 class ROI:
 
-    def __init__(self,canvas,root):
+    def __init__(self,canvas,root,dimensions_updated_cb = lambda x,y,width,height : None):
         self.x = 0
         self.y = 0
         self.width = 0
@@ -208,6 +212,7 @@ class ROI:
         self.border_radius = 20
         self.rectangle_params = ()
         self.rectangle = None
+        self.dimensions_updated_cb = dimensions_updated_cb
 
         self.canvas = canvas
         self.root = root
@@ -219,10 +224,15 @@ class ROI:
     def update_position(self,x,y):
         self.x = x
         self.y = y
+        self.dimensions_updated_cb(x,y,self.width,self.height)
+        self.update_dimensions(x,y,self.width,self.height)
 
-    def update_dimensions(self,width,height):
-        self.width  = width
+    def update_dimensions(self,x,y,width,height):
+        self.x = x
+        self.y = y
+        self.width = width
         self.height = height
+
         if self.rectangle_params != ():
             self.clean_up(self.canvas,*self.rectangle_params)
         self.rectangle_params = self.create_rounded_rectangle(
@@ -234,8 +244,11 @@ class ROI:
             self.border_radius,
             fill="lightblue")
         self.rectangle = self.rectangle_params[0]
+        self.dimensions_updated_cb(x,y,width,height)
+
 
     def remove(self):
+        print("calling remove")
         if self.rectangle_params != ():
             self.clean_up(self.canvas,*self.rectangle_params)
 
@@ -353,14 +366,8 @@ class ROI:
             self.resizing = True
         elif self.y + self.height - margin < event.y and event.y < self.y + self.height:
             self.resizing = True
-        print(f"self.resizing: {self.resizing}")
-
-
-    def resize_rectangle(self, event, handle):
-        pass
 
     def on_drag(self,event):
-        print("pressing down")
         margin = 50
         dx = event.x - self.drag_start_x
         dy = event.y - self.drag_start_y
@@ -369,90 +376,115 @@ class ROI:
             self.canvas.move(self.rectangle, dx, dy)
             self.update_position(self.x + dx,self.y + dy)
         else:
-            print(f"dx: {dx} dy: {dy}")
             if event.x < self.x + margin:
                 self.clean_up(self.canvas,*self.rectangle_params)
                 self.x -= dx
                 self.width += dx
-                self.rectangle_params = self.create_rounded_rectangle(
-                    self.canvas,
+                self.update_dimensions(
                     self.x,
                     self.y,
                     self.width,
-                    self.height,
-                    self.border_radius,
-                    fill="lightblue")
-                self.rectangle = self.rectangle_params[0]
+                    self.height)
             elif self.x + self.width - margin < event.x:
                 self.clean_up(self.canvas,*self.rectangle_params)
                 self.width += dx
-                self.rectangle_params = self.create_rounded_rectangle(
-                    self.canvas,
+                self.update_dimensions(
                     self.x,
                     self.y,
                     self.width,
-                    self.height,
-                    self.border_radius,
-                    fill="lightblue")
-                self.rectangle = self.rectangle_params[0]
+                    self.height)
             if event.y < self.y + margin:
                 self.clean_up(self.canvas,*self.rectangle_params)
                 self.y -= dy
                 self.width += dx
-                self.rectangle_params = self.create_rounded_rectangle(
-                    self.canvas,
+                self.update_dimensions(
                     self.x,
                     self.y,
                     self.width,
-                    self.height,
-                    self.border_radius,
-                    fill="lightblue")
-                self.rectangle = self.rectangle_params[0]
+                    self.height)
             elif self.y + self.height - margin < event.y:
                 self.clean_up(self.canvas,*self.rectangle_params)
                 self.height += dy
-                self.rectangle_params = self.create_rounded_rectangle(
-                    self.canvas,
+                self.update_dimensions(
                     self.x,
                     self.y,
                     self.width,
-                    self.height + dy,
-                    self.border_radius,
-                    fill="lightblue")
-                self.rectangle = self.rectangle_params[0]
+                    self.height)
 
         self.drag_start_x = event.x
         self.drag_start_y = event.y
 
 
-class RoIPainter:
+class RoIMan:
 
     def __init__(self):
-        
+        self.root = None
+        self.canvas = None
+        self.t = None
+        self.roi_counter = 0
+        self.rois = []
+
+    def start_painting(self):
+        if self.t == None and self.root == None:
+            self.t = threading.Thread(target=self.__start_thread)
+            self.t.start()
+
+    def __start_thread(self):
+        self.root = tk.Tk()
+        self.root.overrideredirect(True)
+        self.root.title("Rounded Rectangle")
+        self.root.attributes("-alpha", 0.5)
+        self.root.attributes("-transparentcolor","white")
+        monitor = get_monitors()[0]
+        self.canvas = tk.Canvas(self.root, width=monitor.width-5, height=monitor.height-5, bg="white")
+        self.canvas.pack(fill="both", expand=True)
+        self.root.mainloop()
+        print("painter stopped")
+
+    def stop_painting(self):
+        print("stopping painter")
+        self.root.after(1,self.root.destroy)
+
+    def add_roi(self):
+        while self.root == None or self.canvas == None:
+            pass
+        print(self.root,self.canvas)
+        self.rois.append(RoIPainter(self.canvas,self.root,self.remove_callback))
+        self.roi_counter += 1
+
+    def remove_callback(self):
+        self.roi_counter -= 1
+        print(self.roi_counter)
+        if(self.roi_counter <= 0):
+            self.stop_painting()
+
+class RoIPainter:
+
+    def __init__(self,root,canvas, remove_cb = lambda : None):
+        self.remove_cb = remove_cb
+        self.roi = ROI(root,canvas,self.position_of_roi_updated)
+        self.roi_widget = AceeptRemoveWidget(self.remove)
+        self.roi_widget.show()
+
+        self.roi.update_position(50,50)
+        self.roi.update_dimensions(0,0,500,500)
+
+    def remove(self):
+        self.roi.remove()
+        print("roi removed")
+        self.remove_cb()
+        print("remove cb")
+
+    def position_of_roi_updated(self,x,y,width,height):
+        self.roi_widget.move(x,y-100)
         pass
 
-
 def rectangle_class():
-    root = tk.Tk()
-    root.overrideredirect(True)
-    monitor = get_monitors()[0]
-    root.title("Rounded Rectangle")
-    root.attributes("-alpha", 0.5)
-    root.attributes("-transparentcolor","white")
-
-    canvas = tk.Canvas(root, width=monitor.width-5, height=monitor.height-5, bg="white")
-    canvas.pack(fill="both", expand=True)
-    rect_1 = ROI(canvas,root)
-    rect_2 = ROI(canvas,root)
-
-    # rect_1.update_position(500,500)
-    rect_2.update_position(50,50)
-
-    # rect_1.update_dimensions(500,500)
-    rect_2.update_dimensions(500,500)
-
-    root.after(10000, root.destroy)
-    root.mainloop()
+    app = QApplication(sys.argv)
+    RM = RoIMan()
+    RM.start_painting()
+    RM.add_roi()
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
 
