@@ -195,8 +195,57 @@ class AceeptRemoveWidget(QWidget):
             """)  # Remove padding and margin
         layout.addWidget(close_button)
 
-def rectangle_class(self):
-    def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
+
+class ROI:
+
+    def __init__(self,canvas,root):
+        self.x = 0
+        self.y = 0
+        self.width = 0
+        self.height = 0
+        self.drag_start_x = 0
+        self.drag_start_y = 0
+        self.border_radius = 20
+        self.rectangle_params = ()
+        self.rectangle = None
+
+        self.canvas = canvas
+        self.root = root
+
+    def update_position(self,x,y):
+        self.x = x
+        self.y = y
+
+    def update_dimensions(self,width,height):
+        self.width  = width
+        self.height = height
+        if self.rectangle_params != ():
+            self.clean_up(self.canvas,*self.rectangle_params)
+        self.rectangle_params = self.create_rounded_rectangle(
+            self.canvas,
+            self.x,
+            self.y,
+            self.width,
+            self.height,
+            self.border_radius,
+            fill="lightblue")
+        self.rectangle = self.rectangle_params[0]
+        self.canvas.tag_bind(self.rectangle, "<Enter>", self.on_hover)
+        self.canvas.tag_bind(self.rectangle, "<Leave>", self.on_leave)
+        self.canvas.tag_bind(self.rectangle, "<Button-1>", self.on_click)
+        self.canvas.tag_bind(self.rectangle, "<ButtonPress-1>", self.on_drag_start)
+        self.canvas.tag_bind(self.rectangle, "<B1-Motion>", self.on_drag)
+        self.canvas.bind("<Motion>", self.on_hover)
+
+    def remove(self):
+        if self.rectangle_params != ():
+            self.clean_up(self.canvas,*self.rectangle_params)
+
+    def clean_up(self,canvas, *args):
+        for item in args:
+            canvas.delete(item)
+
+    def create_rounded_rectangle(self,canvas, x, y, width, height, radius, **kwargs):
         """
         Draw a rounded rectangle on Tkinter Canvas.
         Parameters:
@@ -206,6 +255,11 @@ def rectangle_class(self):
         - radius: Radius of the rounded corners
         - kwargs: Additional arguments for canvas.create_polygon()
         """
+        x1 = x
+        y1 = y
+        x2 = x + width
+        y2 = y + height
+
         points = [x1+radius, y1,
                 x1+radius, y1, x2-radius, y1, x2-radius, y1,
                 x2, y1, x2, y1+radius,
@@ -217,14 +271,72 @@ def rectangle_class(self):
                 x1, y1]
 
         # Create rounded corners
-        canvas.create_arc(x1, y1, x1+radius*2, y1+radius*2, start=90, extent=90, style="pieslice", outline="", **kwargs)
-        canvas.create_arc(x2-radius*2, y1, x2, y1+radius*2, start=0, extent=90, style="pieslice", outline="", **kwargs)
-        canvas.create_arc(x2-radius*2, y2-radius*2, x2, y2, start=270, extent=90, style="pieslice", outline="", **kwargs)
-        canvas.create_arc(x1, y2-radius*2, x1+radius*2, y2, start=180, extent=90, style="pieslice", outline="", **kwargs)
+        arc1 = canvas.create_arc(x1, y1, x1+radius*2, y1+radius*2, start=90, extent=90, style="pieslice", outline="", **kwargs)
+        arc2 = canvas.create_arc(x2-radius*2, y1, x2, y1+radius*2, start=0, extent=90, style="pieslice", outline="", **kwargs)
+        arc3 = canvas.create_arc(x2-radius*2, y2-radius*2, x2, y2, start=270, extent=90, style="pieslice", outline="", **kwargs)
+        arc4 = canvas.create_arc(x1, y2-radius*2, x1+radius*2, y2, start=180, extent=90, style="pieslice", outline="", **kwargs)
 
         # Create the rectangle
-        canvas.create_polygon(points, **kwargs, smooth=True)
+        rectangle = canvas.create_polygon(points, **kwargs, smooth=True)
+        return (rectangle, arc1, arc2, arc3, arc4)
 
+    def on_hover(self,event):
+        margin = 50
+        if (self.x < event.x and event.x < self.x  + margin) \
+            and \
+            (self.y < event.y and event.y < self.y  + margin):
+            self.root.config(cursor="top_left_corner")
+        elif (self.x < event.x and event.x < self.x  + margin) \
+            and \
+            (self.y + self.height - margin < event.y and event.y < self.y + self.height):
+            self.root.config(cursor="bottom_left_corner")
+        elif (self.x + self.width - margin < event.x and event.x < self.x + self.width) \
+            and \
+            (self.y < event.y and event.y < self.y  + margin):
+            self.root.config(cursor="top_right_corner")
+        elif (self.x + self.width - margin < event.x and event.x < self.x + self.width) \
+            and \
+            (self.y + self.height - margin < event.y and event.y < self.y + self.height):
+            self.root.config(cursor="bottom_right_corner")
+        elif self.x < event.x and event.x < self.x  + margin:
+            self.root.config(cursor="sb_h_double_arrow")
+        elif self.x + self.width - margin < event.x and event.x < self.x + self.width:
+            self.root.config(cursor="sb_h_double_arrow")
+        elif self.y < event.y and event.y < self.y  + margin:
+            self.root.config(cursor="sb_v_double_arrow")
+        elif self.y + self.height - margin < event.y and event.y < self.y + self.height:
+            self.root.config(cursor="sb_v_double_arrow")
+        else:
+            self.root.config(cursor="")
+
+        self.canvas.itemconfig(self.rectangle, fill="lightgreen")
+
+    def on_leave(self,event):
+        self.canvas.itemconfig(self.rectangle, fill="lightblue")
+
+    def on_click(self,event):
+        pass
+
+    def on_drag_start(self,event):
+        self.drag_start_x = event.x
+        self.drag_start_y = event.y
+
+    def on_drag(self,event):
+        dx = event.x - self.drag_start_x
+        dy = event.y - self.drag_start_y
+        self.canvas.move(self.rectangle, dx, dy)
+        self.update_position(self.x + dx,self.y + dy)
+        self.drag_start_x = event.x
+        self.drag_start_y = event.y
+
+class RoIPainter:
+
+    def __init__(self):
+        
+        pass
+
+
+def rectangle_class():
     root = tk.Tk()
     root.overrideredirect(True)
     monitor = get_monitors()[0]
@@ -234,19 +346,23 @@ def rectangle_class(self):
 
     canvas = tk.Canvas(root, width=monitor.width-5, height=monitor.height-5, bg="white")
     canvas.pack(fill="both", expand=True)
+    rect_1 = ROI(canvas,root)
+    rect_2 = ROI(canvas,root)
 
-    create_rounded_rectangle(canvas, 50, 50, 350, 250, 20, fill="lightblue")
+    # rect_1.update_position(500,500)
+    rect_2.update_position(50,50)
 
-    root.after(500, root.destroy)
+    # rect_1.update_dimensions(500,500)
+    rect_2.update_dimensions(500,500)
+
+    root.after(10000, root.destroy)
     root.mainloop()
-
-
-
 
 if __name__ == '__main__':
 
-    app = QApplication(sys.argv)
-    accept_remove = AceeptRemoveWidget()
-    accept_remove.show()
+    # app = QApplication(sys.argv)
+    # accept_remove = AceeptRemoveWidget()
+    # accept_remove.show()
+    rectangle_class()
 
-    sys.exit(app.exec_())
+    # sys.exit(app.exec_())
