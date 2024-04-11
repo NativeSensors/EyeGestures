@@ -10,116 +10,6 @@ from screeninfo import get_monitors
 import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
 import threading
-import platform
-
-class RegionOfInterest(QWidget):
-
-    def __init__(self, parent=None):
-        super().__init__()
-
-        self.x = 0
-        self.y = 0
-        self.width = 1000
-        self.height= 1000
-
-        # Set up the window attributes
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        # self.setAttribute(Qt.WA_TranslucentBackground, True)
-        # self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-
-        self.root = None
-        self.t = threading.Thread(target=self.__create)
-        self.t.start()
-
-    def __create_transparent_rectangle_with_semi_transparent_circle(self, size):
-        # Create a transparent rectangle image with a semi-transparent orange circle in the middle
-        image = Image.new("RGBA", size, (0, 0, 0, 0))
-        draw = ImageDraw.Draw(image)
-
-        # Draw the transparent rectangle
-        draw.rectangle([(0, 0), size], fill="black")
-
-        # Draw the semi-transparent orange circle in the middle
-        circle_radius = self.circle_radius1
-        circle_center = (size[0] // 2, size[1] // 2)
-        draw.ellipse([(circle_center[0] - circle_radius, circle_center[1] - circle_radius),
-                    (circle_center[0] + circle_radius, circle_center[1] + circle_radius)],
-                    fill="orange")  # Use (R, G, B, A) for the color, where A is the alpha (transparency)
-
-        circle_radius = self.circle_radius2
-        draw.ellipse([(circle_center[0] - circle_radius, circle_center[1] - circle_radius),
-                    (circle_center[0] + circle_radius, circle_center[1] + circle_radius)],
-                    fill=(0, 0, 0, 256))  # Use (R, G, B, A) for the color, where A is the alpha (transparency)
-
-        return image
-
-
-    def __create(self):
-        self.root = tk.Tk()
-        self.root.overrideredirect(True)
-        self.root.attributes("-topmost", True)  # Set the window to always be on top
-
-        # Set rectangular window shape
-        self.root.geometry(f"{self.width}x{self.height}")
-        self.circle_radius1 = self.radius
-        self.circle_radius2 = self.radius - 1
-        self.image = self.__create_transparent_rectangle_with_semi_transparent_circle((self.width, self.height))
-        self.tk_image = ImageTk.PhotoImage(self.image)
-
-        # Create a label with the image as a background
-        self.label = tk.Label(self.root, image=self.tk_image)
-        self.label.pack(fill="both", expand=True)
-
-        # Set transparency
-        if "Windows" in platform.system():
-            self.root.attributes("-transparentcolor", "black")
-        # Schedule the update of the window position
-        self.root.after(10, lambda: self.__update_window_position(self.root))
-
-        self.root.mainloop()
-
-
-    def disappear(self):
-        self.hide()
-
-    def close_event(self):
-        self.close()
-
-    def show_again(self):
-        pass
-        # self.setStyleSheet("background-color: #de4dff00; border-radius: 10px;")
-
-    def set_new_position(self,x,y):
-        self.x = x
-        self.y = y
-        self.move(self.x, self.y)
-
-    def set_new_width(self,x,y):
-        self.x = x
-        self.y = y
-        self.setGeometry(self.x, self.y, self.width, self.height)
-
-    def paintEvent(self, event):
-        qp = QtGui.QPainter(self)
-        br = QtGui.QBrush(QtGui.QColor(100, 10, 10, 40))
-        qp.setBrush(br)
-        qp.drawRect(QtCore.QRect(self.begin, self.end))
-
-    def mousePressEvent(self, event):
-        self.begin = event.pos()
-        self.end = event.pos()
-        self.update()
-
-    def mouseMoveEvent(self, event):
-        self.end = event.pos()
-        self.update()
-
-    # def mouseReleaseEvent(self, event):
-    #     print("mouseReleaseEvent")
-    #     self.begin = event.pos()
-    #     self.end = event.pos()
-    #     self.update()
-
 
 class AceeptRemoveWidget(QWidget):
     def __init__(self, clear_up_cb = lambda: None, accept_cb = lambda: None):
@@ -274,12 +164,6 @@ class ROI:
 
         canvas.tag_bind(rectangle, "<Enter>", self.on_hover)
         canvas.tag_bind(rectangle, "<Leave>", self.on_leave)
-        # canvas.tag_bind(rectangle, "<ButtonPress-1>", self.on_drag_start)
-        # canvas.tag_bind("<B1-Motion>", self.on_drag)
-        # canvas.tag_bind("<ButtonPress-1>", self.on_drag_start)
-        # canvas.tag_bind("<ButtonRelease-1>", self.on_release)
-        # canvas.tag_bind("<Motion>", self.on_hover)
-
         return (rectangle, arc1, arc2, arc3, arc4)
 
     def on_hover(self,event):
@@ -425,7 +309,7 @@ class RoIPainter:
         pass
 
     def show(self):
-        self.hidden = True
+        self.hidden = False
         self.roi.show()
         self.roi_widget.show_again()
 

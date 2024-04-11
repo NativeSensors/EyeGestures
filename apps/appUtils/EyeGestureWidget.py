@@ -1,5 +1,5 @@
 import sys
-from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar
+from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar, QSlider
 from PySide2.QtGui import QPixmap, QPalette, QColor, QPainterPath, QRegion, QMouseEvent
 from PySide2.QtCore import Qt, QRectF, QMargins, QPoint
 from PySide2.QtGui import QPainter, QFont
@@ -7,12 +7,21 @@ from PySide2.QtCore import QByteArray
 from PySide2.QtSvg import QSvgRenderer
 from screeninfo   import get_monitors
 
-from ActivationZone import RoIMan
-from RoiViewer import RoiViewer
+from appUtils.ActivationZone import RoIMan
+from appUtils.RoiViewer import RoiViewer
 
 class EyeGestureWidget(QWidget):
-    def __init__(self):
+    def __init__(self,
+                start_cb = lambda : None,
+                stop_cb = lambda : None,
+                update_fixation_cb = lambda : None,
+                update_radius_cb   = lambda : None):
         super().__init__()
+
+        self.start_cb = start_cb
+        self.stop_cb  = stop_cb
+        self.update_fixation_cb = update_fixation_cb
+        self.update_radius_cb   = update_radius_cb
 
         self.close_events = []
         self.roiMan = RoIMan()
@@ -21,7 +30,6 @@ class EyeGestureWidget(QWidget):
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
         postion_x = int(self.monitor.width/2) + self.monitor.x - 110
         postion_y = 45 + self.monitor.y
-
 
         # Set dark theme
         palette = QPalette()
@@ -39,6 +47,21 @@ class EyeGestureWidget(QWidget):
         palette.setColor(QPalette.HighlightedText, Qt.black)
         self.setPalette(palette)
 
+        self.slider_fixation = QSlider(Qt.Horizontal)
+        self.slider_fixation.setMinimum(0)
+        self.slider_fixation.setMaximum(10)
+        self.slider_fixation.setValue(8)
+        self.slider_fixation.valueChanged.connect(self.update_fixation_label)
+
+        self.slider_radius = QSlider(Qt.Horizontal)
+        self.slider_radius.setMinimum(1)
+        self.slider_radius.setMaximum(500)
+        self.slider_radius.setValue(400)
+        self.slider_radius.valueChanged.connect(self.update_radius_label)
+
+        self.label_fixation_threshold = QLabel("Fixation: 0.8")
+        self.label_radius_threshold   = QLabel("Radius: 500px")
+
         # Window positioning
         self.setGeometry(100, 100, 1000, 700)  # Adjust size as needed
         self.move_to_center()
@@ -54,27 +77,18 @@ class EyeGestureWidget(QWidget):
         self.show_roi_btn = QPushButton('Show')
         self.show_roi_btn.clicked.connect(self.show_roi)
 
-
         self.label_name = QLabel("EyeGestures")
         # Set text alignment to center
         self.label_name.setAlignment(Qt.AlignCenter)
 
-        info_params_container = QWidget()
-        info_params_container_layout = QHBoxLayout()
-        info_params_container_layout.setAlignment(Qt.AlignHCenter)
-        info_params_container.setLayout(info_params_container_layout)
-
-        self.label_fixation_threshold = QLabel("Fixation: 0.8")
-        self.label_fixation_radius  = QLabel("Distance: 500px")
-
-        info_params_container_layout.addWidget(self.label_fixation_threshold)
-        info_params_container_layout.addWidget(self.label_fixation_radius)
-
-
-        progress_bar_container = QWidget()
         progress_bar_container_layout = QHBoxLayout()
         progress_bar_container_layout.setAlignment(Qt.AlignHCenter)
-        progress_bar_container.setLayout(progress_bar_container_layout)
+
+        self.start_stop_btn = QPushButton("Start")
+        self.start_stop_btn.setCheckable(True)  # Make the button a toggle button
+        self.start_stop_btn.clicked.connect(self.toggle_start_stop)
+
+        progress_bar_container_layout.addWidget(self.start_stop_btn)
 
         self.fixation_bar = QProgressBar()
         self.fixation_bar.setValue(40)  # Set initial value
@@ -98,7 +112,6 @@ class EyeGestureWidget(QWidget):
         progress_bar_container_layout.addWidget(self.label_fixation)
         progress_bar_container_layout.addWidget(self.label_fixation_level)
 
-
         # Set font size
         font = self.label_name.font()
         font.setPointSize(20) # You can adjust the font size as per your requirement
@@ -107,11 +120,19 @@ class EyeGestureWidget(QWidget):
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
 
-
-        # self.image_label.setPixmap(scaled_pixmap)
         main_layout.addWidget(self.label_name)
-        main_layout.addWidget(info_params_container)
-        main_layout.addWidget(progress_bar_container)
+        # self.image_label.setPixmap(scaled_pixmap)
+        fixation_layout = QHBoxLayout()
+        fixation_layout.addWidget(self.label_fixation_threshold)
+        fixation_layout.addWidget(self.slider_fixation)
+        main_layout.addLayout(fixation_layout)
+
+        radius_layout = QHBoxLayout()
+        radius_layout.addWidget(self.label_radius_threshold)
+        radius_layout.addWidget(self.slider_radius)
+        main_layout.addLayout(radius_layout)
+
+        main_layout.addLayout(progress_bar_container_layout)
         main_layout.addWidget(self.roiViewer)
 
         roi_buttons_layout = QHBoxLayout()
@@ -168,6 +189,7 @@ class EyeGestureWidget(QWidget):
             """)
 
         self.style_buttons(self.close_btn)
+        self.style_buttons(self.start_stop_btn)
 
         # this sets windows frameless
         self.resize(400,self.frameGeometry().height())
@@ -180,6 +202,27 @@ class EyeGestureWidget(QWidget):
 
         self.setLayout(main_layout)
         self.move(postion_x, postion_y)
+
+    def toggle_start_stop(self):
+        text = "Start" if self.start_stop_btn.isChecked() else "Stop"
+        self.start_stop_btn.setText(text)
+
+        if text == "Start":
+            self.start_cb()
+        else:
+            self.stop_cb()
+
+        # Perform actions based on button state here (optional)
+
+    def update_fixation_label(self, value):
+        # Convert integer value to float (0.0 to 1.0)
+        self.label_fixation_threshold.setText(f"Fixation: {value/10}")
+        self.update_fixation_cb(value/10)
+
+    def update_radius_label(self, value):
+        # Convert integer value to float (0.0 to 1.0)
+        self.label_radius_threshold.setText(f"Radius: {value}px")
+        self.update_radius_cb(value)
 
     def add_close_event(self,clsoe_callback):
         self.close_events.append(clsoe_callback)

@@ -1,9 +1,7 @@
 import sys
 from PySide2.QtWidgets import QApplication, QWidget
 from PySide2.QtCore import Qt, QRect
-from PySide2.QtGui import QPainter
-
-from ActivationZone import RoIMan
+from PySide2.QtGui import QPainter, QColor
 
 class RoiViewer(QWidget):
     def __init__(self):
@@ -29,15 +27,15 @@ class RoiViewer(QWidget):
 
         # Draw rounded rectangle
         rounded_rect = self.rect()
-        painter.setBrush(Qt.lightGray)
+        painter.setBrush(QColor("#020024"))
         painter.setPen(Qt.NoPen)
         painter.drawRoundedRect(rounded_rect, 10, 10)
 
         # Draw small rectangles inside the rounded rectangle
-        painter.setBrush(Qt.blue)
+        painter.setBrush(QColor("#0600c2"))
         for key in self.rectangles:
             rectangle = QRect(*self.rectangles[key])
-            painter.drawRect(rectangle)
+            painter.drawRoundedRect(rectangle, 10, 10)
 
     def resizeEvent(self, event):
         # Update the width and height when the widget is resized

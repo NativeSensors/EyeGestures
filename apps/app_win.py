@@ -8,6 +8,7 @@ from PySide2.QtWidgets import QApplication
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}\\..')
+
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
 from appUtils.EyeGestureWidget import EyeGestureWidget
@@ -115,7 +116,12 @@ class Lab:
 
         self.calibration_widget = CalibrationWidget()
         self.calibration_widget.disappear()
-        self.eyegesture_widget = EyeGestureWidget()
+        self.eyegesture_widget = EyeGestureWidget(
+            self.start,
+            self.stop,
+            self.update_fixation,
+            self.update_radius)
+
         self.eyegesture_widget.show()
 
         self.dot_widget = WindowsCursor(50, 2)
@@ -127,7 +133,8 @@ class Lab:
         self.eyegesture_widget.add_close_event(self.cap.close)
         self.eyegesture_widget.add_close_event(self.dot_widget.close_event)
 
-        self.__run = True
+        self.__run = False
+        self.power_off = False
 
         self.worker = Worker(self.run)
 
@@ -135,8 +142,25 @@ class Lab:
         self.calibration = False
         self.iterations = 0
 
+        self.fixation = 0.8
+        self.radius   = 400
+
+    def start(self):
+        self.__run = True
+
+    def stop(self):
+        self.__run = False
+        pass
+
+    def update_fixation(self,fixation):
+        self.fixation = fixation
+
+    def update_radius(self,radius):
+        self.radius = radius
+
     def on_quit(self):
         self.__run = False
+        self.power_off = True
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)
@@ -179,15 +203,16 @@ class Lab:
             self.dot_widget.move(int(cursor_x),int(cursor_y))
 
     def run(self):
-        ret = True
-        while ret and self.__run:
+        while not self.power_off: 
+            ret = True
+            while ret and self.__run:
 
-            ret, frame = self.cap.read()
+                ret, frame = self.cap.read()
 
-            try:
-                self.__display_eye(frame)
-            except Exception as e:
-                print(f"crashed in debug {e}")
+                try:
+                    self.__display_eye(frame)
+                except Exception as e:
+                    print(f"crashed in debug {e}")
 
 
 if __name__ == '__main__':
