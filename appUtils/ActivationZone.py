@@ -293,10 +293,10 @@ class ROI:
         canvas.tag_bind(rectangle, "<Enter>", self.on_hover)
         canvas.tag_bind(rectangle, "<Leave>", self.on_leave)
         # canvas.tag_bind(rectangle, "<ButtonPress-1>", self.on_drag_start)
-        canvas.bind("<B1-Motion>", self.on_drag)
-        canvas.bind("<ButtonPress-1>", self.on_drag_start)
-        canvas.bind("<ButtonRelease-1>", self.on_release)
-        canvas.bind("<Motion>", self.on_hover)
+        # canvas.tag_bind("<B1-Motion>", self.on_drag)
+        # canvas.tag_bind("<ButtonPress-1>", self.on_drag_start)
+        # canvas.tag_bind("<ButtonRelease-1>", self.on_release)
+        # canvas.tag_bind("<Motion>", self.on_hover)
 
         return (rectangle, arc1, arc2, arc3, arc4)
 
@@ -338,6 +338,7 @@ class ROI:
         self.resizing = False
 
     def on_drag_start(self,event):
+        print("start dragging")
         self.drag_start_x = event.x
         self.drag_start_y = event.y
 
@@ -368,6 +369,7 @@ class ROI:
             self.resizing = True
 
     def on_drag(self,event):
+        print("dragging")
         margin = 50
         dx = event.x - self.drag_start_x
         dy = event.y - self.drag_start_y
@@ -414,7 +416,9 @@ class ROI:
         self.drag_start_x = event.x
         self.drag_start_y = event.y
 
-
+    def is_in(self,event):
+        return self.x < event.x < self.x + self.width and self.y < event.y < self.y + self.height
+    
 class RoIMan:
 
     def __init__(self):
@@ -439,8 +443,39 @@ class RoIMan:
         monitor = get_monitors()[0]
         self.canvas = tk.Canvas(self.root, width=monitor.width-5, height=monitor.height-5, bg="white")
         self.canvas.pack(fill="both", expand=True)
+
+        self.canvas.bind("<B1-Motion>", self.on_drag)
+        self.canvas.bind("<ButtonPress-1>", self.on_drag_start)
+        self.canvas.bind("<ButtonRelease-1>", self.on_release)
+        self.canvas.bind("<Motion>", self.on_hover)
+
         self.root.mainloop()
         print("painter stopped")
+
+    def on_drag_start(self,event):
+
+        for roi in self.rois:
+            if roi.is_in(event):
+                roi.on_drag_start(event)
+                break
+
+    def on_drag(self,event):
+        for roi in self.rois:
+            if roi.is_in(event):
+                roi.on_drag(event)
+                break
+
+    def on_release(self,event):
+        for roi in self.rois:
+            if roi.is_in(event):
+                roi.on_release(event)
+                break
+
+    def on_hover(self,event):
+        for roi in self.rois:
+            if roi.is_in(event):
+                roi.on_hover(event)
+                break
 
     def stop_painting(self):
         print("stopping painter")
@@ -459,6 +494,9 @@ class RoIMan:
         if(self.roi_counter <= 0):
             self.stop_painting()
 
+    def get_all_rois(self):
+        return self.rois
+
 class RoIPainter:
 
     def __init__(self,root,canvas, remove_cb = lambda : None):
@@ -468,7 +506,7 @@ class RoIPainter:
         self.roi_widget.show()
 
         self.roi.update_position(50,50)
-        self.roi.update_dimensions(0,0,500,500)
+        self.roi.update_dimensions(200,200,500,500)
 
     def remove(self):
         self.roi.remove()
@@ -479,6 +517,21 @@ class RoIPainter:
     def position_of_roi_updated(self,x,y,width,height):
         self.roi_widget.move(x,y-100)
         pass
+
+    def on_drag_start(self,event):
+        self.roi.on_drag_start(event)
+
+    def on_drag(self,event):
+        self.roi.on_drag(event)
+
+    def on_release(self,event):
+        self.roi.on_release(event)
+
+    def on_hover(self,event):
+        self.roi.on_hover(event)
+
+    def is_in(self,event):
+        return self.roi.is_in(event)
 
 def rectangle_class():
     app = QApplication(sys.argv)
