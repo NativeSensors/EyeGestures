@@ -106,13 +106,11 @@ class RegionOfInterest(QWidget):
         qp.drawRect(QtCore.QRect(self.begin, self.end))
 
     def mousePressEvent(self, event):
-        print("calling mouse event")
         self.begin = event.pos()
         self.end = event.pos()
         self.update()
 
     def mouseMoveEvent(self, event):
-        print("calling mouse event")
         self.end = event.pos()
         self.update()
 
@@ -124,38 +122,19 @@ class RegionOfInterest(QWidget):
 
 
 class AceeptRemoveWidget(QWidget):
-    def __init__(self, clear_up_cb = lambda: None):
+    def __init__(self, clear_up_cb = lambda: None, accept_cb = lambda: None):
         super().__init__()
 
         self.x = 0
         self.y = 0
+        self.accept_cb = accept_cb
         self.clear_up_cb = clear_up_cb
-
         # Set up the window attributes
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-    
+
         layout = QHBoxLayout(self)
         layout.setSpacing(0)
-
-        # Create Accept button with checkmark icon
-        draw_button = QPushButton(QtGui.QIcon.fromTheme("dialog-ok-apply"), "⏹")
-        draw_button.setStyleSheet(
-            """
-            QPushButton {
-                padding: 0px; margin: 0px; width: 50px; height: 50px;
-                border-top-left-radius: 5px;
-                border-bottom-left-radius: 5px;
-                border: 2px solid #16171f;
-                border-right: none;
-                border-left: none;
-                background: #1d1e27;
-            }
-            QPushButton:hover {
-                background: #0062ff; /* Change border color on hover */
-            }
-            """)  # Remove padding and margin
-        layout.addWidget(draw_button)
 
         # Create Accept button with checkmark icon
         accept_button = QPushButton(QtGui.QIcon.fromTheme("dialog-ok-apply"), "✔️")
@@ -173,11 +152,12 @@ class AceeptRemoveWidget(QWidget):
                 background: #0062ff; /* Change border color on hover */
             }
             """)  # Remove padding and margin
+        accept_button.clicked.connect(self.accept)
         layout.addWidget(accept_button)
 
         # Create Close button with close icon
         close_button = QPushButton(QtGui.QIcon.fromTheme("dialog-close"), "❌")
-        close_button.clicked.connect(self.clear_up)
+        close_button.clicked.connect(self.clear_up_cb)
         close_button.setStyleSheet(
             """
             QPushButton {
@@ -195,10 +175,12 @@ class AceeptRemoveWidget(QWidget):
             """)  # Remove padding and margin
         layout.addWidget(close_button)
 
-    def clear_up(self):
-        self.clear_up_cb()
-        print("cleared up")
-        self.close()
+    def accept(self):
+        self.accept_cb()
+        self.hide()
+
+    def show_again(self):
+        self.show()
 
 class ROI:
 
@@ -246,9 +228,10 @@ class ROI:
         self.rectangle = self.rectangle_params[0]
         self.dimensions_updated_cb(x,y,width,height)
 
+    def show(self):
+        self.update_dimensions(self.x,self.y,self.width,self.height)
 
     def remove(self):
-        print("calling remove")
         if self.rectangle_params != ():
             self.clean_up(self.canvas,*self.rectangle_params)
 
@@ -338,7 +321,6 @@ class ROI:
         self.resizing = False
 
     def on_drag_start(self,event):
-        print("start dragging")
         self.drag_start_x = event.x
         self.drag_start_y = event.y
 
@@ -369,7 +351,6 @@ class ROI:
             self.resizing = True
 
     def on_drag(self,event):
-        print("dragging")
         margin = 50
         dx = event.x - self.drag_start_x
         dy = event.y - self.drag_start_y
@@ -418,7 +399,54 @@ class ROI:
 
     def is_in(self,event):
         return self.x < event.x < self.x + self.width and self.y < event.y < self.y + self.height
-    
+
+class RoIPainter:
+
+    def __init__(self,id,root,canvas, off_x = 0, off_y = 0, remove_cb = lambda : None, hide_cb = lambda: None):
+        self.id = id
+        self.remove_cb = remove_cb
+        self.hidden = False
+
+        self.roi = ROI(root,canvas,self.position_of_roi_updated)
+        self.roi_widget = AceeptRemoveWidget(self.remove,self.hide)
+        self.roi_widget.show()
+
+        self.roi.update_position(50,50)
+        self.roi.update_dimensions(200+off_x,200+off_y,500,500)
+
+    def remove(self):
+        self.roi_widget.close()
+        self.roi.remove()
+        self.remove_cb(self.id)
+
+    def hide(self):
+        self.roi.remove()
+        self.hidden = True
+        pass
+
+    def show(self):
+        self.hidden = True
+        self.roi.show()
+        self.roi_widget.show_again()
+
+    def position_of_roi_updated(self,x,y,width,height):
+        self.roi_widget.move(x,y-100)
+        pass
+
+    def on_drag_start(self,event):
+        self.roi.on_drag_start(event)
+
+    def on_drag(self,event):
+        self.roi.on_drag(event)
+
+    def on_release(self,event):
+        self.roi.on_release(event)
+
+    def on_hover(self,event):
+        self.roi.on_hover(event)
+
+    def is_in(self,event):
+        return self.roi.is_in(event)
 class RoIMan:
 
     def __init__(self):
@@ -426,7 +454,8 @@ class RoIMan:
         self.canvas = None
         self.t = None
         self.roi_counter = 0
-        self.rois = []
+        self.rois = dict()
+        self.dragged_roi = None
 
     def start_painting(self):
         if self.t == None and self.root == None:
@@ -450,88 +479,69 @@ class RoIMan:
         self.canvas.bind("<Motion>", self.on_hover)
 
         self.root.mainloop()
-        print("painter stopped")
 
     def on_drag_start(self,event):
 
-        for roi in self.rois:
-            if roi.is_in(event):
-                roi.on_drag_start(event)
+        for key in self.rois:
+            if self.rois[key].is_in(event):
+                self.dragged_roi = self.rois[key]
+                self.rois[key].on_drag_start(event)
                 break
 
     def on_drag(self,event):
-        for roi in self.rois:
-            if roi.is_in(event):
-                roi.on_drag(event)
-                break
+        if self.dragged_roi.is_in(event):
+            self.dragged_roi.on_drag(event)
+
 
     def on_release(self,event):
-        for roi in self.rois:
-            if roi.is_in(event):
-                roi.on_release(event)
+        for key in self.rois:
+            if self.rois[key].is_in(event):
+                self.rois[key].on_release(event)
                 break
 
     def on_hover(self,event):
-        for roi in self.rois:
-            if roi.is_in(event):
-                roi.on_hover(event)
+        for key in self.rois:
+            if self.rois[key].is_in(event):
+                self.rois[key].on_hover(event)
                 break
 
     def stop_painting(self):
-        print("stopping painter")
         self.root.after(1,self.root.destroy)
+        self.t = None
+        self.root = None
 
     def add_roi(self):
+        self.start_painting()
+
         while self.root == None or self.canvas == None:
             pass
-        print(self.root,self.canvas)
-        self.rois.append(RoIPainter(self.canvas,self.root,self.remove_callback))
-        self.roi_counter += 1
+        self.rois[len(self.rois)] = RoIPainter(
+            len(self.rois), # id
+            self.canvas,
+            self.root,
+            self.roi_counter*5,
+            self.roi_counter*5,
+            self.remove_callback)
 
-    def remove_callback(self):
-        self.roi_counter -= 1
-        print(self.roi_counter)
-        if(self.roi_counter <= 0):
-            self.stop_painting()
+        self.roi_counter = len(self.rois)
+
+    def remove_callback(self,id):
+        self.rois.pop(id)
+        self.roi_counter = len(self.rois)
+
+    def remove(self):
+        while len(self.rois) > 0:
+            self.rois[list(self.rois.keys())[0]].remove()
+
+        self.stop_painting()
 
     def get_all_rois(self):
         return self.rois
 
-class RoIPainter:
-
-    def __init__(self,root,canvas, remove_cb = lambda : None):
-        self.remove_cb = remove_cb
-        self.roi = ROI(root,canvas,self.position_of_roi_updated)
-        self.roi_widget = AceeptRemoveWidget(self.remove)
-        self.roi_widget.show()
-
-        self.roi.update_position(50,50)
-        self.roi.update_dimensions(200,200,500,500)
-
-    def remove(self):
-        self.roi.remove()
-        print("roi removed")
-        self.remove_cb()
-        print("remove cb")
-
-    def position_of_roi_updated(self,x,y,width,height):
-        self.roi_widget.move(x,y-100)
-        pass
-
-    def on_drag_start(self,event):
-        self.roi.on_drag_start(event)
-
-    def on_drag(self,event):
-        self.roi.on_drag(event)
-
-    def on_release(self,event):
-        self.roi.on_release(event)
-
-    def on_hover(self,event):
-        self.roi.on_hover(event)
-
-    def is_in(self,event):
-        return self.roi.is_in(event)
+    def show(self):
+        for key in self.rois:
+            print(f"showing: {self.rois[key]}")
+            self.rois[key].show()
 
 def rectangle_class():
     app = QApplication(sys.argv)

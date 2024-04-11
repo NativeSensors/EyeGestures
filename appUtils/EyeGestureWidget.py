@@ -7,11 +7,14 @@ from PySide2.QtCore import QByteArray
 from PySide2.QtSvg import QSvgRenderer
 from screeninfo   import get_monitors
 
+from ActivationZone import RoIMan
+
 class EyeGestureWidget(QWidget):
     def __init__(self):
         super().__init__()
 
         self.close_events = []
+        self.roiMan = RoIMan()
 
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
         postion_x = int(self.monitor.width/2) + self.monitor.x - 110
@@ -42,6 +45,13 @@ class EyeGestureWidget(QWidget):
         # Buttons
         self.close_btn = QPushButton('Close')
         self.close_btn.clicked.connect(self.close_event)
+
+        self.add_roi_btn = QPushButton('Add')
+        self.add_roi_btn.clicked.connect(self.add_roi)
+
+        self.show_roi_btn = QPushButton('Show')
+        self.show_roi_btn.clicked.connect(self.show_roi)
+
 
         self.label_name = QLabel("EyeGestures")
         # Set text alignment to center
@@ -95,13 +105,22 @@ class EyeGestureWidget(QWidget):
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
 
+
         # self.image_label.setPixmap(scaled_pixmap)
         main_layout.addWidget(self.label_name)
         main_layout.addWidget(info_params_container)
         main_layout.addWidget(progress_bar_container)
+
+        roi_buttons_layout = QHBoxLayout()
+
+        roi_buttons_layout.addWidget(self.show_roi_btn)
+        roi_buttons_layout.addWidget(self.add_roi_btn)
+        main_layout.addLayout(roi_buttons_layout)
+        self.style_buttons(self.add_roi_btn)
+        self.style_buttons(self.show_roi_btn)
+
+
         main_layout.addWidget(self.close_btn)
-
-
         self.style_buttons(self.close_btn)
 
         # this sets windows frameless
@@ -124,7 +143,8 @@ class EyeGestureWidget(QWidget):
         for event in self.close_events:
             event()
 
-        self.close() 
+        self.roiMan.remove()
+        self.close()
 
     def move_to_center(self):
         screen_geometry = QApplication.desktop().screenGeometry()
@@ -168,6 +188,12 @@ class EyeGestureWidget(QWidget):
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         self.oldPos = None
+
+    def add_roi(self):
+        self.roiMan.add_roi()
+
+    def show_roi(self):
+        self.roiMan.show()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
