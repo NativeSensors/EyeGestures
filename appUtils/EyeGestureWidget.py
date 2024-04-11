@@ -2,12 +2,13 @@ import sys
 from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar
 from PySide2.QtGui import QPixmap, QPalette, QColor, QPainterPath, QRegion, QMouseEvent
 from PySide2.QtCore import Qt, QRectF, QMargins, QPoint
-from PySide2.QtGui import QPainter
+from PySide2.QtGui import QPainter, QFont
 from PySide2.QtCore import QByteArray
 from PySide2.QtSvg import QSvgRenderer
 from screeninfo   import get_monitors
 
 from ActivationZone import RoIMan
+from RoiViewer import RoiViewer
 
 class EyeGestureWidget(QWidget):
     def __init__(self):
@@ -15,6 +16,7 @@ class EyeGestureWidget(QWidget):
 
         self.close_events = []
         self.roiMan = RoIMan()
+        self.roiViewer = RoiViewer()
 
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
         postion_x = int(self.monitor.width/2) + self.monitor.x - 110
@@ -110,17 +112,61 @@ class EyeGestureWidget(QWidget):
         main_layout.addWidget(self.label_name)
         main_layout.addWidget(info_params_container)
         main_layout.addWidget(progress_bar_container)
+        main_layout.addWidget(self.roiViewer)
 
         roi_buttons_layout = QHBoxLayout()
+        roi_buttons_layout.setSpacing(0)
 
-        roi_buttons_layout.addWidget(self.show_roi_btn)
-        roi_buttons_layout.addWidget(self.add_roi_btn)
+        roi_buttons_layout.addWidget(self.show_roi_btn,2)
+        roi_buttons_layout.addWidget(self.add_roi_btn,1)
         main_layout.addLayout(roi_buttons_layout)
-        self.style_buttons(self.add_roi_btn)
-        self.style_buttons(self.show_roi_btn)
-
-
         main_layout.addWidget(self.close_btn)
+
+        # Set font bold for button2
+        self.add_roi_btn.setStyleSheet(
+            """
+            QPushButton {
+                padding: 0px; margin: 0px;
+                border: 2px solid #16171f;
+                height: 40px;
+                border-top-right-radius: 5px;
+                border-bottom-right-radius: 5px;
+                color: #ebe9fc;
+                background-color: #3a31d8;
+                font-size: 14px;  /* Larger font size */
+                font-family: Poppins;
+            }
+            QPushButton:hover {
+                background-color: #818992;
+            }
+            QPushButton:pressed {
+                background-color: #212426;
+            }
+            """)
+
+        self.show_roi_btn.setStyleSheet(
+            """
+            QPushButton {
+                padding: 0px; margin: 0px;
+                border: 2px solid #16171f;
+                height: 40px;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+                color: #eff0f1;
+                border-right: none;
+                border-left: none;
+                background-color: #DD555b62;
+                font-size: 14px;  /* Larger font size */
+                font-family: Poppins;
+            }
+            QPushButton:hover {
+                background-color: #818992;
+            }
+            QPushButton:pressed {
+                background-color: #212426;
+            }
+            """)
+
         self.style_buttons(self.close_btn)
 
         # this sets windows frameless
@@ -189,8 +235,34 @@ class EyeGestureWidget(QWidget):
     def mouseReleaseEvent(self, event: QMouseEvent):
         self.oldPos = None
 
+    def rm_roi(self,id):
+        print("removing")
+        self.roiViewer.rm_rectangle(id)
+        self.roiViewer.update()
+
+    def update_roi(self,id,rect_params):
+        # TODO: maybe those parameters could be handled better?
+        rois = self.roiMan.get_all_rois()
+        for key in rois:
+            self.roiViewer.add_rectangle(
+                key,
+                rois[key].get_rectangle(),
+                self.monitor.width,
+                self.monitor.height
+            )
+        self.roiViewer.update()
+
     def add_roi(self):
-        self.roiMan.add_roi()
+        self.roiMan.add_roi(self.rm_roi,self.update_roi)
+        rois = self.roiMan.get_all_rois()
+        for key in rois:
+            print(rois[key])
+            self.roiViewer.add_rectangle(
+                key,
+                rois[key].get_rectangle(),
+                self.monitor.width,
+                self.monitor.height)
+        self.roiViewer.update()
 
     def show_roi(self):
         self.roiMan.show()

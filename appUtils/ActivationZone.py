@@ -206,7 +206,6 @@ class ROI:
     def update_position(self,x,y):
         self.x = x
         self.y = y
-        self.dimensions_updated_cb(x,y,self.width,self.height)
         self.update_dimensions(x,y,self.width,self.height)
 
     def update_dimensions(self,x,y,width,height):
@@ -402,13 +401,14 @@ class ROI:
 
 class RoIPainter:
 
-    def __init__(self,id,root,canvas, off_x = 0, off_y = 0, remove_cb = lambda : None, hide_cb = lambda: None):
+    def __init__(self,id,root,canvas, off_x = 0, off_y = 0, remove_cb = lambda : None, position_update_cb = lambda : None, hide_cb = lambda: None):
         self.id = id
         self.remove_cb = remove_cb
+        self.position_update_cb = position_update_cb
         self.hidden = False
 
         self.roi = ROI(root,canvas,self.position_of_roi_updated)
-        self.roi_widget = AceeptRemoveWidget(self.remove,self.hide)
+        self.roi_widget = AceeptRemoveWidget(self.remove, self.hide)
         self.roi_widget.show()
 
         self.roi.update_position(50,50)
@@ -431,7 +431,16 @@ class RoIPainter:
 
     def position_of_roi_updated(self,x,y,width,height):
         self.roi_widget.move(x,y-100)
+        self.position_update_cb(self.id,(x,y,width,height))
         pass
+
+    def get_rectangle(self):
+        return (
+            self.roi.x,
+            self.roi.y,
+            self.roi.width,
+            self.roi.height
+        )
 
     def on_drag_start(self,event):
         self.roi.on_drag_start(event)
@@ -446,7 +455,7 @@ class RoIPainter:
         self.roi.on_hover(event)
 
     def is_in(self,event):
-        return self.roi.is_in(event)
+        return self.roi.is_in(event) and not self.hidden
 class RoIMan:
 
     def __init__(self):
@@ -506,28 +515,37 @@ class RoIMan:
                 break
 
     def stop_painting(self):
-        self.root.after(1,self.root.destroy)
-        self.t = None
-        self.root = None
+        if self.t != None and self.root != None:
+            self.root.after(1,self.root.destroy)
+            self.t = None
+            self.root = None
 
-    def add_roi(self):
+    def add_roi(self, remove_cb = lambda id : None, position_update_cb = lambda id, rect_params : None):
         self.start_painting()
+
+        def remove_callback(id):
+            remove_cb(id)
+            self.rois.pop(id)
+            self.roi_counter = len(self.rois)
 
         while self.root == None or self.canvas == None:
             pass
-        self.rois[len(self.rois)] = RoIPainter(
-            len(self.rois), # id
+        id = len(self.rois)
+        self.rois[id] = RoIPainter(
+            id, # id
             self.canvas,
             self.root,
             self.roi_counter*5,
             self.roi_counter*5,
-            self.remove_callback)
+            remove_callback,
+            position_update_cb)
 
         self.roi_counter = len(self.rois)
+        return id
 
-    def remove_callback(self,id):
-        self.rois.pop(id)
-        self.roi_counter = len(self.rois)
+    # def remove_callback(self,id):
+    #     self.rois.pop(id)
+    #     self.roi_counter = len(self.rois)
 
     def remove(self):
         while len(self.rois) > 0:
