@@ -10,8 +10,8 @@ class WarningPill(QWidget):
     def __init__(self, position, text, angle = 0):
         super(WarningPill, self).__init__()
 
-        width = 150
-        height= 40
+        width = 200
+        height= 200
 
         # Set up the window attributes
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
@@ -19,7 +19,7 @@ class WarningPill(QWidget):
         self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
         self.setGeometry(position[0], position[1], width, height)
-        self.setStyleSheet("background-color: #99ffff00; border-radius: 10px;")
+        self.setStyleSheet("background-color: #99ffff00; border-radius: 100;")
 
         # Add a label for displaying text
         self.angle = angle
@@ -35,7 +35,7 @@ class WarningPill(QWidget):
         self.close()
 
     def show_again(self):
-        self.setStyleSheet("background-color: #99ffff00; border-radius: 10px;")
+        self.setStyleSheet("background-color: #99ffff00; border-radius: 100;")
 
 
 class CalibrationWidget():
@@ -46,14 +46,14 @@ class CalibrationWidget():
 
         # Create warning pills on each edge and add them to the layout
         self.warning_pills = [
-            WarningPill((self.monitor.x + self.monitor.width/2 - 50,
-                         self.monitor.y + 0), "Move cursor here", 0),
-            WarningPill((self.monitor.x + self.monitor.width/2 - 50,
-                         self.monitor.y + self.monitor.height - 50), "Move cursor here", 0),
+            WarningPill((self.monitor.x + self.monitor.width/2 - 100,
+                         self.monitor.y + 0), "LOOK HERE", 0),
+            WarningPill((self.monitor.x + self.monitor.width/2 - 100,
+                         self.monitor.y + self.monitor.height - 200), "LOOK HERE", 0),
             WarningPill((self.monitor.x + 0,
-                         self.monitor.y + self.monitor.height/2), "Move cursor here", 90),
-            WarningPill((self.monitor.x + self.monitor.width - 100,
-                         self.monitor.y + self.monitor.height/2), "Move cursor here", -90)
+                         self.monitor.y + self.monitor.height/2 - 100), "LOOK HERE", 0),
+            WarningPill((self.monitor.x + self.monitor.width - 200,
+                         self.monitor.y + self.monitor.height/2 -100 ), "LOOK HERE", 0)
         ]
 
         for pill in self.warning_pills:
