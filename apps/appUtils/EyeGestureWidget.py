@@ -1,5 +1,5 @@
 import sys
-from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar, QSlider
+from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar, QSlider, QLineEdit
 from PySide2.QtGui import QPixmap, QPalette, QColor, QPainterPath, QRegion, QMouseEvent
 from PySide2.QtCore import Qt, QRectF, QMargins, QPoint
 from PySide2.QtGui import QPainter, QFont
@@ -10,18 +10,28 @@ from screeninfo   import get_monitors
 from appUtils.ActivationZone import RoIMan
 from appUtils.RoiViewer import RoiViewer
 
+import hashlib
+import os
+
 class EyeGestureWidget(QWidget):
     def __init__(self,
                 start_cb = lambda : None,
                 stop_cb = lambda : None,
                 update_fixation_cb = lambda : None,
-                update_radius_cb   = lambda : None):
+                update_radius_cb = lambda : None,
+                text_updated_cb = lambda : None):
         super().__init__()
+
+        random_hash = hashlib.sha256(os.urandom(16)).hexdigest()[:8]
+
+        self.is_editable = True  # Initial editable state
 
         self.start_cb = start_cb
         self.stop_cb  = stop_cb
         self.update_fixation_cb = update_fixation_cb
         self.update_radius_cb   = update_radius_cb
+        self.text_updated_cb = text_updated_cb
+
 
         self.close_events = []
         self.roiMan = RoIMan()
@@ -117,10 +127,25 @@ class EyeGestureWidget(QWidget):
         font.setPointSize(20) # You can adjust the font size as per your requirement
         self.label_name.setFont(font)
 
+        self.text_input = QLineEdit(f"collection_{random_hash}")
+        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
+        self.text_input.setStyleSheet("""
+                                QLineEdit {
+                                    background-color: #8b125c;
+                                    border-radius: 10px; /* Adjust this value to change the roundness */
+                                    font-size: 20px;  /* Larger font size */
+                                    font-family: Poppins;
+                                }
+                                """)
+        self.text_input.textChanged.connect(self.on_text_updated)
+
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
 
         main_layout.addWidget(self.label_name)
+
+        main_layout.addWidget(self.text_input)
+
         # self.image_label.setPixmap(scaled_pixmap)
         fixation_layout = QHBoxLayout()
         fixation_layout.addWidget(self.label_fixation_threshold)
@@ -203,13 +228,26 @@ class EyeGestureWidget(QWidget):
         self.setLayout(main_layout)
         self.move(postion_x, postion_y)
 
+    # Example usage with default text and callback
+    def on_text_updated(self, updated_text):
+        # Execute the callback function with the new text
+        if self.text_updated_cb:
+            self.text_updated_cb(updated_text)
+
+    def get_text(self):
+        return self.text_input.text()
+
     def toggle_start_stop(self):
         text = "Start" if self.start_stop_btn.isChecked() else "Stop"
         self.start_stop_btn.setText(text)
 
         if text == "Start":
+            self.is_editable = False
+            self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
             self.start_cb()
         else:
+            self.is_editable = True
+            self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
             self.stop_cb()
 
         # Perform actions based on button state here (optional)

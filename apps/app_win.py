@@ -29,7 +29,11 @@ class Calibrator:
         self.height = height
         self.start_x = start_x
         self.start_y = start_y
-        self.calibration_margin = 20
+
+        self.prev_x = 0
+        self.prev_y = 0
+
+        self.calibration_margin = 100
         self.calibration_steps = []
         self.__set_order()
         self.show = show
@@ -75,13 +79,33 @@ class Calibrator:
         elif self.start_y > self.height/2 and CalibrationTypes.BOTTOM not in self.calibration_steps:
             self.__add_bottom().__add_top()
 
+    def add_recalibrate(self,recalibrate_step):
+
+        if recalibrate_step not in self.calibration_steps:
+            self.calibration_steps.append(recalibrate_step)
+
+
     def calibrate(self,x,y,fix):
 
+        if abs(x - self.prev_x) > 200:
+            if x - self.prev_x < 0:
+                self.add_recalibrate(CalibrationTypes.LEFT)
+            else:
+                self.add_recalibrate(CalibrationTypes.RIGHT)
+
+        if abs(y - self.prev_y) > 200:
+            if y - self.prev_y < 0:
+                self.add_recalibrate(CalibrationTypes.TOP)
+            else:
+                self.add_recalibrate(CalibrationTypes.BOTTOM)
+
+        self.prev_y = y
+        self.prev_x = x
         if len(self.calibration_steps) <= 0:
             return False
 
         self.display_next_calibration_target()
-        fixation_thresh = 0.7
+        fixation_thresh = 0.4
         if CalibrationTypes.LEFT == self.calibration_steps[0] and x < self.calibration_margin and fix > fixation_thresh:
             self.disappear(self.calibration_steps[0])
             self.calibration_steps.pop(0)
@@ -104,6 +128,10 @@ class Calibrator:
             return True
 
         return False
+
+    def clear_up(self):
+        for calibration_step in self.calibration_steps:
+            self.disappear(calibration_step)
 
 
 class Lab:
@@ -146,10 +174,12 @@ class Lab:
         self.radius   = 400
 
     def start(self):
+        self.calibrator = None
         self.__run = True
 
     def stop(self):
         self.__run = False
+        self.calibrator.clear_up()
         pass
 
     def update_fixation(self,fixation):
