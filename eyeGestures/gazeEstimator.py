@@ -183,7 +183,7 @@ class GazeTracker:
                                fix,
                                l_eye,
                                r_eye,
-                               context,
+                               self.screen,
                                context_id)
             else:
                 self.freezed_point = self.point_screen
@@ -193,7 +193,7 @@ class GazeTracker:
                                fix,
                                l_eye,
                                r_eye,
-                               context,
+                               self.screen,
                                context_id)
 
         return event

@@ -8,3 +8,4 @@ dist/*
 venv
 *.pyc
 dist/*
+*.csv

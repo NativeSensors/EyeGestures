@@ -15,6 +15,7 @@ from appUtils.EyeGestureWidget import EyeGestureWidget
 from appUtils.CalibrationWidget import CalibrationWidget
 from lab.pupillab import Worker
 from appUtils.dot_windows import WindowsCursor
+from appUtils.data_saver import save_gaze_data_to_csv
 
 class CalibrationTypes:
     LEFT = "left"
@@ -192,6 +193,10 @@ class Lab:
         self.__run = False
         self.power_off = True
 
+    def save_data(self,event):
+        filename = f"{self.eyegesture_widget.get_text()}.csv"
+        save_gaze_data_to_csv(filename,event)
+
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)
         cursor_x, cursor_y = 0, 0
@@ -217,7 +222,7 @@ class Lab:
         # frame = pygame.transform.scale(frame, (400, 400))
 
         if not event is None:
-
+            self.save_data(event)
             #scale down radius when focusing
             radius = int(60 - (50 * event.fixation))
             self.dot_widget.set_radius(radius)
@@ -233,7 +238,7 @@ class Lab:
             self.dot_widget.move(int(cursor_x),int(cursor_y))
 
     def run(self):
-        while not self.power_off: 
+        while not self.power_off:
             ret = True
             while ret and self.__run:
 
