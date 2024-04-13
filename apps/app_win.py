@@ -88,6 +88,9 @@ class Calibrator:
 
     def calibrate(self,x,y,fix):
 
+        if self.calibrated():
+            return True
+
         if abs(x - self.prev_x) > 200:
             if x - self.prev_x < 0:
                 self.add_recalibrate(CalibrationTypes.LEFT)
@@ -127,11 +130,30 @@ class Calibrator:
             self.calibration_steps.pop(0)
             self.drawn = False
             return True
+        elif fix > fixation_thresh:
+            self.disappear(self.calibration_steps[0])
+            self.drawn = False
+            if self.calibration_steps[0] in [CalibrationTypes.RIGHT,CalibrationTypes.LEFT]:
+                if x < self.width/2:
+                    if CalibrationTypes.RIGHT in self.calibration_steps:
+                        self.calibration_steps.remove(CalibrationTypes.RIGHT)
+                    self.calibration_steps.insert(0,CalibrationTypes.RIGHT)
+                else:
+                    if CalibrationTypes.LEFT in self.calibration_steps:
+                        self.calibration_steps.remove(CalibrationTypes.LEFT)
+                    self.calibration_steps.insert(0,CalibrationTypes.LEFT)
+
+            if self.calibration_steps[0] in [CalibrationTypes.TOP,CalibrationTypes.BOTTOM]:
+                if y < self.height/2:
+                    self.calibration_steps.insert(0,CalibrationTypes.TOP)
+                else:
+                    self.calibration_steps.insert(0,CalibrationTypes.BOTTOM)
+
+            return True
 
         return False
 
     def calibrated(self):
-        print(len(self.calibration_steps))
         return len(self.calibration_steps) <= 0
 
     def clear_up(self):
@@ -145,7 +167,7 @@ class Lab:
         self.step         = 10
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
-        self.gestures = EyeGestures(285,115)
+        self.gestures = EyeGestures(roi_width=int(80),roi_height=int(20))
 
         self.calibration_widget = CalibrationWidget()
         self.calibration_widget.disappear()
@@ -225,11 +247,10 @@ class Lab:
             self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
         # frame = pygame.transform.scale(frame, (400, 400))
 
-        print(f"self.calibration: {self.calibrator.calibrated()}")
-        if self.calibrator.calibrated():
-            self.dot_widget.hide()
-        else:
-            self.dot_widget.show()
+        # if self.calibrator.calibrated():
+        #     self.dot_widget.hide()
+        # else:
+        #     self.dot_widget.show()
 
         if not event is None:
             self.save_data(event)
@@ -239,15 +260,16 @@ class Lab:
             radius = int(60 - (50 * event.fixation))
             self.dot_widget.set_radius(radius)
 
-            if self.calibration:
-                if event.fixation > 0.7:
-                    pyautogui.moveTo(cursor_x + radius/2,  cursor_y + radius/2)
+            # if self.calibration:
+            #     if event.fixation > 0.7:
+            #         pyautogui.moveTo(cursor_x + radius/2,  cursor_y + radius/2)
 
-                if event.blink:
-                    pyautogui.moveTo(cursor_x + radius/2,  cursor_y + radius/2)
-                    pyautogui.click()
+            #     if event.blink:
+            #         pyautogui.moveTo(cursor_x + radius/2,  cursor_y + radius/2)
+            #         pyautogui.click()
 
             self.dot_widget.move(int(cursor_x),int(cursor_y))
+            self.eyegesture_widget.update_dot_viewer(int(cursor_x),int(cursor_y))
 
     def run(self):
         while not self.power_off:

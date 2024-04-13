@@ -496,6 +496,17 @@ class EyeGestureWidget(QWidget):
                 self.monitor.height)
         self.roiViewer.update()
 
+    def update_dot_viewer(self,x,y):
+        # TODO: maybe those parameters could be handled better?
+        self.roiViewer.add_dot(
+            0,
+            (x,y,0,0),
+            self.monitor.width,
+            self.monitor.height
+        )
+        self.roiViewer.update()
+
+
     def show_roi(self):
         self.roiMan.show()
 

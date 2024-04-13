@@ -9,6 +9,7 @@ class RoiViewer(QWidget):
         self._width = 300
         self._height = 200
         self.rectangles = dict()  # Define small rectangles as (x, y, width, height) tuples
+        self.dots = dict()
         self.setMinimumSize(self.width,self.height)
 
     def add_rectangle(self, id, rectangle, display_width, display_height):
@@ -17,6 +18,11 @@ class RoiViewer(QWidget):
         width =  rectangle[2] * self.width/display_width
         height = rectangle[3] * self.height/display_height
         self.rectangles[id] = (x,y,width,height)
+
+    def add_dot(self, id, rectangle, display_width, display_height):
+        x = rectangle[0] * self._width/display_width
+        y = rectangle[1] * self._height/display_height
+        self.dots[id] = (x,y,10,10)
 
     def rm_rectangle(self, id):
         del self.rectangles[id]
@@ -35,6 +41,11 @@ class RoiViewer(QWidget):
         painter.setBrush(QColor("#0600c2"))
         for key in self.rectangles:
             rectangle = QRect(*self.rectangles[key])
+            painter.drawRoundedRect(rectangle, 10, 10)
+
+        painter.setBrush(QColor("#c03dff"))
+        for key in self.dots:
+            rectangle = QRect(*self.dots[key])
             painter.drawRoundedRect(rectangle, 10, 10)
 
     def resizeEvent(self, event):
