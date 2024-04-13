@@ -68,19 +68,95 @@ class InputFileNameWidget(QWidget):
     def getText(self):
         return self.text_input.text()
 
+class AdvancedSettings(QWidget):
+
+    def __init__(self,update_fixation_cb,update_radius_label) -> None:
+        super().__init__()
+
+        layout = QVBoxLayout()
+
+        self.update_fixation_cb = update_fixation_cb
+        self.update_radius_label = update_radius_label
+
+        self.slider_fixation = QSlider(Qt.Horizontal)
+        self.slider_fixation.setMinimum(0)
+        self.slider_fixation.setMaximum(10)
+        self.slider_fixation.setValue(8)
+        self.slider_fixation.valueChanged.connect(self.update_fixation_label)
+
+        self.slider_radius = QSlider(Qt.Horizontal)
+        self.slider_radius.setMinimum(1)
+        self.slider_radius.setMaximum(500)
+        self.slider_radius.setValue(400)
+        self.slider_radius.valueChanged.connect(self.update_radius_label)
+
+
+        self.label_fixation_threshold = QLabel("Fixation: 0.8")
+        self.label_radius_threshold   = QLabel("Radius: 500px")
+
+        fixation_layout = QHBoxLayout()
+        fixation_layout.addWidget(self.label_fixation_threshold)
+        fixation_layout.addWidget(self.slider_fixation)
+
+        radius_layout = QHBoxLayout()
+        radius_layout.addWidget(self.label_radius_threshold)
+        radius_layout.addWidget(self.slider_radius)
+
+        layout.addLayout(fixation_layout)
+        layout.addLayout(radius_layout)
+        self.setLayout(layout)
+
+    def setReadOnly(self):
+        self.is_editable = False
+        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
+        self.text_input.setStyleSheet("""
+                                QLineEdit {
+                                    background-color: #14171A;
+                                    border: 1px solid #14171A;
+                                    color: #F5F8FA;
+                                    border-radius: 5px; /* Adjust this value to change the roundness */
+                                    font-size: 20px;  /* Larger font size */
+                                    font-family: Poppins;
+                                    padding: 5px;
+                                }
+                                """)
+
+    def unsetReadOnly(self):
+        self.is_editable = True
+        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
+        self.text_input.setStyleSheet("""
+                                QLineEdit {
+                                    background-color: #14171A;
+                                    border: 1px solid #657786;
+                                    color: #F5F8FA;
+                                    border-radius: 5px; /* Adjust this value to change the roundness */
+                                    font-size: 20px;  /* Larger font size */
+                                    font-family: Poppins;
+                                    padding: 5px;
+                                }
+                                """)
+
+    def update_fixation_label(self, value):
+        # Convert integer value to float (0.0 to 1.0)
+        self.label_fixation_threshold.setText(f"Fixation: {value/10}")
+        self.update_fixation_cb(value/10)
+
+    def update_radius_label(self, value):
+        # Convert integer value to float (0.0 to 1.0)
+        self.label_radius_threshold.setText(f"Radius: {value}px")
+        self.update_radius_cb(value)
+
 class EyeGestureWidget(QWidget):
     def __init__(self,
                 start_cb = lambda : None,
                 stop_cb = lambda : None,
-                update_fixation_cb = lambda : None,
-                update_radius_cb = lambda : None,
+                update_fixation_cb = lambda value : None,
+                update_radius_cb = lambda value : None,
                 text_updated_cb = lambda text : None):
         super().__init__()
 
         self.start_cb = start_cb
         self.stop_cb  = stop_cb
-        self.update_fixation_cb = update_fixation_cb
-        self.update_radius_cb   = update_radius_cb
 
         self.close_events = []
         self.roiMan = RoIMan()
@@ -105,21 +181,6 @@ class EyeGestureWidget(QWidget):
         palette.setColor(QPalette.Highlight, QColor(142, 45, 197).lighter())
         palette.setColor(QPalette.HighlightedText, Qt.black)
         self.setPalette(palette)
-
-        self.slider_fixation = QSlider(Qt.Horizontal)
-        self.slider_fixation.setMinimum(0)
-        self.slider_fixation.setMaximum(10)
-        self.slider_fixation.setValue(8)
-        self.slider_fixation.valueChanged.connect(self.update_fixation_label)
-
-        self.slider_radius = QSlider(Qt.Horizontal)
-        self.slider_radius.setMinimum(1)
-        self.slider_radius.setMaximum(500)
-        self.slider_radius.setValue(400)
-        self.slider_radius.valueChanged.connect(self.update_radius_label)
-
-        self.label_fixation_threshold = QLabel("Fixation: 0.8")
-        self.label_radius_threshold   = QLabel("Radius: 500px")
 
         # Window positioning
         self.setGeometry(100, 100, 1000, 700)  # Adjust size as needed
@@ -184,16 +245,8 @@ class EyeGestureWidget(QWidget):
         self.text_input = InputFileNameWidget(text_updated_cb)
         main_layout.addWidget(self.text_input)
 
-        # self.image_label.setPixmap(scaled_pixmap)
-        fixation_layout = QHBoxLayout()
-        fixation_layout.addWidget(self.label_fixation_threshold)
-        fixation_layout.addWidget(self.slider_fixation)
-        main_layout.addLayout(fixation_layout)
-
-        radius_layout = QHBoxLayout()
-        radius_layout.addWidget(self.label_radius_threshold)
-        radius_layout.addWidget(self.slider_radius)
-        main_layout.addLayout(radius_layout)
+        self.adv_settings = AdvancedSettings(update_fixation_cb,update_radius_cb)
+        main_layout.addWidget(self.adv_settings)
 
         main_layout.addLayout(progress_bar_container_layout)
         main_layout.addWidget(self.roiViewer)
@@ -290,16 +343,6 @@ class EyeGestureWidget(QWidget):
     def update_fixation(self,value):
         self.label_fixation_level.setText(f"{value:.2f}")
         self.fixation_bar.setValue(int(value * 100))
-
-    def update_fixation_label(self, value):
-        # Convert integer value to float (0.0 to 1.0)
-        self.label_fixation_threshold.setText(f"Fixation: {value/10}")
-        self.update_fixation_cb(value/10)
-
-    def update_radius_label(self, value):
-        # Convert integer value to float (0.0 to 1.0)
-        self.label_radius_threshold.setText(f"Radius: {value}px")
-        self.update_radius_cb(value)
 
     def add_close_event(self,clsoe_callback):
         self.close_events.append(clsoe_callback)
