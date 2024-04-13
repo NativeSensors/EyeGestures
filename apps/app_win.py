@@ -206,7 +206,7 @@ class Lab:
             self.calibration, # set calibration - switch to False to stop calibration
             self.monitor.width,
             self.monitor.height,
-            0, 0, 0.8,10)
+            0, 0, 0.8, 10)
 
         cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
 
@@ -223,6 +223,8 @@ class Lab:
 
         if not event is None:
             self.save_data(event)
+            self.eyegesture_widget.update_fixation(event.fixation)
+
             #scale down radius when focusing
             radius = int(60 - (50 * event.fixation))
             self.dot_widget.set_radius(radius)

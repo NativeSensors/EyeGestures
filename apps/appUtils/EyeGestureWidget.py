@@ -13,25 +13,74 @@ from appUtils.RoiViewer import RoiViewer
 import hashlib
 import os
 
+class InputFileNameWidget(QWidget):
+
+    def __init__(self,text_updated_cb) -> None:
+        super().__init__()
+        random_hash = hashlib.sha256(os.urandom(16)).hexdigest()[:8]
+        self.text_updated_cb = text_updated_cb
+        self.is_editable = True
+
+        layout = QVBoxLayout()
+        self.text_input = QLineEdit(f"collection_{random_hash}")
+        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
+        self.text_input.textChanged.connect(self.on_text_updated)
+        self.unsetReadOnly()
+        layout.addWidget(self.text_input)
+
+        self.setLayout(layout)
+
+    def setReadOnly(self):
+        self.is_editable = False
+        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
+        self.text_input.setStyleSheet("""
+                                QLineEdit {
+                                    background-color: #14171A;
+                                    border: 1px solid #14171A;
+                                    color: #F5F8FA;
+                                    border-radius: 5px; /* Adjust this value to change the roundness */
+                                    font-size: 20px;  /* Larger font size */
+                                    font-family: Poppins;
+                                    padding: 5px;
+                                }
+                                """)
+
+    def unsetReadOnly(self):
+        self.is_editable = True
+        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
+        self.text_input.setStyleSheet("""
+                                QLineEdit {
+                                    background-color: #14171A;
+                                    border: 1px solid #657786;
+                                    color: #F5F8FA;
+                                    border-radius: 5px; /* Adjust this value to change the roundness */
+                                    font-size: 20px;  /* Larger font size */
+                                    font-family: Poppins;
+                                    padding: 5px;
+                                }
+                                """)
+
+    def on_text_updated(self, updated_text):
+        # Execute the callback function with the new text
+        if self.text_updated_cb:
+            self.text_updated_cb(updated_text)
+
+    def getText(self):
+        return self.text_input.text()
+
 class EyeGestureWidget(QWidget):
     def __init__(self,
                 start_cb = lambda : None,
                 stop_cb = lambda : None,
                 update_fixation_cb = lambda : None,
                 update_radius_cb = lambda : None,
-                text_updated_cb = lambda : None):
+                text_updated_cb = lambda text : None):
         super().__init__()
-
-        random_hash = hashlib.sha256(os.urandom(16)).hexdigest()[:8]
-
-        self.is_editable = True  # Initial editable state
 
         self.start_cb = start_cb
         self.stop_cb  = stop_cb
         self.update_fixation_cb = update_fixation_cb
         self.update_radius_cb   = update_radius_cb
-        self.text_updated_cb = text_updated_cb
-
 
         self.close_events = []
         self.roiMan = RoIMan()
@@ -101,7 +150,7 @@ class EyeGestureWidget(QWidget):
         progress_bar_container_layout.addWidget(self.start_stop_btn)
 
         self.fixation_bar = QProgressBar()
-        self.fixation_bar.setValue(40)  # Set initial value
+        self.fixation_bar.setValue(0)  # Set initial value
         self.fixation_bar.setFixedHeight(100)
         self.fixation_bar.setOrientation(Qt.Orientation.Vertical)
         self.fixation_bar.setTextVisible(False)
@@ -116,8 +165,8 @@ class EyeGestureWidget(QWidget):
                                         }
                                         """)
 
-        self.label_fixation  = QLabel("Fixation")
-        self.label_fixation_level  = QLabel("40")
+        self.label_fixation        = QLabel("Fixation")
+        self.label_fixation_level  = QLabel("0.0")
         progress_bar_container_layout.addWidget(self.fixation_bar)
         progress_bar_container_layout.addWidget(self.label_fixation)
         progress_bar_container_layout.addWidget(self.label_fixation_level)
@@ -127,23 +176,12 @@ class EyeGestureWidget(QWidget):
         font.setPointSize(20) # You can adjust the font size as per your requirement
         self.label_name.setFont(font)
 
-        self.text_input = QLineEdit(f"collection_{random_hash}")
-        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
-        self.text_input.setStyleSheet("""
-                                QLineEdit {
-                                    background-color: #8b125c;
-                                    border-radius: 10px; /* Adjust this value to change the roundness */
-                                    font-size: 20px;  /* Larger font size */
-                                    font-family: Poppins;
-                                }
-                                """)
-        self.text_input.textChanged.connect(self.on_text_updated)
-
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
 
         main_layout.addWidget(self.label_name)
 
+        self.text_input = InputFileNameWidget(text_updated_cb)
         main_layout.addWidget(self.text_input)
 
         # self.image_label.setPixmap(scaled_pixmap)
@@ -173,12 +211,15 @@ class EyeGestureWidget(QWidget):
             """
             QPushButton {
                 padding: 0px; margin: 0px;
-                border: 2px solid #16171f;
+                border: 2px solid #657786;
                 height: 40px;
                 border-top-right-radius: 5px;
                 border-bottom-right-radius: 5px;
-                color: #ebe9fc;
-                background-color: #3a31d8;
+                color: #E1E8ED;
+                border-right: none;
+                border-top: none;
+                border-bottom: none;
+                background-color: #14171A;
                 font-size: 14px;  /* Larger font size */
                 font-family: Poppins;
             }
@@ -194,14 +235,16 @@ class EyeGestureWidget(QWidget):
             """
             QPushButton {
                 padding: 0px; margin: 0px;
-                border: 2px solid #16171f;
+                border: 2px solid #657786;
                 height: 40px;
                 border-top-left-radius: 5px;
                 border-bottom-left-radius: 5px;
                 color: #eff0f1;
                 border-right: none;
                 border-left: none;
-                background-color: #DD555b62;
+                border-top: none;
+                border-bottom: none;
+                background-color: #14171A;
                 font-size: 14px;  /* Larger font size */
                 font-family: Poppins;
             }
@@ -228,29 +271,25 @@ class EyeGestureWidget(QWidget):
         self.setLayout(main_layout)
         self.move(postion_x, postion_y)
 
-    # Example usage with default text and callback
-    def on_text_updated(self, updated_text):
-        # Execute the callback function with the new text
-        if self.text_updated_cb:
-            self.text_updated_cb(updated_text)
-
     def get_text(self):
-        return self.text_input.text()
+        return self.text_input.getText()
 
     def toggle_start_stop(self):
-        text = "Start" if self.start_stop_btn.isChecked() else "Stop"
+        text = "Stop" if self.start_stop_btn.isChecked() else "Start"
         self.start_stop_btn.setText(text)
 
         if text == "Start":
-            self.is_editable = False
-            self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
-            self.start_cb()
-        else:
-            self.is_editable = True
-            self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
+            self.text_input.unsetReadOnly()
             self.stop_cb()
+        else:
+            self.text_input.setReadOnly()
+            self.start_cb()
 
         # Perform actions based on button state here (optional)
+
+    def update_fixation(self,value):
+        self.label_fixation_level.setText(f"{value:.2f}")
+        self.fixation_bar.setValue(int(value * 100))
 
     def update_fixation_label(self, value):
         # Convert integer value to float (0.0 to 1.0)
@@ -285,7 +324,7 @@ class EyeGestureWidget(QWidget):
                 QPushButton {
                     border: none;
                     border-radius: 5px;
-                    background-color: #DD555b62;
+                    background-color: #14171A;
                     color: #eff0f1;
                     margin: 5px;
                     padding: 10px;
