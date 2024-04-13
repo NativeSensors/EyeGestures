@@ -221,6 +221,11 @@ class Lab:
             self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
         # frame = pygame.transform.scale(frame, (400, 400))
 
+        if not self.calibration:
+            self.dot_widget.hide()
+        else:
+            self.dot_widget.show()
+
         if not event is None:
             self.save_data(event)
             self.eyegesture_widget.update_fixation(event.fixation)

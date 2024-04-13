@@ -79,6 +79,15 @@ class WindowsCursor():
         # Schedule the destruction of the Tkinter window in the main thread
         self.root.after(0, destroy_root)
 
+    def hide(self):
+        self.close_event()
+        pass
+
+    def show(self):
+        # self.t = threading.Thread(target=self.__create)
+        # self.t.start()
+        pass
+
     def move(self,x,y):
         self.x = x - self.width//2
         self.y = y - self.height//2
