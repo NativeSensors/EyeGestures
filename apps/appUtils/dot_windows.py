@@ -14,6 +14,7 @@ class WindowsCursor():
         self.thickness = thickness
         self.radius = radius
         self.root = None
+        self.hidden = False
         self.t = threading.Thread(target=self.__create)
         self.t.start()
 
@@ -26,11 +27,13 @@ class WindowsCursor():
         draw.rectangle([(0, 0), size], fill="black")
 
         # Draw the semi-transparent orange circle in the middle
+        color = (0, 0, 0, 256) if self.hidden else "orange"
+
         circle_radius = self.circle_radius1
         circle_center = (size[0] // 2, size[1] // 2)
         draw.ellipse([(circle_center[0] - circle_radius, circle_center[1] - circle_radius),
                     (circle_center[0] + circle_radius, circle_center[1] + circle_radius)],
-                    fill="orange")  # Use (R, G, B, A) for the color, where A is the alpha (transparency)
+                    fill=color)  # Use (R, G, B, A) for the color, where A is the alpha (transparency)
 
         circle_radius = self.circle_radius2
         draw.ellipse([(circle_center[0] - circle_radius, circle_center[1] - circle_radius),
@@ -42,7 +45,6 @@ class WindowsCursor():
     def __update_window_position(self, root):
         root.geometry(f"+{self.x}+{self.y}")
         root.after(10, lambda: self.__update_window_position(root))  # Schedule the next update
-
         self.image = self.__create_transparent_rectangle_with_semi_transparent_circle((self.root.winfo_width(), self.root.winfo_height()))
         self.tk_image = ImageTk.PhotoImage(self.image)
         self.label.configure(image=self.tk_image)
@@ -80,12 +82,11 @@ class WindowsCursor():
         self.root.after(0, destroy_root)
 
     def hide(self):
-        self.close_event()
+        self.hidden = True
         pass
 
     def show(self):
-        # self.t = threading.Thread(target=self.__create)
-        # self.t.start()
+        self.hidden = False
         pass
 
     def move(self,x,y):

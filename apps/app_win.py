@@ -130,6 +130,10 @@ class Calibrator:
 
         return False
 
+    def calibrated(self):
+        print(len(self.calibration_steps))
+        return len(self.calibration_steps) <= 0
+
     def clear_up(self):
         for calibration_step in self.calibration_steps:
             self.disappear(calibration_step)
@@ -221,7 +225,8 @@ class Lab:
             self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
         # frame = pygame.transform.scale(frame, (400, 400))
 
-        if not self.calibration:
+        print(f"self.calibration: {self.calibrator.calibrated()}")
+        if self.calibrator.calibrated():
             self.dot_widget.hide()
         else:
             self.dot_widget.show()
