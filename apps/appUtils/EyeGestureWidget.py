@@ -1,5 +1,5 @@
 import sys
-from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar, QSlider, QLineEdit
+from PySide2.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar, QSlider, QLineEdit, QSpacerItem, QSizePolicy
 from PySide2.QtGui import QPixmap, QPalette, QColor, QPainterPath, QRegion, QMouseEvent
 from PySide2.QtCore import Qt, QRectF, QMargins, QPoint
 from PySide2.QtGui import QPainter, QFont
@@ -22,10 +22,12 @@ class InputFileNameWidget(QWidget):
         self.is_editable = True
 
         layout = QVBoxLayout()
+        self.label = QLabel("💾 File:")
         self.text_input = QLineEdit(f"collection_{random_hash}")
         self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
         self.text_input.textChanged.connect(self.on_text_updated)
         self.unsetReadOnly()
+        layout.addWidget(self.label)
         layout.addWidget(self.text_input)
 
         self.setLayout(layout)
@@ -39,7 +41,6 @@ class InputFileNameWidget(QWidget):
                                     border: 1px solid #14171A;
                                     color: #F5F8FA;
                                     border-radius: 5px; /* Adjust this value to change the roundness */
-                                    font-size: 20px;  /* Larger font size */
                                     font-family: Poppins;
                                     padding: 5px;
                                 }
@@ -54,7 +55,6 @@ class InputFileNameWidget(QWidget):
                                     border: 1px solid #657786;
                                     color: #F5F8FA;
                                     border-radius: 5px; /* Adjust this value to change the roundness */
-                                    font-size: 20px;  /* Larger font size */
                                     font-family: Poppins;
                                     padding: 5px;
                                 }
@@ -78,6 +78,32 @@ class AdvancedSettings(QWidget):
         self.update_fixation_cb = update_fixation_cb
         self.update_radius_label = update_radius_label
 
+        self.control_btn = QPushButton('🞂 ⚙️Advanced settings')
+        self.control_btn.setCheckable(True)  # Make the button a toggle button
+        self.control_btn.clicked.connect(self.__toggle)
+
+        self.control_btn.setStyleSheet("""
+            QPushButton {
+                padding: 5px;
+                margin: 0px;
+                height: 40px;
+                width: 200px;
+                border-radius: 5px;
+                color: #E1E8ED;
+                border: none;
+                text-align: left;
+                background-color: #14171A;
+                font-family: Poppins;
+            }
+            QPushButton:hover {
+                background-color: #818992;
+            }
+            QPushButton:pressed {
+                background-color: #212426;
+            }
+            """)
+
+
         self.slider_fixation = QSlider(Qt.Horizontal)
         self.slider_fixation.setMinimum(0)
         self.slider_fixation.setMaximum(10)
@@ -94,47 +120,43 @@ class AdvancedSettings(QWidget):
         self.label_fixation_threshold = QLabel("Fixation: 0.8")
         self.label_radius_threshold   = QLabel("Radius: 500px")
 
-        fixation_layout = QHBoxLayout()
-        fixation_layout.addWidget(self.label_fixation_threshold)
-        fixation_layout.addWidget(self.slider_fixation)
+        self.fixation_layout = QHBoxLayout()
+        self.fixation_layout.addWidget(self.label_fixation_threshold)
+        self.fixation_layout.addWidget(self.slider_fixation)
 
-        radius_layout = QHBoxLayout()
-        radius_layout.addWidget(self.label_radius_threshold)
-        radius_layout.addWidget(self.slider_radius)
+        self.radius_layout = QHBoxLayout()
+        self.radius_layout.addWidget(self.label_radius_threshold)
+        self.radius_layout.addWidget(self.slider_radius)
 
-        layout.addLayout(fixation_layout)
-        layout.addLayout(radius_layout)
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.control_btn,  alignment=Qt.AlignLeft)
+
+        layout.addLayout(button_layout)
+        layout.addLayout(self.fixation_layout)
+        layout.addLayout(self.radius_layout)
+        spacer = QSpacerItem(0, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        layout.addSpacerItem(spacer)
+
+        self.setFixedHeight(140)
         self.setLayout(layout)
+        self.hide()
 
-    def setReadOnly(self):
-        self.is_editable = False
-        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
-        self.text_input.setStyleSheet("""
-                                QLineEdit {
-                                    background-color: #14171A;
-                                    border: 1px solid #14171A;
-                                    color: #F5F8FA;
-                                    border-radius: 5px; /* Adjust this value to change the roundness */
-                                    font-size: 20px;  /* Larger font size */
-                                    font-family: Poppins;
-                                    padding: 5px;
-                                }
-                                """)
+    def hide(self):
+        self.label_fixation_threshold.hide()
+        self.slider_fixation.hide()
+        self.label_radius_threshold.hide()
+        self.slider_radius.hide()
+        self.control_btn.setText('🞂  ⚙️Advanced settings')
 
-    def unsetReadOnly(self):
-        self.is_editable = True
-        self.text_input.setReadOnly(not self.is_editable)  # Set initial read-only state
-        self.text_input.setStyleSheet("""
-                                QLineEdit {
-                                    background-color: #14171A;
-                                    border: 1px solid #657786;
-                                    color: #F5F8FA;
-                                    border-radius: 5px; /* Adjust this value to change the roundness */
-                                    font-size: 20px;  /* Larger font size */
-                                    font-family: Poppins;
-                                    padding: 5px;
-                                }
-                                """)
+
+    def show_again(self):
+        self.label_fixation_threshold.show()
+        self.slider_fixation.show()
+        self.label_radius_threshold.show()
+        self.slider_radius.show()
+        self.control_btn.setText('🞃 ⚙️Advanced settings')
+
+
 
     def update_fixation_label(self, value):
         # Convert integer value to float (0.0 to 1.0)
@@ -145,6 +167,86 @@ class AdvancedSettings(QWidget):
         # Convert integer value to float (0.0 to 1.0)
         self.label_radius_threshold.setText(f"Radius: {value}px")
         self.update_radius_cb(value)
+
+    def __toggle(self):
+        self.show_again() if self.control_btn.isChecked() else self.hide()
+
+
+class StartStopWidget(QWidget):
+
+    def __init__(self,stop_cb,start_cb) -> None:
+        super().__init__()
+
+        self.stop_cb = stop_cb
+        self.start_cb = start_cb
+
+        progress_bar_container_layout = QHBoxLayout()
+        progress_bar_container_layout.setAlignment(Qt.AlignHCenter)
+
+        self.start_stop_btn = QPushButton("🟢 Start")
+        self.start_stop_btn.setCheckable(True)  # Make the button a toggle button
+        self.start_stop_btn.setStyleSheet("""
+                QPushButton {
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #14171A;
+                    color: #eff0f1;
+                    margin: 5px;
+                    padding: 10px;
+                    padding: 10px 20px;  /* Increase padding for bigger size */
+                    font-family: Poppins;
+                }
+                QPushButton:hover {
+                    background-color: #818992;
+                }
+                QPushButton:pressed {
+                    background-color: #212426;
+                }
+            """)
+        self.start_stop_btn.clicked.connect(self.toggle_start_stop)
+
+        self.fixation_bar = QProgressBar()
+        self.fixation_bar.setValue(0)  # Set initial value
+        self.fixation_bar.setFixedHeight(100)
+        self.fixation_bar.setOrientation(Qt.Orientation.Vertical)
+        self.fixation_bar.setTextVisible(False)
+        self.fixation_bar.setStyleSheet("""
+                                        QProgressBar {
+                                            background-color: #06020f;
+                                            border-radius: 10px; /* Adjust this value to change the roundness */
+                                        }
+                                        QProgressBar::chunk {
+                                            background-color: #8b125c;
+                                            border-radius: 10px; /* Adjust this value to change the roundness */
+                                        }
+                                        """)
+
+        self.label_fixation        = QLabel("Fixation")
+        self.label_fixation_level  = QLabel("0.0")
+
+        progress_bar_container_layout.addWidget(self.start_stop_btn)
+        spacer = QSpacerItem(100, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        progress_bar_container_layout.addSpacerItem(spacer)
+        progress_bar_container_layout.addWidget(self.fixation_bar)
+        progress_bar_container_layout.addWidget(self.label_fixation)
+        progress_bar_container_layout.addWidget(self.label_fixation_level)
+
+        self.setLayout(progress_bar_container_layout)
+
+    def update_fixation(self,value):
+        self.label_fixation_level.setText(f"{value:.2f}")
+        self.fixation_bar.setValue(int(value * 100))
+
+    def toggle_start_stop(self):
+        text = "🔴 Stop" if self.start_stop_btn.isChecked() else "🟢 Start"
+        self.start_stop_btn.setText(text)
+
+        if text == "🟢 Start":
+            self.stop_cb()
+        else:
+            self.start_cb()
+
+        # Perform actions based on button state here (optional)
 
 class EyeGestureWidget(QWidget):
     def __init__(self,
@@ -183,54 +285,23 @@ class EyeGestureWidget(QWidget):
         self.setPalette(palette)
 
         # Window positioning
-        self.setGeometry(100, 100, 1000, 700)  # Adjust size as needed
+        self.setGeometry(100, 100, 1050, 800)  # Adjust size as needed
         self.move_to_center()
 
         self.setWindowTitle("EyeGestures")
         # Buttons
-        self.close_btn = QPushButton('Close')
+        self.close_btn = QPushButton('😢 Close')
         self.close_btn.clicked.connect(self.close_event)
 
-        self.add_roi_btn = QPushButton('Add')
+        self.add_roi_btn = QPushButton('➕ Add')
         self.add_roi_btn.clicked.connect(self.add_roi)
 
-        self.show_roi_btn = QPushButton('Show')
+        self.show_roi_btn = QPushButton('🔍 Show')
         self.show_roi_btn.clicked.connect(self.show_roi)
 
         self.label_name = QLabel("EyeGestures")
         # Set text alignment to center
         self.label_name.setAlignment(Qt.AlignCenter)
-
-        progress_bar_container_layout = QHBoxLayout()
-        progress_bar_container_layout.setAlignment(Qt.AlignHCenter)
-
-        self.start_stop_btn = QPushButton("Start")
-        self.start_stop_btn.setCheckable(True)  # Make the button a toggle button
-        self.start_stop_btn.clicked.connect(self.toggle_start_stop)
-
-        progress_bar_container_layout.addWidget(self.start_stop_btn)
-
-        self.fixation_bar = QProgressBar()
-        self.fixation_bar.setValue(0)  # Set initial value
-        self.fixation_bar.setFixedHeight(100)
-        self.fixation_bar.setOrientation(Qt.Orientation.Vertical)
-        self.fixation_bar.setTextVisible(False)
-        self.fixation_bar.setStyleSheet("""
-                                        QProgressBar {
-                                            background-color: #06020f;
-                                            border-radius: 10px; /* Adjust this value to change the roundness */
-                                        }
-                                        QProgressBar::chunk {
-                                            background-color: #8b125c;
-                                            border-radius: 10px; /* Adjust this value to change the roundness */
-                                        }
-                                        """)
-
-        self.label_fixation        = QLabel("Fixation")
-        self.label_fixation_level  = QLabel("0.0")
-        progress_bar_container_layout.addWidget(self.fixation_bar)
-        progress_bar_container_layout.addWidget(self.label_fixation)
-        progress_bar_container_layout.addWidget(self.label_fixation_level)
 
         # Set font size
         font = self.label_name.font()
@@ -242,13 +313,15 @@ class EyeGestureWidget(QWidget):
 
         main_layout.addWidget(self.label_name)
 
+        self.startStop = StartStopWidget(self.__stop_cb,self.__start_cb)
+        main_layout.addWidget(self.startStop)
+
         self.text_input = InputFileNameWidget(text_updated_cb)
         main_layout.addWidget(self.text_input)
 
         self.adv_settings = AdvancedSettings(update_fixation_cb,update_radius_cb)
         main_layout.addWidget(self.adv_settings)
 
-        main_layout.addLayout(progress_bar_container_layout)
         main_layout.addWidget(self.roiViewer)
 
         roi_buttons_layout = QHBoxLayout()
@@ -257,7 +330,13 @@ class EyeGestureWidget(QWidget):
         roi_buttons_layout.addWidget(self.show_roi_btn,2)
         roi_buttons_layout.addWidget(self.add_roi_btn,1)
         main_layout.addLayout(roi_buttons_layout)
+
+        # Add a spacer at the bottom
+        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        main_layout.addSpacerItem(spacer)
+
         main_layout.addWidget(self.close_btn)
+
 
         # Set font bold for button2
         self.add_roi_btn.setStyleSheet(
@@ -273,7 +352,6 @@ class EyeGestureWidget(QWidget):
                 border-top: none;
                 border-bottom: none;
                 background-color: #14171A;
-                font-size: 14px;  /* Larger font size */
                 font-family: Poppins;
             }
             QPushButton:hover {
@@ -298,7 +376,6 @@ class EyeGestureWidget(QWidget):
                 border-top: none;
                 border-bottom: none;
                 background-color: #14171A;
-                font-size: 14px;  /* Larger font size */
                 font-family: Poppins;
             }
             QPushButton:hover {
@@ -310,7 +387,6 @@ class EyeGestureWidget(QWidget):
             """)
 
         self.style_buttons(self.close_btn)
-        self.style_buttons(self.start_stop_btn)
 
         # this sets windows frameless
         self.resize(400,self.frameGeometry().height())
@@ -324,25 +400,19 @@ class EyeGestureWidget(QWidget):
         self.setLayout(main_layout)
         self.move(postion_x, postion_y)
 
+    def __stop_cb(self):
+        self.text_input.unsetReadOnly()
+        self.stop_cb()
+
+    def __start_cb(self):
+        self.text_input.setReadOnly()
+        self.start_cb()
+
     def get_text(self):
         return self.text_input.getText()
 
-    def toggle_start_stop(self):
-        text = "Stop" if self.start_stop_btn.isChecked() else "Start"
-        self.start_stop_btn.setText(text)
-
-        if text == "Start":
-            self.text_input.unsetReadOnly()
-            self.stop_cb()
-        else:
-            self.text_input.setReadOnly()
-            self.start_cb()
-
-        # Perform actions based on button state here (optional)
-
     def update_fixation(self,value):
-        self.label_fixation_level.setText(f"{value:.2f}")
-        self.fixation_bar.setValue(int(value * 100))
+        self.startStop.update_fixation(value)
 
     def add_close_event(self,clsoe_callback):
         self.close_events.append(clsoe_callback)
@@ -372,7 +442,6 @@ class EyeGestureWidget(QWidget):
                     margin: 5px;
                     padding: 10px;
                     padding: 10px 20px;  /* Increase padding for bigger size */
-                    font-size: 14px;  /* Larger font size */
                     font-family: Poppins;
                 }
                 QPushButton:hover {
@@ -432,6 +501,10 @@ class EyeGestureWidget(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    # Set default font and size
+    font = QFont("Arial", 20)  # You can change "Arial" to your preferred font
+    app.setFont(font)
+
     eyegesture_widget = EyeGestureWidget()
     eyegesture_widget.show()
 
