@@ -1,6 +1,7 @@
 import os
 import cv2
 import sys
+import time
 
 import pyautogui
 from screeninfo import get_monitors
@@ -34,7 +35,7 @@ class Calibrator:
         self.prev_x = 0
         self.prev_y = 0
 
-        self.calibration_margin = 100
+        self.calibration_margin = 200
         self.calibration_steps = []
         self.__set_order()
         self.show = show
@@ -47,6 +48,7 @@ class Calibrator:
 
         self.calibration = False
         self.drawn = False
+        self.last_calib = time.time()
         pass
 
     def display_next_calibration_target(self):
@@ -97,7 +99,7 @@ class Calibrator:
             else:
                 self.add_recalibrate(CalibrationTypes.RIGHT)
 
-        if abs(y - self.prev_y) > 200:
+        if abs(y - self.prev_y) > 100:
             if y - self.prev_y < 0:
                 self.add_recalibrate(CalibrationTypes.TOP)
             else:
@@ -130,7 +132,7 @@ class Calibrator:
             self.calibration_steps.pop(0)
             self.drawn = False
             return True
-        elif fix > min(fixation_thresh * 2, 1.0):
+        elif fix > min(fixation_thresh * 2, 1.0) and self.last_calib - time.time() > 0.2:
             # TODO: somewhere here is bug breaking entire program
             print("here")
             self.disappear(self.calibration_steps[0])
@@ -147,11 +149,11 @@ class Calibrator:
                     self.calibration_steps.insert(0,CalibrationTypes.LEFT)
                 return True
 
-            if self.calibration_steps[0] in [CalibrationTypes.TOP,CalibrationTypes.BOTTOM]:
-                if y < self.height/2:
-                    self.calibration_steps.insert(0,CalibrationTypes.TOP)
-                else:
-                    self.calibration_steps.insert(0,CalibrationTypes.BOTTOM)
+            if self.calibration_steps[0] is CalibrationTypes.TOP:
+                self.calibration_steps.insert(0,CalibrationTypes.BOTTOM)
+                return True
+            else:
+                self.calibration_steps.insert(0,CalibrationTypes.TOP)
                 return True
 
         return False
