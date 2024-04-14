@@ -1,8 +1,9 @@
 
+import pickle
 import csv
 import os
 
-def save_gaze_data_to_csv(filename, gevent):
+def save_gaze_data_to_csv(filename, gevent,rois_to_save):
     """Saves gaze event data from a Gevent object to a CSV file,
        extracting relevant data during saving.
 
@@ -14,7 +15,7 @@ def save_gaze_data_to_csv(filename, gevent):
 
     headers = ["point_x", "point_y", "blink", "fixation", "screen_x", "screen_y",
                "l_eye_landmarks", "r_eye_landmarks", "l_eye_pupil", "r_eye_pupil",
-               "screen_width", "screen_height"]
+               "screen_width", "screen_height","rois"]
     write_headers = not os.path.exists(filename)
     append = os.path.exists(filename)
 
@@ -35,6 +36,10 @@ def save_gaze_data_to_csv(filename, gevent):
 
         row = [point_x, point_y, gevent.blink, gevent.fixation,
                screen_x, screen_y,
-               l_eye_landmarks, r_eye_landmarks, l_eye_pupil, r_eye_pupil,
-               screen_width, screen_height]
+               pickle.dumps(l_eye_landmarks),
+               pickle.dumps(r_eye_landmarks),
+               pickle.dumps(l_eye_pupil),
+               pickle.dumps(r_eye_pupil),
+               screen_width, screen_height, rois_to_save]
+
         writer.writerow(row)

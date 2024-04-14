@@ -89,7 +89,7 @@ class Calibrator:
     def calibrate(self,x,y,fix):
 
         if self.calibrated():
-            return True
+            return False
 
         if abs(x - self.prev_x) > 200:
             if x - self.prev_x < 0:
@@ -130,9 +130,12 @@ class Calibrator:
             self.calibration_steps.pop(0)
             self.drawn = False
             return True
-        elif fix > fixation_thresh:
+        elif fix > min(fixation_thresh * 2, 1.0):
+            # TODO: somewhere here is bug breaking entire program
+            print("here")
             self.disappear(self.calibration_steps[0])
             self.drawn = False
+
             if self.calibration_steps[0] in [CalibrationTypes.RIGHT,CalibrationTypes.LEFT]:
                 if x < self.width/2:
                     if CalibrationTypes.RIGHT in self.calibration_steps:
@@ -142,14 +145,14 @@ class Calibrator:
                     if CalibrationTypes.LEFT in self.calibration_steps:
                         self.calibration_steps.remove(CalibrationTypes.LEFT)
                     self.calibration_steps.insert(0,CalibrationTypes.LEFT)
+                return True
 
             if self.calibration_steps[0] in [CalibrationTypes.TOP,CalibrationTypes.BOTTOM]:
                 if y < self.height/2:
                     self.calibration_steps.insert(0,CalibrationTypes.TOP)
                 else:
                     self.calibration_steps.insert(0,CalibrationTypes.BOTTOM)
-
-            return True
+                return True
 
         return False
 
@@ -219,9 +222,9 @@ class Lab:
         self.__run = False
         self.power_off = True
 
-    def save_data(self,event):
+    def save_data(self,event,rois_to_save):
         filename = f"{self.eyegesture_widget.get_text()}.csv"
-        save_gaze_data_to_csv(filename,event)
+        save_gaze_data_to_csv(filename,event,rois_to_save)
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)
@@ -253,23 +256,16 @@ class Lab:
         #     self.dot_widget.show()
 
         if not event is None:
-            self.save_data(event)
+            rois_to_save = self.eyegesture_widget.get_rois_w_detection(cursor_x,cursor_y)
             self.eyegesture_widget.update_fixation(event.fixation)
 
             #scale down radius when focusing
             radius = int(60 - (50 * event.fixation))
             self.dot_widget.set_radius(radius)
 
-            # if self.calibration:
-            #     if event.fixation > 0.7:
-            #         pyautogui.moveTo(cursor_x + radius/2,  cursor_y + radius/2)
-
-            #     if event.blink:
-            #         pyautogui.moveTo(cursor_x + radius/2,  cursor_y + radius/2)
-            #         pyautogui.click()
-
             self.dot_widget.move(int(cursor_x),int(cursor_y))
             self.eyegesture_widget.update_dot_viewer(int(cursor_x),int(cursor_y))
+            self.save_data(event,rois_to_save)
 
     def run(self):
         while not self.power_off:

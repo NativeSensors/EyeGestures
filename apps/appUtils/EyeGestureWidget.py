@@ -485,16 +485,34 @@ class EyeGestureWidget(QWidget):
         self.roiViewer.update()
 
     def add_roi(self):
-        self.roiMan.add_roi(self.rm_roi,self.update_roi)
         rois = self.roiMan.get_all_rois()
+        if len(rois) < 10:
+            self.roiMan.add_roi(self.rm_roi,self.update_roi)
+            for key in rois:
+                print(rois[key])
+                self.roiViewer.add_rectangle(
+                    key,
+                    rois[key].get_rectangle(),
+                    self.monitor.width,
+                    self.monitor.height)
+            self.roiViewer.update()
+
+    def get_rois_w_detection(self,x,y):
+        rois = self.roiMan.get_all_rois()
+        ret_data = []
         for key in rois:
-            print(rois[key])
-            self.roiViewer.add_rectangle(
-                key,
-                rois[key].get_rectangle(),
-                self.monitor.width,
-                self.monitor.height)
-        self.roiViewer.update()
+            r_x, r_y, r_w, r_h = rois[key].get_rectangle()
+            if  r_x < x < r_x + r_w and r_y < y < r_y + r_h:
+                self.roiViewer.update_rectangle_color(
+                    key,"#c03dff70"
+                )
+                ret_data.append((1, [r_x, r_y, r_w, r_h]))
+            else:
+                self.roiViewer.update_rectangle_color(
+                    key,"#c03dff"
+                )
+                ret_data.append((0, [r_x, r_y, r_w, r_h]))
+        return ret_data
 
     def update_dot_viewer(self,x,y):
         # TODO: maybe those parameters could be handled better?
@@ -505,7 +523,6 @@ class EyeGestureWidget(QWidget):
             self.monitor.height
         )
         self.roiViewer.update()
-
 
     def show_roi(self):
         self.roiMan.show()

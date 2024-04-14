@@ -110,7 +110,7 @@ class Lab:
 
             #scale down radius when focusing
             self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
-            
+
             if self.calibrated:
                 if event.fixation > 0.7:
                     pyautogui.moveTo(event.point_screen[0]+25, event.point_screen[1]+25)

@@ -12,12 +12,15 @@ class RoiViewer(QWidget):
         self.dots = dict()
         self.setMinimumSize(self.width,self.height)
 
-    def add_rectangle(self, id, rectangle, display_width, display_height):
+    def add_rectangle(self, id, rectangle, display_width, display_height, color="#0600c2"):
         x = rectangle[0] * self._width/display_width
         y = rectangle[1] * self._height/display_height
         width =  rectangle[2] * self.width/display_width
         height = rectangle[3] * self.height/display_height
-        self.rectangles[id] = (x,y,width,height)
+        self.rectangles[id] = [color,(x,y,width,height)]
+
+    def update_rectangle_color(self, id, color="#0600c2"):
+        self.rectangles[id][0] = color
 
     def add_dot(self, id, rectangle, display_width, display_height):
         x = rectangle[0] * self._width/display_width
@@ -38,9 +41,11 @@ class RoiViewer(QWidget):
         painter.drawRoundedRect(rounded_rect, 10, 10)
 
         # Draw small rectangles inside the rounded rectangle
-        painter.setBrush(QColor("#0600c2"))
         for key in self.rectangles:
-            rectangle = QRect(*self.rectangles[key])
+            color = self.rectangles[key][0]
+            rect = self.rectangles[key][1]
+            painter.setBrush(QColor(color))
+            rectangle = QRect(*rect)
             painter.drawRoundedRect(rectangle, 10, 10)
 
         painter.setBrush(QColor("#c03dff"))
