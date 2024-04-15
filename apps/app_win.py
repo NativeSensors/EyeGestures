@@ -6,6 +6,7 @@ import time
 import pyautogui
 from screeninfo import get_monitors
 from PySide2.QtWidgets import QApplication
+from PySide2.QtCore import QObject, QThread
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}\\..')
@@ -14,7 +15,6 @@ from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
 from appUtils.EyeGestureWidget import EyeGestureWidget
 from appUtils.CalibrationWidget import CalibrationWidget
-from lab.pupillab import Worker
 from appUtils.dot_windows import WindowsCursor
 from appUtils.data_saver import DataManager
 
@@ -23,6 +23,35 @@ class CalibrationTypes:
     RIGHT = "right"
     TOP = "top"
     BOTTOM = "bottom"
+
+
+class Worker(QObject):
+
+    def __init__(self,thread):
+        super().__init__()
+
+        self.__displayPool = dict()
+        self.__thread = thread
+
+        self.__run = True
+
+        self.thread = QThread()
+        self.moveToThread(self.thread)
+
+        self.thread.started.connect(self.run)
+        self.thread.start()
+
+    def on_quit(self):
+        if self.__run == True:
+            self.__run = False
+            self.thread.quit()
+            self.thread.wait()
+            print("worker quitted")
+
+    def run(self):
+        while self.__run:
+            self.__thread()
+        print("exiting worker")
 
 class Calibrator:
 
@@ -168,7 +197,7 @@ class Calibrator:
 
 class Lab:
 
-    def __init__(self):
+    def __init__(self,main_quit):
         self.step         = 10
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
@@ -192,10 +221,11 @@ class Lab:
 
         self.cap = VideoCapture(0)
 
-        self.eyegesture_widget.add_close_event(self.calibration_widget.close_event)
-        self.eyegesture_widget.add_close_event(self.on_quit)
         self.eyegesture_widget.add_close_event(self.cap.close)
         self.eyegesture_widget.add_close_event(self.dot_widget.close_event)
+        self.eyegesture_widget.add_close_event(self.calibration_widget.close_event)
+        self.eyegesture_widget.add_close_event(self.on_quit)
+        self.eyegesture_widget.add_close_event(main_quit)
 
         self.__run = False
         self.power_off = False
@@ -219,7 +249,8 @@ class Lab:
     def stop(self):
         self.dataSavingMan.disable_screenshots()
         self.__run = False
-        self.calibrator.clear_up()
+        if self.calibrator:
+            self.calibrator.clear_up()
         pass
 
     def cursor_visible(self):
@@ -247,8 +278,11 @@ class Lab:
         self.radius = radius
 
     def on_quit(self):
+        self.stop()
         self.__run = False
         self.power_off = True
+        self.worker.on_quit()
+        print("main on quit finished")
 
     def save_data(self,event,rois_to_save):
         filename = f"{self.eyegesture_widget.get_text()}"
@@ -301,9 +335,9 @@ class Lab:
                     self.__display_eye(frame)
                 except Exception as e:
                     print(f"crashed in debug {e}")
-
+        print("Exiting main loop.")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    lab = Lab()
+    lab = Lab(app.quit)
     sys.exit(app.exec_())

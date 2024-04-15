@@ -1,3 +1,3 @@
-./venv/Scripts/activate;
-pyinstaller app_win.spec;
-deactivate;
+@REM .\venv\Scripts\activate
+pyinstaller ./apps/app_win.spec
+@REM deactivate;

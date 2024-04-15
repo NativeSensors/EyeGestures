@@ -445,6 +445,10 @@ class RoIMan:
             print(f"showing: {self.rois[key]}")
             self.rois[key].show()
 
+    def close_event(self):
+        if self.t != None and self.root != None:
+            self.stop_painting()
+
 def rectangle_class():
     app = QApplication(sys.argv)
     RM = RoIMan()

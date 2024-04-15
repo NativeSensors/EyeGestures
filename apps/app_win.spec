@@ -1,12 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
-# -*- mode: python ; coding: utf-8 -*-
-
 
 a = Analysis(
     ['app_win.py'],
     pathex=[],
     binaries=[],
-    datas=[('./venv/Lib/site-packages/mediapipe/modules', 'mediapipe/modules'),],
+    datas=[
+        ('../venv/Lib/site-packages/mediapipe/modules', 'mediapipe/modules'),
+        ('../lab', '.'),
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

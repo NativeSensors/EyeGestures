@@ -31,9 +31,12 @@ class DataManager:
     def __save_screenshots(self):
         while self.screenshots_enable:
             if self.ipc.not_empty:
-                print("saving screenshots")
-                filename, screenshot = self.ipc.get()
-                screenshot.save(filename)
+                try:
+                    filename, screenshot = self.ipc.get(True,0.2)
+                    screenshot.save(filename)
+                except:
+                    print("no item available")
+        print("exiting saving")
 
     def add_frame(self,directory,gevent,rois_to_save):
         timestamp = datetime.datetime.now().timestamp()
