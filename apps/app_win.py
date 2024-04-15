@@ -16,7 +16,7 @@ from appUtils.EyeGestureWidget import EyeGestureWidget
 from appUtils.CalibrationWidget import CalibrationWidget
 from lab.pupillab import Worker
 from appUtils.dot_windows import WindowsCursor
-from appUtils.data_saver import save_gaze_data_to_csv
+from appUtils.data_saver import DataManager
 
 class CalibrationTypes:
     LEFT = "left"
@@ -132,9 +132,8 @@ class Calibrator:
             self.calibration_steps.pop(0)
             self.drawn = False
             return True
-        elif fix > min(fixation_thresh * 2, 1.0) and self.last_calib - time.time() > 0.2:
+        elif fix >= min(fixation_thresh * 2, 1.0) and time.time() - self.last_calib > 0.2:
             # TODO: somewhere here is bug breaking entire program
-            print("here")
             self.disappear(self.calibration_steps[0])
             self.drawn = False
 
@@ -150,6 +149,7 @@ class Calibrator:
                 return True
 
             if self.calibration_steps[0] is CalibrationTypes.TOP:
+                print("adding top")
                 self.calibration_steps.insert(0,CalibrationTypes.BOTTOM)
                 return True
             else:
@@ -177,10 +177,14 @@ class Lab:
         self.calibration_widget = CalibrationWidget()
         self.calibration_widget.disappear()
         self.eyegesture_widget = EyeGestureWidget(
-            self.start,
-            self.stop,
-            self.update_fixation,
-            self.update_radius)
+            start_cb = self.start,
+            stop_cb = self.stop,
+            update_fixation_cb = self.update_fixation,
+            update_radius_cb = self.update_radius,
+            cursor_visible = self.cursor_visible,
+            cursor_not_visible = self.cursor_not_visible,
+            screen_recording_enable = self.screen_recording_enable,
+            screen_recording_disabled = self.screen_recording_disabled)
 
         self.eyegesture_widget.show()
 
@@ -205,13 +209,35 @@ class Lab:
         self.fixation = 0.8
         self.radius   = 400
 
+        self.dataSavingMan = DataManager()
+
     def start(self):
+        self.dataSavingMan.enable_screenshots()
         self.calibrator = None
         self.__run = True
 
     def stop(self):
+        self.dataSavingMan.disable_screenshots()
         self.__run = False
         self.calibrator.clear_up()
+        pass
+
+    def cursor_visible(self):
+        print("cb:  cursor_visible")
+        self.dot_widget.show()
+        pass
+
+    def cursor_not_visible(self):
+        print("cb: cursor_not_visible")
+        self.dot_widget.hide()
+        pass
+
+    def screen_recording_enable(self):
+        self.dataSavingMan.enable_screenshots()
+        pass
+
+    def screen_recording_disabled(self):
+        self.dataSavingMan.disable_screenshots()
         pass
 
     def update_fixation(self,fixation):
@@ -225,8 +251,8 @@ class Lab:
         self.power_off = True
 
     def save_data(self,event,rois_to_save):
-        filename = f"{self.eyegesture_widget.get_text()}.csv"
-        save_gaze_data_to_csv(filename,event,rois_to_save)
+        filename = f"{self.eyegesture_widget.get_text()}"
+        self.dataSavingMan.add_frame(filename,event,rois_to_save)
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)
@@ -251,11 +277,6 @@ class Lab:
             self.calibrator = Calibrator(self.monitor.width,self.monitor.height,cursor_x,cursor_y,self.calibration_widget.show_pill,self.calibration_widget.disappear_pill)
             self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
         # frame = pygame.transform.scale(frame, (400, 400))
-
-        # if self.calibrator.calibrated():
-        #     self.dot_widget.hide()
-        # else:
-        #     self.dot_widget.show()
 
         if not event is None:
             rois_to_save = self.eyegesture_widget.get_rois_w_detection(cursor_x,cursor_y)

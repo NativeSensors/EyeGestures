@@ -70,13 +70,25 @@ class InputFileNameWidget(QWidget):
 
 class AdvancedSettings(QWidget):
 
-    def __init__(self,update_fixation_cb,update_radius_label) -> None:
+    def __init__(self,
+                 update_fixation_cb,
+                 update_radius_label,
+                 cursor_visible,
+                 cursor_not_visible,
+                 screen_recording_enable,
+                 screen_recording_disabled,
+                 _toggle_callback) -> None:
         super().__init__()
 
         layout = QVBoxLayout()
 
         self.update_fixation_cb = update_fixation_cb
         self.update_radius_label = update_radius_label
+        self.cursor_visible = cursor_visible
+        self.cursor_not_visible = cursor_not_visible
+        self.screen_recording_enable = screen_recording_enable
+        self.screen_recording_disabled = screen_recording_disabled
+        self._toggle_callback = _toggle_callback
 
         self.control_btn = QPushButton('🞂 ⚙️Advanced settings')
         self.control_btn.setCheckable(True)  # Make the button a toggle button
@@ -116,6 +128,56 @@ class AdvancedSettings(QWidget):
         self.slider_radius.setValue(400)
         self.slider_radius.valueChanged.connect(self.update_radius_label)
 
+        self.cursor_toggle_btn = QPushButton("Cursor Visible")
+        self.cursor_toggle_btn.setCheckable(True)  # Make the button a toggle button
+        self.cursor_toggle_btn.setStyleSheet("""
+                QPushButton {
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #14171A;
+                    color: #eff0f1;
+                    margin: 5px;
+                    padding: 10px;
+                    padding: 10px 20px;  /* Increase padding for bigger size */
+                    font-family: Poppins;
+                }
+                QPushButton:hover {
+                    background-color: #818992;
+                }
+                QPushButton:pressed {
+                    background-color: #212426;
+                }
+            """)
+        self.cursor_toggle_btn.clicked.connect(self.toggle_visible_cursor)
+
+        self.screen_recording_tgl_btn = QPushButton("Screen recording ON 🔴")
+        self.screen_recording_tgl_btn.setCheckable(True)  # Make the button a toggle button
+        self.screen_recording_tgl_btn.setStyleSheet("""
+                QPushButton {
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #14171A;
+                    color: #eff0f1;
+                    margin: 5px;
+                    padding: 10px;
+                    padding: 10px 20px;  /* Increase padding for bigger size */
+                    font-family: Poppins;
+                }
+                QPushButton:hover {
+                    background-color: #818992;
+                }
+                QPushButton:pressed {
+                    background-color: #212426;
+                }
+            """)
+        self.screen_recording_tgl_btn.clicked.connect(self.toggle_recording_screen)
+
+        self.slider_radius = QSlider(Qt.Horizontal)
+        self.slider_radius.setMinimum(1)
+        self.slider_radius.setMaximum(500)
+        self.slider_radius.setValue(400)
+        self.slider_radius.valueChanged.connect(self.update_radius_label)
+
 
         self.label_fixation_threshold = QLabel("Fixation: 0.8")
         self.label_radius_threshold   = QLabel("Radius: 500px")
@@ -128,16 +190,23 @@ class AdvancedSettings(QWidget):
         self.radius_layout.addWidget(self.label_radius_threshold)
         self.radius_layout.addWidget(self.slider_radius)
 
+        self.cursor_toggle_layout = QHBoxLayout()
+        self.cursor_toggle_layout.addWidget(self.cursor_toggle_btn)
+
+        self.screen_recording_layout = QHBoxLayout()
+        self.screen_recording_layout.addWidget(self.screen_recording_tgl_btn)
+
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.control_btn,  alignment=Qt.AlignLeft)
 
         layout.addLayout(button_layout)
         layout.addLayout(self.fixation_layout)
         layout.addLayout(self.radius_layout)
-        spacer = QSpacerItem(0, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        layout.addLayout(self.cursor_toggle_layout)
+        layout.addLayout(self.screen_recording_layout)
+        spacer = QSpacerItem(0, 100, QSizePolicy.Minimum, QSizePolicy.Expanding)
         layout.addSpacerItem(spacer)
 
-        self.setFixedHeight(140)
         self.setLayout(layout)
         self.hide()
 
@@ -146,17 +215,20 @@ class AdvancedSettings(QWidget):
         self.slider_fixation.hide()
         self.label_radius_threshold.hide()
         self.slider_radius.hide()
+        self.screen_recording_tgl_btn.hide()
+        self.cursor_toggle_btn.hide()
         self.control_btn.setText('🞂  ⚙️Advanced settings')
-
+        self.setFixedHeight(100)
 
     def show_again(self):
         self.label_fixation_threshold.show()
         self.slider_fixation.show()
         self.label_radius_threshold.show()
         self.slider_radius.show()
+        self.screen_recording_tgl_btn.show()
+        self.cursor_toggle_btn.show()
         self.control_btn.setText('🞃 ⚙️Advanced settings')
-
-
+        self.setFixedHeight(300)
 
     def update_fixation_label(self, value):
         # Convert integer value to float (0.0 to 1.0)
@@ -168,9 +240,27 @@ class AdvancedSettings(QWidget):
         self.label_radius_threshold.setText(f"Radius: {value}px")
         self.update_radius_cb(value)
 
+    def toggle_visible_cursor(self):
+        text = "Cursor not visible ⚫" if self.cursor_toggle_btn.isChecked() else "Cursor visible 🟠"
+        self.cursor_toggle_btn.setText(text)
+
+        if text == "Cursor visible 🟠":
+            self.cursor_visible()
+        else:
+            self.cursor_not_visible()
+
+    def toggle_recording_screen(self):
+        text = "Screen recording OFF ⚫" if self.screen_recording_tgl_btn.isChecked() else "Screen recording ON 🔴"
+        self.screen_recording_tgl_btn.setText(text)
+
+        if text == "Screen recording ON 🔴":
+            self.screen_recording_enable()
+        else:
+            self.screen_recording_disabled()
+
     def __toggle(self):
         self.show_again() if self.control_btn.isChecked() else self.hide()
-
+        self._toggle_callback()
 
 class StartStopWidget(QWidget):
 
@@ -225,7 +315,7 @@ class StartStopWidget(QWidget):
         self.label_fixation_level  = QLabel("0.0")
 
         progress_bar_container_layout.addWidget(self.start_stop_btn)
-        spacer = QSpacerItem(100, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        spacer = QSpacerItem(90, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
         progress_bar_container_layout.addSpacerItem(spacer)
         progress_bar_container_layout.addWidget(self.fixation_bar)
         progress_bar_container_layout.addWidget(self.label_fixation)
@@ -254,7 +344,11 @@ class EyeGestureWidget(QWidget):
                 stop_cb = lambda : None,
                 update_fixation_cb = lambda value : None,
                 update_radius_cb = lambda value : None,
-                text_updated_cb = lambda text : None):
+                text_updated_cb = lambda text : None,
+                cursor_visible = lambda : None,
+                cursor_not_visible = lambda : None,
+                screen_recording_enable = lambda : None,
+                screen_recording_disabled = lambda : None):
         super().__init__()
 
         self.start_cb = start_cb
@@ -285,7 +379,7 @@ class EyeGestureWidget(QWidget):
         self.setPalette(palette)
 
         # Window positioning
-        self.setGeometry(100, 100, 1050, 800)  # Adjust size as needed
+        self.setGeometry(100, 100, 1050, 750)  # Adjust size as needed
         self.move_to_center()
 
         self.setWindowTitle("EyeGestures")
@@ -319,7 +413,14 @@ class EyeGestureWidget(QWidget):
         self.text_input = InputFileNameWidget(text_updated_cb)
         main_layout.addWidget(self.text_input)
 
-        self.adv_settings = AdvancedSettings(update_fixation_cb,update_radius_cb)
+        self.adv_settings = AdvancedSettings(
+            update_fixation_cb,
+            update_radius_cb,
+            cursor_visible,
+            cursor_not_visible,
+            screen_recording_enable,
+            screen_recording_disabled,
+            self._toggle_callback)
         main_layout.addWidget(self.adv_settings)
 
         main_layout.addWidget(self.roiViewer)
@@ -400,6 +501,22 @@ class EyeGestureWidget(QWidget):
         self.setLayout(main_layout)
         self.move(postion_x, postion_y)
 
+    def _toggle_callback(self):
+        if self.height() == 750:
+            self.setFixedHeight(1000)
+        else:
+            self.setFixedHeight(750)
+
+        # this sets windows frameless
+        self.resize(400,self.frameGeometry().height())
+        radius = 10.0
+        path = QPainterPath()
+        # self.resize(440,220)
+        path.addRoundedRect(QRectF(self.rect()), radius, radius)
+        mask = QRegion(path.toFillPolygon().toPolygon())
+        self.setMask(mask)
+
+
     def __stop_cb(self):
         self.text_input.unsetReadOnly()
         self.stop_cb()
@@ -468,7 +585,6 @@ class EyeGestureWidget(QWidget):
         self.oldPos = None
 
     def rm_roi(self,id):
-        print("removing")
         self.roiViewer.rm_rectangle(id)
         self.roiViewer.update()
 
@@ -489,7 +605,6 @@ class EyeGestureWidget(QWidget):
         if len(rois) < 10:
             self.roiMan.add_roi(self.rm_roi,self.update_roi)
             for key in rois:
-                print(rois[key])
                 self.roiViewer.add_rectangle(
                     key,
                     rois[key].get_rectangle(),
