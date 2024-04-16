@@ -79,6 +79,8 @@ class AdvancedSettings(QWidget):
                  screen_recording_disabled,
                  update_sensitivity_x_cb,
                  update_sensitivity_y_cb,
+                 live_viewer_ON,
+                 live_viewer_OFF,
                  _toggle_callback) -> None:
         super().__init__()
 
@@ -93,6 +95,8 @@ class AdvancedSettings(QWidget):
         self._toggle_callback = _toggle_callback
         self.update_sensitivity_x_cb = update_sensitivity_x_cb
         self.update_sensitivity_y_cb = update_sensitivity_y_cb
+        self.live_viewer_ON  = live_viewer_ON
+        self.live_viewer_OFF = live_viewer_OFF
 
         self.control_btn = QPushButton('🞂 ⚙️Advanced settings')
         self.control_btn.setCheckable(True)  # Make the button a toggle button
@@ -176,6 +180,28 @@ class AdvancedSettings(QWidget):
             """)
         self.screen_recording_tgl_btn.clicked.connect(self.toggle_recording_screen)
 
+        self.enable_live_view = QPushButton("Live viewer is OFF ⚫")
+        self.enable_live_view.setCheckable(True)  # Make the button a toggle button
+        self.enable_live_view.setStyleSheet("""
+                QPushButton {
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #14171A;
+                    color: #eff0f1;
+                    margin: 5px;
+                    padding: 10px;
+                    padding: 10px 20px;  /* Increase padding for bigger size */
+                    font-family: Poppins;
+                }
+                QPushButton:hover {
+                    background-color: #818992;
+                }
+                QPushButton:pressed {
+                    background-color: #212426;
+                }
+            """)
+        self.enable_live_view.clicked.connect(self.toggle_live_viewer)
+
         self.slider_radius = QSlider(Qt.Horizontal)
         self.slider_radius.setMinimum(1)
         self.slider_radius.setMaximum(500)
@@ -223,6 +249,9 @@ class AdvancedSettings(QWidget):
         self.screen_recording_layout = QHBoxLayout()
         self.screen_recording_layout.addWidget(self.screen_recording_tgl_btn)
 
+        self.enable_live_view_layout = QHBoxLayout()
+        self.enable_live_view_layout.addWidget(self.enable_live_view)
+
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.control_btn,  alignment=Qt.AlignLeft)
 
@@ -233,6 +262,7 @@ class AdvancedSettings(QWidget):
         layout.addLayout(self.sensitivity_x_layout)
         layout.addLayout(self.cursor_toggle_layout)
         layout.addLayout(self.screen_recording_layout)
+        layout.addLayout(self.enable_live_view_layout)
         spacer = QSpacerItem(0, 300, QSizePolicy.Minimum, QSizePolicy.Expanding)
         layout.addSpacerItem(spacer)
 
@@ -252,6 +282,7 @@ class AdvancedSettings(QWidget):
         self.slider_vertical_sensitivity.hide()
         self.label_horizontal_sensitivity.hide()
         self.slider_horizontal_sensitivity.hide()
+        self.enable_live_view.hide()
         self.control_btn.setText('🞂  ⚙️Advanced settings')
         self.setFixedHeight(100)
 
@@ -268,8 +299,9 @@ class AdvancedSettings(QWidget):
         self.slider_vertical_sensitivity.show()
         self.label_horizontal_sensitivity.show()
         self.slider_horizontal_sensitivity.show()
+        self.enable_live_view.show()
         self.control_btn.setText('🞃 ⚙️Advanced settings')
-        self.setFixedHeight(300)
+        self.setFixedHeight(400)
 
     def update_fixation_label(self, value):
         # Convert integer value to float (0.0 to 1.0)
@@ -299,6 +331,15 @@ class AdvancedSettings(QWidget):
             self.cursor_visible()
         else:
             self.cursor_not_visible()
+
+    def toggle_live_viewer(self):
+        text = "Live viewer is ON 🟠" if self.enable_live_view.isChecked() else "Live viewer is OFF ⚫"
+        self.enable_live_view.setText(text)
+
+        if text == "Live viewer is ON 🟠":
+            self.live_viewer_ON()
+        else:
+            self.live_viewer_OFF()
 
     def toggle_recording_screen(self):
         text = "Screen recording OFF ⚫" if self.screen_recording_tgl_btn.isChecked() else "Screen recording ON 🔴"
@@ -401,7 +442,9 @@ class EyeGestureWidget(QWidget):
                 screen_recording_enable = lambda : None,
                 screen_recording_disabled = lambda : None,
                 update_sensitivity_x_cb = lambda : None,
-                update_sensitivity_y_cb = lambda : None):
+                update_sensitivity_y_cb = lambda : None,
+                live_viewer_OFF = lambda : None,
+                live_viewer_ON = lambda : None):
         super().__init__()
 
         self.start_cb = start_cb
@@ -475,6 +518,8 @@ class EyeGestureWidget(QWidget):
             screen_recording_disabled = screen_recording_disabled,
             update_sensitivity_x_cb = update_sensitivity_y_cb,
             update_sensitivity_y_cb = update_sensitivity_x_cb,
+            live_viewer_OFF = live_viewer_OFF,
+            live_viewer_ON = live_viewer_ON,
             _toggle_callback = self._toggle_callback)
         main_layout.addWidget(self.adv_settings)
 
@@ -559,7 +604,7 @@ class EyeGestureWidget(QWidget):
     def _toggle_callback(self):
         print("resizing")
         if self.height() == 750:
-            self.setFixedHeight(1000)
+            self.setFixedHeight(1200)
         else:
             self.setFixedHeight(750)
 

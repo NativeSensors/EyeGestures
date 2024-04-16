@@ -230,7 +230,9 @@ class Lab:
             screen_recording_enable = self.screen_recording_enable,
             screen_recording_disabled = self.screen_recording_disabled,
             update_sensitivity_y_cb = self.update_sensitivity_y_cb,
-            update_sensitivity_x_cb = self.update_sensitivity_x_cb
+            update_sensitivity_x_cb = self.update_sensitivity_x_cb,
+            live_viewer_OFF = self.live_viewer_OFF,
+            live_viewer_ON = self.live_viewer_ON,
         )
 
         self.eyegesture_widget.show()
@@ -257,6 +259,8 @@ class Lab:
         self.fixation = 0.8
         self.radius   = 400
 
+        self.live_view = False
+
         self.dataSavingMan = DataManager()
 
     def update_sensitivity_y_cb(self, value):
@@ -282,6 +286,12 @@ class Lab:
         if self.calibrator:
             self.calibrator.clear_up()
         pass
+
+    def live_viewer_ON(self):
+        self.live_view = True
+
+    def live_viewer_OFF(self):
+        self.live_view = False
 
     def cursor_visible(self):
         self.dot_widget.show()
@@ -354,7 +364,7 @@ class Lab:
             self.save_data(event,rois_to_save)
 
             # during calibration update visuals
-            if not self.calibrator.calibrated():
+            if not self.calibrator.calibrated() or self.live_view:
                 self.eyegesture_widget.update_fixation(event.fixation)
                 self.eyegesture_widget.update_dot_viewer(int(cursor_x),int(cursor_y))
 
