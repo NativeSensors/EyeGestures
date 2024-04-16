@@ -324,10 +324,13 @@ class Lab:
     def save_data(self,event,rois_to_save):
         if not self.calibrator.calibrated():
             filename = f"calib_{self.eyegesture_widget.get_text()}"
-            self.dataSavingMan.add_frame(filename,event,rois_to_save)
         else:
             filename = f"{self.eyegesture_widget.get_text()}"
-            self.dataSavingMan.add_frame(filename,event,rois_to_save)
+        self.dataSavingMan.add_frame(filename,
+                                        event,
+                                        rois_to_save,
+                                        self.sensitivity_roi_width,
+                                        self.sensitivity_roi_height)
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)

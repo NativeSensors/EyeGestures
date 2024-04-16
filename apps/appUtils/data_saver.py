@@ -51,7 +51,7 @@ class DataManager:
                     print("no item available")
         print("exiting saving")
 
-    def add_frame(self,directory,gevent,rois_to_save):
+    def add_frame(self,directory,gevent,rois_to_save,x_sensitivity,y_sensitivity):
         timestamp = datetime.datetime.now().timestamp()
 
         Path(f"./data/{directory}").mkdir(parents=True, exist_ok=True)
@@ -60,7 +60,7 @@ class DataManager:
 
         headers = ["unix_timestamp","point_x", "point_y", "blink", "fixation",
                 "screen_x", "screen_y", "screen_width", "screen_height",
-                "l_eye_landmarks", "r_eye_landmarks", "l_eye_pupil", "r_eye_pupil","rois"]
+                "l_eye_landmarks", "r_eye_landmarks", "l_eye_pupil", "r_eye_pupil","rois","x_sensitivity","y_sensitivity"]
 
         if self.sizes[self.number_of_csv] > 100:
             self.number_of_csv += 1
@@ -93,7 +93,9 @@ class DataManager:
                 pickle.dumps(r_eye_landmarks),
                 pickle.dumps(l_eye_pupil),
                 pickle.dumps(r_eye_pupil),
-                rois_to_save]
+                rois_to_save,
+                x_sensitivity,
+                y_sensitivity]
 
             writer.writerow(row)
             self.sizes[self.number_of_csv] += 1
