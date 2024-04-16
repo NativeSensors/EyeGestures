@@ -119,9 +119,6 @@ class Calibrator:
 
     def calibrate(self,x,y,fix):
 
-        if self.calibrated():
-            return False
-
         if abs(x - self.width/2) > 150 and self.prev_point in [CalibrationTypes.TOP, CalibrationTypes.BOTTOM]:
             if x - self.width/2 < 0:
                 self.add_recalibrate(CalibrationTypes.LEFT)
@@ -137,6 +134,7 @@ class Calibrator:
         self.prev_y = y
         self.prev_x = x
         if len(self.calibration_steps) <= 0:
+            self.prev_point = None
             return False
 
         self.display_next_calibration_target()
