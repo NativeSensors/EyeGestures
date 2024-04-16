@@ -5,6 +5,7 @@ import pickle
 import csv
 import ast
 import re
+import os
 
 def read_gaze_data_from_csv(filename):
     """Reads gaze event data from a CSV file.
@@ -70,7 +71,7 @@ def main(gaze_data_file,background_file = False, step = None, window_size = None
 
     # picture = background_file
 
-    recordings_path = f"{gaze_data_file[:-8]}/recordings"
+    recordings_path = f"{os.path.dirname(gaze_data_file)}/recordings"
 
     filename = gaze_data_file
     gaze_data = read_gaze_data_from_csv(filename)

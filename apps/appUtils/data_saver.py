@@ -6,6 +6,7 @@ import pyautogui
 import datetime
 import pickle
 import queue
+import time
 import csv
 import os
 
@@ -31,18 +32,20 @@ class DataManager:
         self.ipc.put(filename)
 
     def __save_screenshots(self):
+        fps_cap = 1
+        start = time.time()
+        screenshot = pyautogui.screenshot()
         while self.screenshots_enable:
             if self.ipc.not_empty:
                 try:
                     filename = self.ipc.get(True,1.0)
-                    screenshot = pyautogui.screenshot()
-                    # Define the desired width and height for the resized image
-                    desired_width = 800
-                    desired_height = 600
-
-                    # Resize the screenshot
-
-                    screenshot = screenshot.resize((desired_width, desired_height))
+                    if (time.time() - start) > 1.0/fps_cap:
+                        screenshot = pyautogui.screenshot()
+                        # Define the desired width and height for the resized image
+                        desired_width = 800
+                        desired_height = 600
+                        # Resize the screenshot
+                        screenshot = screenshot.resize((desired_width, desired_height))
                     screenshot.save(filename)
                 except:
                     print("no item available")

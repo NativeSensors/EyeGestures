@@ -76,6 +76,7 @@ class Calibrator:
 
         self.calibration = False
         self.drawn = False
+        self.prev_point = None
         self.last_calib = time.time()
         pass
 
@@ -116,19 +117,19 @@ class Calibrator:
             self.calibration_steps.append(recalibrate_step)
 
 
-    def calibrate(self,x,y,fix,prev_calibrate):
+    def calibrate(self,x,y,fix):
 
         if self.calibrated():
             return False
 
-        if abs(x - self.prev_x) > 30 and prev_calibrate:
-            if x - self.prev_x < 0:
+        if abs(x - self.width/2) > 150 and self.prev_point in [CalibrationTypes.TOP, CalibrationTypes.BOTTOM]:
+            if x - self.width/2 < 0:
                 self.add_recalibrate(CalibrationTypes.LEFT)
             else:
                 self.add_recalibrate(CalibrationTypes.RIGHT)
 
-        if abs(y - self.prev_y) > 30 and prev_calibrate:
-            if y - self.prev_y < 0:
+        if abs(y - self.height/2) > 150  and self.prev_point in [CalibrationTypes.LEFT, CalibrationTypes.RIGHT]:
+            if y - self.height/2 < 0:
                 self.add_recalibrate(CalibrationTypes.TOP)
             else:
                 self.add_recalibrate(CalibrationTypes.BOTTOM)
@@ -140,58 +141,65 @@ class Calibrator:
 
         self.display_next_calibration_target()
         fixation_thresh = 0.3
-        if CalibrationTypes.LEFT == self.calibration_steps[0] and x < self.calibration_margin and fix > fixation_thresh:
-            self.disappear(self.calibration_steps[0])
-            if CalibrationTypes.LEFT in self.calibration_steps:
-                self.calibration_steps.remove(CalibrationTypes.LEFT)
-            self.drawn = False
-            self.last_calib = time.time()
-            return True
-        elif CalibrationTypes.RIGHT == self.calibration_steps[0] and x > self.width - self.calibration_margin and fix > fixation_thresh:
-            self.disappear(self.calibration_steps[0])
-            if CalibrationTypes.RIGHT in self.calibration_steps:
-                self.calibration_steps.remove(CalibrationTypes.RIGHT)
-            self.drawn = False
-            self.last_calib = time.time()
-            return True
-        elif CalibrationTypes.TOP == self.calibration_steps[0] and y < self.calibration_margin and fix > fixation_thresh:
-            self.disappear(self.calibration_steps[0])
-            if CalibrationTypes.TOP in self.calibration_steps:
-                self.calibration_steps.remove(CalibrationTypes.TOP)
-            self.drawn = False
-            self.last_calib = time.time()
-            return True
-        elif CalibrationTypes.BOTTOM == self.calibration_steps[0] and y > self.height - self.calibration_margin and fix > fixation_thresh:
-            self.disappear(self.calibration_steps[0])
-            if CalibrationTypes.BOTTOM in self.calibration_steps:
-                self.calibration_steps.remove(CalibrationTypes.BOTTOM)
-            self.drawn = False
-            self.last_calib = time.time()
-            return True
-        elif fix > fixation_thresh and (time.time() - self.last_calib) > 5.0:
-            # TODO: somewhere here is bug breaking entire program
-            self.last_calib = time.time()
-            self.disappear(self.calibration_steps[0])
-            self.drawn = False
-
-            if self.calibration_steps[0] in [CalibrationTypes.RIGHT,CalibrationTypes.LEFT]:
-                if x < self.width/2:
-                    if CalibrationTypes.RIGHT in self.calibration_steps:
-                        self.calibration_steps.remove(CalibrationTypes.RIGHT)
-                    self.calibration_steps.insert(0,CalibrationTypes.RIGHT)
-                else:
-                    if CalibrationTypes.LEFT in self.calibration_steps:
-                        self.calibration_steps.remove(CalibrationTypes.LEFT)
-                    self.calibration_steps.insert(0,CalibrationTypes.LEFT)
+        if fix > fixation_thresh and (time.time() - self.last_calib) > 5.0:
+            if CalibrationTypes.LEFT == self.calibration_steps[0] and x < self.calibration_margin:
+                self.disappear(self.calibration_steps[0])
+                if CalibrationTypes.LEFT in self.calibration_steps:
+                    self.calibration_steps.remove(CalibrationTypes.LEFT)
+                self.prev_point = CalibrationTypes.LEFT
+                self.drawn = False
+                self.last_calib = time.time()
                 return True
-
-            if self.calibration_steps[0] is CalibrationTypes.TOP:
-                self.calibration_steps.insert(0,CalibrationTypes.BOTTOM)
+            elif CalibrationTypes.RIGHT == self.calibration_steps[0] and x > self.width - self.calibration_margin:
+                self.disappear(self.calibration_steps[0])
+                if CalibrationTypes.RIGHT in self.calibration_steps:
+                    self.calibration_steps.remove(CalibrationTypes.RIGHT)
+                self.prev_point = CalibrationTypes.RIGHT
+                self.drawn = False
+                self.last_calib = time.time()
+                return True
+            elif CalibrationTypes.TOP == self.calibration_steps[0] and y < self.calibration_margin:
+                self.disappear(self.calibration_steps[0])
+                if CalibrationTypes.TOP in self.calibration_steps:
+                    self.calibration_steps.remove(CalibrationTypes.TOP)
+                self.prev_point = CalibrationTypes.TOP
+                self.drawn = False
+                self.last_calib = time.time()
+                return True
+            elif CalibrationTypes.BOTTOM == self.calibration_steps[0] and y > self.height - self.calibration_margin:
+                self.disappear(self.calibration_steps[0])
+                if CalibrationTypes.BOTTOM in self.calibration_steps:
+                    self.calibration_steps.remove(CalibrationTypes.BOTTOM)
+                self.prev_point = CalibrationTypes.BOTTOM
+                self.drawn = False
+                self.last_calib = time.time()
                 return True
             else:
-                self.calibration_steps.insert(0,CalibrationTypes.TOP)
-                return True
+                # TODO: somewhere here is bug breaking entire program
+                self.last_calib = time.time()
+                self.disappear(self.calibration_steps[0])
+                self.drawn = False
+                self.prev_point = None
 
+                if self.calibration_steps[0] in [CalibrationTypes.RIGHT,CalibrationTypes.LEFT]:
+                    if x < self.width/2:
+                        if CalibrationTypes.RIGHT in self.calibration_steps:
+                            self.calibration_steps.remove(CalibrationTypes.RIGHT)
+                        self.calibration_steps.insert(0,CalibrationTypes.RIGHT)
+                    else:
+                        if CalibrationTypes.LEFT in self.calibration_steps:
+                            self.calibration_steps.remove(CalibrationTypes.LEFT)
+                        self.calibration_steps.insert(0,CalibrationTypes.LEFT)
+                    return True
+
+                if self.calibration_steps[0] is CalibrationTypes.TOP:
+                    self.calibration_steps.insert(0,CalibrationTypes.BOTTOM)
+                    return True
+                else:
+                    self.calibration_steps.insert(0,CalibrationTypes.TOP)
+                    return True
+
+        self.prev_point = None
         return False
 
     def calibrated(self):
@@ -209,8 +217,8 @@ class Lab:
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
         self.sensitivity_roi_width = int(80)
-        self.sensitivity_roi_height = int(10)
-        self.gestures = EyeGestures(roi_width=int(80),roi_height=int(10))
+        self.sensitivity_roi_height = int(8)
+        self.gestures = EyeGestures(roi_y = 40, roi_width=int(80),roi_height=int(8))
 
         self.calibration_widget = CalibrationWidget()
         self.calibration_widget.disappear()
@@ -260,7 +268,9 @@ class Lab:
         self.sensitivity_roi_width = value
 
     def start(self):
+        self.dataSavingMan = DataManager()
         self.gestures = EyeGestures(
+            roi_y = 40,
             roi_width=self.sensitivity_roi_width ,
             roi_height=self.sensitivity_roi_height
         )
@@ -304,8 +314,12 @@ class Lab:
         self.worker.on_quit()
 
     def save_data(self,event,rois_to_save):
-        filename = f"{self.eyegesture_widget.get_text()}"
-        self.dataSavingMan.add_frame(filename,event,rois_to_save)
+        if not self.calibrator.calibrated():
+            filename = f"calib_{self.eyegesture_widget.get_text()}"
+            self.dataSavingMan.add_frame(filename,event,rois_to_save)
+        else:
+            filename = f"{self.eyegesture_widget.get_text()}"
+            self.dataSavingMan.add_frame(filename,event,rois_to_save)
 
     def __display_eye(self,frame):
         frame = cv2.flip(frame, 1)
@@ -325,17 +339,10 @@ class Lab:
             return None
 
         if self.calibrator:
-            print("calibrating")
-            if not self.calibrator.calibrated():
-                self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation,self.calibration)
-            else:
-                self.calibration = not self.calibrator.calibrated()
-            print("calibrated")
+            self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
         else:
-            print("init calibrating")
             self.calibrator = Calibrator(self.monitor.width,self.monitor.height,cursor_x,cursor_y,self.calibration_widget.show_pill,self.calibration_widget.disappear_pill)
-            self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation,self.calibration)
-            print("init calibrated")
+            self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
         # frame = pygame.transform.scale(frame, (400, 400))
 
         if not event is None:
@@ -346,9 +353,7 @@ class Lab:
             self.dot_widget.set_radius(radius)
 
             self.dot_widget.move(int(cursor_x),int(cursor_y))
-            print("saving data")
             self.save_data(event,rois_to_save)
-            print("data saved")
 
             # during calibration update visuals
             if not self.calibrator.calibrated():
