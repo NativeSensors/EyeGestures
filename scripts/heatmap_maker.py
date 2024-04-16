@@ -113,10 +113,10 @@ if __name__ == "__main__":
     parser.add_argument('path_to_gaze_data', type=str, help='Path to the gaze data file')
     parser.add_argument('--window', type=int, help='Window size in samples')
     parser.add_argument('--step', type=int, help='Window size in samples')
-    parser.add_argument('--no_background',  action='store_true', help='Path to the background file')
+    parser.add_argument('--background',  action='store_true', help='Path to the background file')
     parser.add_argument('--start', type=float, help='Window size in samples')
     parser.add_argument('--stop',  type=float, help='Path to the background file')
 
     args = parser.parse_args()
 
-    main(args.path_to_gaze_data,background_file = args.no_background, step = args.step, window_size = args.window, start = args.start, stop = args.stop)
+    main(args.path_to_gaze_data,background_file = args.background, step = args.step, window_size = args.window, start = args.start, stop = args.stop)

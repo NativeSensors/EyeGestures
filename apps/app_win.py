@@ -46,12 +46,11 @@ class Worker(QObject):
             self.__run = False
             self.thread.quit()
             self.thread.wait()
-            print("worker quitted")
+            print("worker stopped")
 
     def run(self):
         while self.__run:
             self.__thread()
-        print("exiting worker")
 
 class Calibrator:
 
@@ -117,18 +116,18 @@ class Calibrator:
             self.calibration_steps.append(recalibrate_step)
 
 
-    def calibrate(self,x,y,fix):
+    def calibrate(self,x,y,fix,prev_calibrate):
 
         if self.calibrated():
             return False
 
-        if abs(x - self.prev_x) > 200:
+        if abs(x - self.prev_x) > 30 and prev_calibrate:
             if x - self.prev_x < 0:
                 self.add_recalibrate(CalibrationTypes.LEFT)
             else:
                 self.add_recalibrate(CalibrationTypes.RIGHT)
 
-        if abs(y - self.prev_y) > 100:
+        if abs(y - self.prev_y) > 30 and prev_calibrate:
             if y - self.prev_y < 0:
                 self.add_recalibrate(CalibrationTypes.TOP)
             else:
@@ -140,29 +139,38 @@ class Calibrator:
             return False
 
         self.display_next_calibration_target()
-        fixation_thresh = 0.4
+        fixation_thresh = 0.3
         if CalibrationTypes.LEFT == self.calibration_steps[0] and x < self.calibration_margin and fix > fixation_thresh:
             self.disappear(self.calibration_steps[0])
-            self.calibration_steps.pop(0)
+            if CalibrationTypes.LEFT in self.calibration_steps:
+                self.calibration_steps.remove(CalibrationTypes.LEFT)
             self.drawn = False
+            self.last_calib = time.time()
             return True
         elif CalibrationTypes.RIGHT == self.calibration_steps[0] and x > self.width - self.calibration_margin and fix > fixation_thresh:
             self.disappear(self.calibration_steps[0])
-            self.calibration_steps.pop(0)
+            if CalibrationTypes.RIGHT in self.calibration_steps:
+                self.calibration_steps.remove(CalibrationTypes.RIGHT)
             self.drawn = False
+            self.last_calib = time.time()
             return True
         elif CalibrationTypes.TOP == self.calibration_steps[0] and y < self.calibration_margin and fix > fixation_thresh:
             self.disappear(self.calibration_steps[0])
-            self.calibration_steps.pop(0)
+            if CalibrationTypes.TOP in self.calibration_steps:
+                self.calibration_steps.remove(CalibrationTypes.TOP)
             self.drawn = False
+            self.last_calib = time.time()
             return True
         elif CalibrationTypes.BOTTOM == self.calibration_steps[0] and y > self.height - self.calibration_margin and fix > fixation_thresh:
             self.disappear(self.calibration_steps[0])
-            self.calibration_steps.pop(0)
+            if CalibrationTypes.BOTTOM in self.calibration_steps:
+                self.calibration_steps.remove(CalibrationTypes.BOTTOM)
             self.drawn = False
+            self.last_calib = time.time()
             return True
-        elif fix >= min(fixation_thresh * 2, 1.0) and time.time() - self.last_calib > 0.2:
+        elif fix > fixation_thresh and (time.time() - self.last_calib) > 5.0:
             # TODO: somewhere here is bug breaking entire program
+            self.last_calib = time.time()
             self.disappear(self.calibration_steps[0])
             self.drawn = False
 
@@ -178,7 +186,6 @@ class Calibrator:
                 return True
 
             if self.calibration_steps[0] is CalibrationTypes.TOP:
-                print("adding top")
                 self.calibration_steps.insert(0,CalibrationTypes.BOTTOM)
                 return True
             else:
@@ -201,7 +208,9 @@ class Lab:
         self.step         = 10
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
-        self.gestures = EyeGestures(roi_width=int(80),roi_height=int(20))
+        self.sensitivity_roi_width = int(80)
+        self.sensitivity_roi_height = int(10)
+        self.gestures = EyeGestures(roi_width=int(80),roi_height=int(10))
 
         self.calibration_widget = CalibrationWidget()
         self.calibration_widget.disappear()
@@ -213,7 +222,10 @@ class Lab:
             cursor_visible = self.cursor_visible,
             cursor_not_visible = self.cursor_not_visible,
             screen_recording_enable = self.screen_recording_enable,
-            screen_recording_disabled = self.screen_recording_disabled)
+            screen_recording_disabled = self.screen_recording_disabled,
+            update_sensitivity_y_cb = self.update_sensitivity_y_cb,
+            update_sensitivity_x_cb = self.update_sensitivity_x_cb
+        )
 
         self.eyegesture_widget.show()
 
@@ -241,7 +253,17 @@ class Lab:
 
         self.dataSavingMan = DataManager()
 
+    def update_sensitivity_y_cb(self, value):
+        self.sensitivity_roi_height = value
+
+    def update_sensitivity_x_cb(self, value):
+        self.sensitivity_roi_width = value
+
     def start(self):
+        self.gestures = EyeGestures(
+            roi_width=self.sensitivity_roi_width ,
+            roi_height=self.sensitivity_roi_height
+        )
         self.dataSavingMan.enable_screenshots()
         self.calibrator = None
         self.__run = True
@@ -254,12 +276,10 @@ class Lab:
         pass
 
     def cursor_visible(self):
-        print("cb:  cursor_visible")
         self.dot_widget.show()
         pass
 
     def cursor_not_visible(self):
-        print("cb: cursor_not_visible")
         self.dot_widget.hide()
         pass
 
@@ -282,7 +302,6 @@ class Lab:
         self.__run = False
         self.power_off = True
         self.worker.on_quit()
-        print("main on quit finished")
 
     def save_data(self,event,rois_to_save):
         filename = f"{self.eyegesture_widget.get_text()}"
@@ -306,38 +325,59 @@ class Lab:
             return None
 
         if self.calibrator:
-            self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
+            print("calibrating")
+            if not self.calibrator.calibrated():
+                self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation,self.calibration)
+            else:
+                self.calibration = not self.calibrator.calibrated()
+            print("calibrated")
         else:
+            print("init calibrating")
             self.calibrator = Calibrator(self.monitor.width,self.monitor.height,cursor_x,cursor_y,self.calibration_widget.show_pill,self.calibration_widget.disappear_pill)
-            self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation)
+            self.calibration = self.calibrator.calibrate(cursor_x,cursor_y,event.fixation,self.calibration)
+            print("init calibrated")
         # frame = pygame.transform.scale(frame, (400, 400))
 
         if not event is None:
             rois_to_save = self.eyegesture_widget.get_rois_w_detection(cursor_x,cursor_y)
-            self.eyegesture_widget.update_fixation(event.fixation)
 
             #scale down radius when focusing
             radius = int(60 - (50 * event.fixation))
             self.dot_widget.set_radius(radius)
 
             self.dot_widget.move(int(cursor_x),int(cursor_y))
-            self.eyegesture_widget.update_dot_viewer(int(cursor_x),int(cursor_y))
+            print("saving data")
             self.save_data(event,rois_to_save)
+            print("data saved")
+
+            # during calibration update visuals
+            if not self.calibrator.calibrated():
+                self.eyegesture_widget.update_fixation(event.fixation)
+                self.eyegesture_widget.update_dot_viewer(int(cursor_x),int(cursor_y))
 
     def run(self):
+        fps_cap = 30
+        self.prev_frame = time.time()
         while not self.power_off:
             ret = True
             while ret and self.__run:
+                if (time.time() - self.prev_frame) > 1.0/fps_cap:
+                    ret, frame = self.cap.read()
 
-                ret, frame = self.cap.read()
-
-                try:
-                    self.__display_eye(frame)
-                except Exception as e:
-                    print(f"crashed in debug {e}")
+                    try:
+                        self.__display_eye(frame)
+                    except Exception as e:
+                        print(f"crashed in debug {e}")
+                    self.prev_frame = time.time()
         print("Exiting main loop.")
 
 if __name__ == '__main__':
+    # x_prev = 117
+    # x = 0
+    # y = 1440
+    # c = Calibrator(2560,1440,0,0, lambda x : None, lambda x : None)
+    # c.prev_x = 117
+    # c.calibrate(x,y,0.3,True)
     app = QApplication(sys.argv)
     lab = Lab(app.quit)
     sys.exit(app.exec_())

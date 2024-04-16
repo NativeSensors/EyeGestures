@@ -77,6 +77,8 @@ class AdvancedSettings(QWidget):
                  cursor_not_visible,
                  screen_recording_enable,
                  screen_recording_disabled,
+                 update_sensitivity_x_cb,
+                 update_sensitivity_y_cb,
                  _toggle_callback) -> None:
         super().__init__()
 
@@ -89,6 +91,8 @@ class AdvancedSettings(QWidget):
         self.screen_recording_enable = screen_recording_enable
         self.screen_recording_disabled = screen_recording_disabled
         self._toggle_callback = _toggle_callback
+        self.update_sensitivity_x_cb = update_sensitivity_x_cb
+        self.update_sensitivity_y_cb = update_sensitivity_y_cb
 
         self.control_btn = QPushButton('🞂 ⚙️Advanced settings')
         self.control_btn.setCheckable(True)  # Make the button a toggle button
@@ -128,7 +132,7 @@ class AdvancedSettings(QWidget):
         self.slider_radius.setValue(400)
         self.slider_radius.valueChanged.connect(self.update_radius_label)
 
-        self.cursor_toggle_btn = QPushButton("Cursor Visible")
+        self.cursor_toggle_btn = QPushButton("Cursor visible 🟠")
         self.cursor_toggle_btn.setCheckable(True)  # Make the button a toggle button
         self.cursor_toggle_btn.setStyleSheet("""
                 QPushButton {
@@ -182,6 +186,21 @@ class AdvancedSettings(QWidget):
         self.label_fixation_threshold = QLabel("Fixation: 0.8")
         self.label_radius_threshold   = QLabel("Radius: 500px")
 
+        self.label_horizontal_sensitivity = QLabel("Sensitivity X axis: 80")
+        self.slider_horizontal_sensitivity = QSlider(Qt.Horizontal)
+        self.slider_horizontal_sensitivity.setMinimum(20)
+        self.slider_horizontal_sensitivity.setMaximum(80)
+        self.slider_horizontal_sensitivity.setValue(80)
+        self.slider_horizontal_sensitivity.valueChanged.connect(self.update_horizontal_sensitivity)
+
+        self.label_vertical_sensitivity = QLabel("Sensitivity Y axis: 10")
+        self.slider_vertical_sensitivity = QSlider(Qt.Horizontal)
+        self.slider_vertical_sensitivity.setMinimum(4)
+        self.slider_vertical_sensitivity.setMaximum(20)
+        self.slider_vertical_sensitivity.setValue(10)
+        self.slider_vertical_sensitivity.valueChanged.connect(self.update_vertical_sensitivity)
+
+
         self.fixation_layout = QHBoxLayout()
         self.fixation_layout.addWidget(self.label_fixation_threshold)
         self.fixation_layout.addWidget(self.slider_fixation)
@@ -189,6 +208,14 @@ class AdvancedSettings(QWidget):
         self.radius_layout = QHBoxLayout()
         self.radius_layout.addWidget(self.label_radius_threshold)
         self.radius_layout.addWidget(self.slider_radius)
+
+        self.sensitivity_y_layout = QHBoxLayout()
+        self.sensitivity_y_layout.addWidget(self.label_vertical_sensitivity)
+        self.sensitivity_y_layout.addWidget(self.slider_vertical_sensitivity)
+
+        self.sensitivity_x_layout = QHBoxLayout()
+        self.sensitivity_x_layout.addWidget(self.label_horizontal_sensitivity)
+        self.sensitivity_x_layout.addWidget(self.slider_horizontal_sensitivity)
 
         self.cursor_toggle_layout = QHBoxLayout()
         self.cursor_toggle_layout.addWidget(self.cursor_toggle_btn)
@@ -202,9 +229,11 @@ class AdvancedSettings(QWidget):
         layout.addLayout(button_layout)
         layout.addLayout(self.fixation_layout)
         layout.addLayout(self.radius_layout)
+        layout.addLayout(self.sensitivity_y_layout)
+        layout.addLayout(self.sensitivity_x_layout)
         layout.addLayout(self.cursor_toggle_layout)
         layout.addLayout(self.screen_recording_layout)
-        spacer = QSpacerItem(0, 100, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        spacer = QSpacerItem(0, 300, QSizePolicy.Minimum, QSizePolicy.Expanding)
         layout.addSpacerItem(spacer)
 
         self.setLayout(layout)
@@ -217,6 +246,12 @@ class AdvancedSettings(QWidget):
         self.slider_radius.hide()
         self.screen_recording_tgl_btn.hide()
         self.cursor_toggle_btn.hide()
+        self.screen_recording_tgl_btn.hide()
+        self.cursor_toggle_btn.hide()
+        self.label_vertical_sensitivity.hide()
+        self.slider_vertical_sensitivity.hide()
+        self.label_horizontal_sensitivity.hide()
+        self.slider_horizontal_sensitivity.hide()
         self.control_btn.setText('🞂  ⚙️Advanced settings')
         self.setFixedHeight(100)
 
@@ -227,6 +262,12 @@ class AdvancedSettings(QWidget):
         self.slider_radius.show()
         self.screen_recording_tgl_btn.show()
         self.cursor_toggle_btn.show()
+        self.screen_recording_tgl_btn.show()
+        self.cursor_toggle_btn.show()
+        self.label_vertical_sensitivity.show()
+        self.slider_vertical_sensitivity.show()
+        self.label_horizontal_sensitivity.show()
+        self.slider_horizontal_sensitivity.show()
         self.control_btn.setText('🞃 ⚙️Advanced settings')
         self.setFixedHeight(300)
 
@@ -239,6 +280,16 @@ class AdvancedSettings(QWidget):
         # Convert integer value to float (0.0 to 1.0)
         self.label_radius_threshold.setText(f"Radius: {value}px")
         self.update_radius_cb(value)
+
+    def update_vertical_sensitivity(self,value):
+        self.label_vertical_sensitivity.setText(f"Sensitivity X axis: {value}")
+        if self.update_sensitivity_x_cb:
+            self.update_sensitivity_x_cb(value)
+
+    def update_horizontal_sensitivity(self,value):
+        self.label_horizontal_sensitivity.setText(f"Sensitivity Y axis:: {value}")
+        if self.update_sensitivity_y_cb:
+            self.update_sensitivity_y_cb(value)
 
     def toggle_visible_cursor(self):
         text = "Cursor not visible ⚫" if self.cursor_toggle_btn.isChecked() else "Cursor visible 🟠"
@@ -348,7 +399,9 @@ class EyeGestureWidget(QWidget):
                 cursor_visible = lambda : None,
                 cursor_not_visible = lambda : None,
                 screen_recording_enable = lambda : None,
-                screen_recording_disabled = lambda : None):
+                screen_recording_disabled = lambda : None,
+                update_sensitivity_x_cb = lambda : None,
+                update_sensitivity_y_cb = lambda : None):
         super().__init__()
 
         self.start_cb = start_cb
@@ -414,13 +467,15 @@ class EyeGestureWidget(QWidget):
         main_layout.addWidget(self.text_input)
 
         self.adv_settings = AdvancedSettings(
-            update_fixation_cb,
-            update_radius_cb,
-            cursor_visible,
-            cursor_not_visible,
-            screen_recording_enable,
-            screen_recording_disabled,
-            self._toggle_callback)
+            update_fixation_cb = update_fixation_cb,
+            update_radius_label = update_radius_cb,
+            cursor_visible = cursor_visible,
+            cursor_not_visible = cursor_not_visible,
+            screen_recording_enable = screen_recording_enable,
+            screen_recording_disabled = screen_recording_disabled,
+            update_sensitivity_x_cb = update_sensitivity_y_cb,
+            update_sensitivity_y_cb = update_sensitivity_x_cb,
+            _toggle_callback = self._toggle_callback)
         main_layout.addWidget(self.adv_settings)
 
         main_layout.addWidget(self.roiViewer)
@@ -502,6 +557,7 @@ class EyeGestureWidget(QWidget):
         self.move(postion_x, postion_y)
 
     def _toggle_callback(self):
+        print("resizing")
         if self.height() == 750:
             self.setFixedHeight(1000)
         else:
@@ -569,20 +625,20 @@ class EyeGestureWidget(QWidget):
                 }
             """)
 
-    def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self.oldPos = event.globalPos()
+    # def mousePressEvent(self, event: QMouseEvent):
+    #     if event.button() == Qt.LeftButton:
+    #         self.oldPos = event.globalPos()
 
-    def mouseMoveEvent(self, event: QMouseEvent):
-        if not self.oldPos:
-            return
+    # def mouseMoveEvent(self, event: QMouseEvent):
+    #     if not self.oldPos:
+    #         return
 
-        delta = QPoint(event.globalPos() - self.oldPos)
-        self.move(self.x() + delta.x(), self.y() + delta.y())
-        self.oldPos = event.globalPos()
+    #     delta = QPoint(event.globalPos() - self.oldPos)
+    #     self.move(self.x() + delta.x(), self.y() + delta.y())
+    #     self.oldPos = event.globalPos()
 
-    def mouseReleaseEvent(self, event: QMouseEvent):
-        self.oldPos = None
+    # def mouseReleaseEvent(self, event: QMouseEvent):
+    #     self.oldPos = None
 
     def rm_roi(self,id):
         self.roiViewer.rm_rectangle(id)
@@ -640,7 +696,8 @@ class EyeGestureWidget(QWidget):
         self.roiViewer.update()
 
     def show_roi(self):
-        self.roiMan.show()
+        # self.roiMan.show()
+        pass
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

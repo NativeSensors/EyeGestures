@@ -414,6 +414,7 @@ class RoIMan:
 
         while self.root == None or self.canvas == None:
             pass
+
         id = len(self.rois)
         self.rois[id] = RoIPainter(
             id, # id

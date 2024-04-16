@@ -12,6 +12,8 @@ import os
 class DataManager:
 
     def __init__(self):
+        self.number_of_csv = 0
+        self.sizes = [0]
         self.ipc = queue.Queue()
         self.screenshots_enable = False
 
@@ -25,14 +27,22 @@ class DataManager:
     def disable_screenshots(self):
         self.screenshots_enable = False
 
-    def __send_screenshot(self, filename, screenshot):
-        self.ipc.put((filename, screenshot))
+    def __send_screenshot(self, filename):
+        self.ipc.put(filename)
 
     def __save_screenshots(self):
         while self.screenshots_enable:
             if self.ipc.not_empty:
                 try:
-                    filename, screenshot = self.ipc.get(True,0.2)
+                    filename = self.ipc.get(True,1.0)
+                    screenshot = pyautogui.screenshot()
+                    # Define the desired width and height for the resized image
+                    desired_width = 800
+                    desired_height = 600
+
+                    # Resize the screenshot
+
+                    screenshot = screenshot.resize((desired_width, desired_height))
                     screenshot.save(filename)
                 except:
                     print("no item available")
@@ -49,7 +59,11 @@ class DataManager:
                 "screen_x", "screen_y", "screen_width", "screen_height",
                 "l_eye_landmarks", "r_eye_landmarks", "l_eye_pupil", "r_eye_pupil","rois"]
 
-        filename = f"./data/{directory}/data.csv"
+        if self.sizes[self.number_of_csv] > 100:
+            self.number_of_csv += 1
+            self.sizes.append(0)
+
+        filename = f"./data/{directory}/data_{self.number_of_csv}.csv"
         write_headers = not os.path.exists(filename)
         append = os.path.exists(filename)
 
@@ -79,6 +93,7 @@ class DataManager:
                 rois_to_save]
 
             writer.writerow(row)
+            self.sizes[self.number_of_csv] += 1
 
         if self.screenshots_enable:
             img_filename = f'{timestamp}.png'
@@ -89,12 +104,4 @@ class DataManager:
     def make_screenshot(self,path,name):
         img_filepath = f"{path}/{name}"
 
-        screenshot = pyautogui.screenshot()
-        # Define the desired width and height for the resized image
-        desired_width = 800
-        desired_height = 600
-
-        # Resize the screenshot
-
-        resized_screenshot = screenshot.resize((desired_width, desired_height))
-        self.__send_screenshot(img_filepath,resized_screenshot)
+        self.__send_screenshot(img_filepath)
