@@ -21,15 +21,15 @@ EyeGestures is open source eyetracking software/library using native webcams and
 " height="300">
 </p>
 
-### ⭐ Mission 
+### ⭐ Mission
 
-There is no one size-fits all solution, and we believe that differentiating interfaces brings accessibility to digital spaces. Designing eye-driven interfaces gives more control over computers to those who cannot fully enjoy their capabilities due to different disabilities, as well as an additional way to control computer to rests. 
+There is no one-size-fits-all solution, and we believe that diversifying interfaces brings accessibility to digital spaces. Designing eye-driven interfaces provides greater control over computers for those unable to fully utilize their capabilities due to various disabilities, while also offering an additional means of computer control for all users.
 
-Such technology should not be paywalled by expensive eye-tracking hardware, especially in case when it is needed to exist in the digital world and operate your computer. Most of the current consumer electronics devices have built-in native cameras, and the current state of research indicates that it is achievable to have eye tracking at reasonable accuracy based on those native cameras. 
+Such technology should not be hindered by expensive eye-tracking hardware, particularly when it is essential for individuals to navigate the digital realm and operate their computers. Many current consumer electronics devices feature built-in native cameras, and ongoing research suggests that achieving eye tracking with reasonable accuracy using these native cameras is feasible.
 
-Our mission is to bring eye-tracking technology to as many people as possible. 
+Our mission is to democratize eye-tracking technology, making it accessible to as many people as possible.
 
-Our technology is not perfect, but we strive to be.
+While our technology is not flawless, we are committed to continuous improvement and strive for excellence.
 
 ### 📇 Find us:
 - [RSS](https://polar.sh/NativeSensors/rss?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRfaWQiOiJkMDYxMDFiOC0xYzYyLTQ1MTYtYjg3YS03NTFhOTM3OTIxZmUiLCJzY29wZXMiOiJhcnRpY2xlczpyZWFkIiwidHlwZSI6ImF1dGgiLCJleHAiOjE3NDMxNjg3ODh9.djoi5ARWHr-xFW_XJ6Fwal3JUT1fAbvx4Npl-daBC5U)
