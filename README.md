@@ -80,6 +80,8 @@ python3 examples/simple_example.py
 python3 apps/win_app.py
 ```
 
+Or download it from [`releases`](https://github.com/NativeSensors/EyeGestures/releases/tag/1.3.4_App_0.0.3)
+
 ### 🔧 Develop 
 
 To begin, you instantiate an EyeGestures object with initial Region of Interest (RoI) parameters. These parameters define a preliminary focus area for the tracker within a virtual 500x500 screen space, which helps in locating the user's gaze more efficiently.
