@@ -7,6 +7,15 @@ For enterprise avoiding GPL3 licensing there is commercial license!
 ```
 We offer custom integration and managed services. For businesses requiring invoices message us `contact@eyegestures.com`.
 
+### 💜 Sponsors: 
+
+```
+Sponsor us and we can add your link, banner or other promo materials!
+```
+<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+
+<!-- POLAR-END id=eizdelwu -->
+
 ## 👁️ EyeGestures
 
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eyetracking and eyedriven interfaces without requirement of obtaining expensive hardware.
@@ -44,17 +53,6 @@ While our technology is not flawless, we are committed to continuous improvement
 Follow us on polar (it costs nothing but you help project!):
 
 <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
-
-### 💜 Sponsors: 
-
-```
-Sponsor us and we can add your link, banner or other promo materials!
-```
-<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
-
-
-
-<!-- POLAR-END id=eizdelwu -->
 
 ### 🔥 Web Demos:
 
