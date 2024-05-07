@@ -183,16 +183,16 @@ class GazeTracker:
 
                 # context.roi.x -= diff_face_x * 500 # current size of virtual display
                 # context.roi.y -= diff_face_y * 500 # current size of virtual display
-                if abs(face_w_perc/c_face_w_perc - 1.0) > 0.01:
+                if abs(face_w_perc/c_face_w_perc - 1.0) > 0.02:
                     context.roi.width  = context.roi.width * abs(face_w_perc/c_face_w_perc)
-                    context.edges.width= context.edges.width * abs(face_w_perc/c_face_w_perc)
+                    # context.edges.width= context.edges.width * abs(face_w_perc/c_face_w_perc)
                     context.gazeBuffor.flush()
-                    context.calibration = True
-                if abs(face_h_perc/c_face_h_perc - 1.0) > 0.01:
+                    # context.calibration = True
+                if abs(face_h_perc/c_face_h_perc - 1.0) > 0.02:
                     context.roi.height = context.roi.height* abs(face_h_perc/c_face_h_perc)
-                    context.edges.height= context.edges.height * abs(face_w_perc/c_face_w_perc)
+                    # context.edges.height= context.edges.height * abs(face_w_perc/c_face_w_perc)
                     context.gazeBuffor.flush()
-                    context.calibration = True
+                    # context.calibration = True
 
             self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                                       context.roi,

@@ -200,8 +200,6 @@ class ScreenManager:
 
         if cluster is not None:
 
-            if not detect_if_inside(buffor.getAvg(20),roi):
-                calibration = True
 
             if calibration:
                 roi = self.screen_processor.update(roi, edges, cluster, heatmap)
