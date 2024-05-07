@@ -37,6 +37,9 @@ class GazeTracker:
 
         self.screen = dp.Screen(screen_width, screen_heigth)
 
+        self.offset_x = 0
+        self.offset_y = 0
+
         self.roi_x = roi_x
         self.roi_y = roi_y
         self.roi_width = roi_width
@@ -127,9 +130,14 @@ class GazeTracker:
         context.calibration = calibration
 
         if not self.face is None:
-            
-            # if context.face == None:
-            #     context.face = self.face
+
+            if context.face == None:
+                print("adding new face")
+                x,y,w,h=self.face.getBoundingBox()
+                i_w = self.face.image_w
+                i_h = self.face.image_h
+                context.face = (x,y,w,h,i_w,i_h)
+
 
             l_eye = self.face.getLeftEye()
             r_eye = self.face.getRightEye()
@@ -151,36 +159,46 @@ class GazeTracker:
             if blink != True:
                 context.gazeBuffor.add(compound_point)
 
+            print("adjusting roi")
             # current face radius
-            # face_w,face_h = self.face.getBoundingBox()
-            # image_w = self.face.image_w
-            # image_h = self.face.image_h
-            
-            # face_w_perc = face_w/image_w
-            # face_h_perc = face_h/image_h
+            face_x,face_y,face_w,face_h = self.face.getBoundingBox()
+            image_w = self.face.image_w
+            image_h = self.face.image_h
+
+            face_w_perc = face_w/image_w
+            face_h_perc = face_h/image_h
 
             # # prev current face radius
-            # c_face_w,c_face_h = context.face.getBoundingBox()
-            # c_image_w = context.face.image_w
-            # c_image_h = context.face.image_h
-            
-            # c_face_w_perc = c_face_w/c_image_w
-            # c_face_h_perc = c_face_h/c_image_h
+            c_face_x,c_face_y,c_face_w,c_face_h,c_image_w,c_image_h = context.face
 
-            # # roi update
+            c_face_w_perc = c_face_w/c_image_w
+            c_face_h_perc = c_face_h/c_image_h
 
-            # roi.width  = roi.width * c_face_w_perc/face_w_perc
-            # roi.height = roi.height* c_face_h_perc/face_h_perc
+            x,y,w,h=self.face.getBoundingBox()
+            i_w = self.face.image_w
+            i_h = self.face.image_h
+            context.face = (x,y,w,h,i_w,i_h)
+            # roi update
 
-            print("processing")
+            diff_face_x = (face_x - c_face_x)/image_w
+            diff_face_y = (face_y - c_face_y)/image_h
+
+            print(f"{diff_face_x:.1f},{diff_face_y:.1f}")
+            # context.roi.x -= diff_face_x * 500 # current size of virtual display
+            # context.roi.y -= diff_face_y * 500 # current size of virtual display
+
+            context.roi.width  = context.roi.width * face_w_perc/c_face_w_perc
+            context.roi.height = context.roi.height* face_h_perc/c_face_h_perc
+
+            print(f"processing: {c_face_w_perc/face_w_perc} and {c_face_h_perc/face_h_perc}")
             self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                                       context.roi,
                                                                       context.edges,
                                                                       self.screen,
                                                                       context.display,
                                                                       context.calibration,
-                                                                      (offset_x,
-                                                                       offset_y)
+                                                                      (self.offset_x,
+                                                                       self.offset_y)
                                                                       )
 
             context.roi = roi
@@ -211,6 +229,9 @@ class GazeTracker:
                                l_eye,
                                r_eye,
                                display,
+                               context.roi,
+                               context.edges,
+                               context.cluster_boundaries,
                                context_id)
             else:
                 self.freezed_point = self.point_screen
@@ -221,6 +242,9 @@ class GazeTracker:
                                l_eye,
                                r_eye,
                                display,
+                               context.roi,
+                               context.edges,
+                               context.cluster_boundaries,
                                context_id)
 
         return event

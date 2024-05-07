@@ -295,12 +295,10 @@ class Lab:
             # self.__display_clusters(whiteboardPupil, 
             #                         event.screen_man.gazeBuffor)
 
-
-            # self.__display_screen(whiteboardPupil, 
-            #                     # event.screen_man.getHist(), 
-            #                     event.context.roi,
-            #                     event.context.edges,
-            #                     event.context.cluster_boundaries)
+            self.__display_screen(whiteboardPupil,
+                                event.roi,
+                                event.edges,
+                                event.cluster)
 
             # self.__display_eyeTracker(whiteboardPupil, 
             #                           event.screen_man, 

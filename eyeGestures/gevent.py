@@ -12,6 +12,9 @@ class Gevent:
                  l_eye,
                  r_eye,
                  screen_man,
+                 roi,
+                 edges,
+                 cluster,
                  context):
 
         self.point = point
@@ -20,7 +23,11 @@ class Gevent:
         self.point_screen = point_screen
 
         # ALL DEBUG DATA
+        self.roi = roi
+        self.edges = edges
         self.l_eye = l_eye
         self.r_eye = r_eye
-        self.screen_man = screen_man
+        self.cluster = cluster
         self.context = context
+        self.screen_man = screen_man
+
