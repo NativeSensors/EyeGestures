@@ -123,6 +123,9 @@ class Eye:
         """function returning eye landmarks"""
 
         return self.region
+    
+    def getBoundingBox(self):
+        return (self.x,self.y,self.width,self.height)
 
     def _process(self, image, region):
         h, w, _ = image.shape

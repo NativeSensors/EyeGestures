@@ -113,6 +113,14 @@ class Buffor:
 
     def getLen(self):
         return len(self.__buffor)
+    
+    def flush(self):
+        tmp = self.__buffor[-1]
+        self.__buffor = []
+        self.__buffor.append(tmp)
+
+    def clear(self):
+        self.__buffor = []
 
 # Bufforless
 

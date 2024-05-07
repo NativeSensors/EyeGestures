@@ -10,6 +10,16 @@ from eyeGestures.screenTracker.heatmap import Heatmap
 
 # THIS FILE IS SLOWLY BECOMING BLACK MAGIC
 
+def detect_if_inside(point,rect):
+    px = point[0]
+    py = point[1]
+    x,y,width,height = rect.getBoundaries() 
+
+    x_in = x < px and px < x + width
+    y_in = y < py and py < y + height
+    
+    return x_in and y_in
+
 def detect_edges(roi, display, point_on_screen, point_on_display):
     """Function performing edge detection based on point, screen and display sizes"""
     (s_x,s_y) = point_on_screen 
@@ -188,10 +198,11 @@ class ScreenManager:
         heatmap = Heatmap(screen.width,screen.height,buffor.getBuffor())
         cluster = Clusters(buffor.getBuffor()).getMainCluster()
 
-        print(f"cluster: {cluster}")
         if cluster is not None:
-            
-            print(f"calibration: {calibration}")
+
+            if not detect_if_inside(buffor.getAvg(20),roi):
+                calibration = True
+
             if calibration:
                 roi = self.screen_processor.update(roi, edges, cluster, heatmap)
 

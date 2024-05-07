@@ -132,7 +132,6 @@ class GazeTracker:
         if not self.face is None:
 
             if context.face == None:
-                print("adding new face")
                 x,y,w,h=self.face.getBoundingBox()
                 i_w = self.face.image_w
                 i_h = self.face.image_h
@@ -160,45 +159,49 @@ class GazeTracker:
                 context.gazeBuffor.add(compound_point)
 
             print("adjusting roi")
-            # current face radius
-            face_x,face_y,face_w,face_h = self.face.getBoundingBox()
-            image_w = self.face.image_w
-            image_h = self.face.image_h
+            if blink != True:
+                # current face radius
+                face_x,face_y,face_w,face_h = self.face.getBoundingBox()
+                image_w = self.face.image_w
+                image_h = self.face.image_h
 
-            face_w_perc = face_w/image_w
-            face_h_perc = face_h/image_h
+                face_w_perc = face_w/image_w
+                face_h_perc = face_h/image_h
 
-            # # prev current face radius
-            c_face_x,c_face_y,c_face_w,c_face_h,c_image_w,c_image_h = context.face
+                # # prev current face radius
+                c_face_x,c_face_y,c_face_w,c_face_h,c_image_w,c_image_h = context.face
 
-            c_face_w_perc = c_face_w/c_image_w
-            c_face_h_perc = c_face_h/c_image_h
+                c_face_w_perc = c_face_w/c_image_w
+                c_face_h_perc = c_face_h/c_image_h
 
-            x,y,w,h=self.face.getBoundingBox()
-            i_w = self.face.image_w
-            i_h = self.face.image_h
-            context.face = (x,y,w,h,i_w,i_h)
-            # roi update
+                x,y,w,h=self.face.getBoundingBox()
+                i_w = self.face.image_w
+                i_h = self.face.image_h
+                context.face = (x,y,w,h,i_w,i_h)
 
-            diff_face_x = (face_x - c_face_x)/image_w
-            diff_face_y = (face_y - c_face_y)/image_h
+                # roi update
 
-            print(f"{diff_face_x:.1f},{diff_face_y:.1f}")
-            # context.roi.x -= diff_face_x * 500 # current size of virtual display
-            # context.roi.y -= diff_face_y * 500 # current size of virtual display
+                # context.roi.x -= diff_face_x * 500 # current size of virtual display
+                # context.roi.y -= diff_face_y * 500 # current size of virtual display
+                if abs(face_w_perc/c_face_w_perc - 1.0) > 0.01:
+                    context.roi.width  = context.roi.width * abs(face_w_perc/c_face_w_perc)
+                    context.edges.width= context.edges.width * abs(face_w_perc/c_face_w_perc)
+                    context.gazeBuffor.flush()
+                    context.calibration = True
+                if abs(face_h_perc/c_face_h_perc - 1.0) > 0.01:
+                    context.roi.height = context.roi.height* abs(face_h_perc/c_face_h_perc)
+                    context.edges.height= context.edges.height * abs(face_w_perc/c_face_w_perc)
+                    context.gazeBuffor.flush()
+                    context.calibration = True
 
-            context.roi.width  = context.roi.width * face_w_perc/c_face_w_perc
-            context.roi.height = context.roi.height* face_h_perc/c_face_h_perc
-
-            print(f"processing: {c_face_w_perc/face_w_perc} and {c_face_h_perc/face_h_perc}")
             self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                                       context.roi,
                                                                       context.edges,
                                                                       self.screen,
                                                                       context.display,
                                                                       context.calibration,
-                                                                      (self.offset_x,
-                                                                       self.offset_y)
+                                                                      (offset_x,
+                                                                       offset_y)
                                                                       )
 
             context.roi = roi
