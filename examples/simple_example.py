@@ -4,7 +4,7 @@ import numpy as np
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
 
-gestures = EyeGestures(285,115)
+gestures = EyeGestures(285,115,20,15)
 
 cap = VideoCapture(0)  
 
@@ -40,14 +40,14 @@ while running:
     frame = cv2.flip(frame,1)
     # frame = cv2.resize(frame, (360, 640))
 
-    calibrate = (iterator <= 100)
+    calibrate = (iterator <= 300)
     iterator += 1
 
     cursor_x, cursor_y = 0, 0
     event = gestures.estimate(
         frame,
         "main",
-        calibrate, # set calibration - switch to False to stop calibration
+        True, # set calibration - switch to False to stop calibration
         screen_width,
         screen_height,
         0, 0, 0.8,10)

@@ -9,12 +9,17 @@ import pyautogui
 
 from PySide2.QtWidgets import QApplication
 import keyboard
+import os
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(f'{dir_path}/..')
+print(f'{dir_path}/..')
 
 from lab.pupillab import Worker
 
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures
-from appUtils.dot import DotWidget
+from apps.appUtils.dot import DotWidget
 from pynput import keyboard
 
 from screeninfo import get_monitors
@@ -132,7 +137,7 @@ class Lab:
 
         self.eye_screen_w = 500
         self.eye_screen_h = 500
-        self.gestures = EyeGestures(285,115)
+        self.gestures = EyeGestures(285,115,80,15)
 
         self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.dot_widget.show()
@@ -222,9 +227,6 @@ class Lab:
 
         cv2.circle(whiteboardPupil,point,5,(0,0,255),-1)            
         
-        (w,h) = (dot_widget.size().width(),dot_widget.size().height()) 
-        dot_widget.move(point_screen[0]-int(w/2),point_screen[1]-int(h/2))
-
     def __display_extended_gaze(self,display,eye,multiplier):
         pupil = eye.getPupil()
         gaze = eye.getGaze()
@@ -282,26 +284,29 @@ class Lab:
             l_eye = event.l_eye
             r_eye = event.r_eye
             
+            (w,h) = (self.dot_widget.size().width(),self.dot_widget.size().height()) 
+            self.dot_widget.move(event.point_screen[0]-int(w/2),event.point_screen[1]-int(h/2))
+
             # here we are having prossed points:
 
             # self.__display_hist(whiteboardPupil,
             #                     event.screen_man.getHist())
             
-            self.__display_clusters(whiteboardPupil, 
-                                    event.screen_man.gazeBuffor)
+            # self.__display_clusters(whiteboardPupil, 
+            #                         event.screen_man.gazeBuffor)
 
 
-            self.__display_screen(whiteboardPupil, 
-                                # event.screen_man.getHist(), 
-                                event.screen_man.roi,
-                                event.screen_man.edges,
-                                event.screen_man.cluster_boundaries)
+            # self.__display_screen(whiteboardPupil, 
+            #                     # event.screen_man.getHist(), 
+            #                     event.context.roi,
+            #                     event.context.edges,
+            #                     event.context.cluster_boundaries)
 
-            self.__display_eyeTracker(whiteboardPupil, 
-                                      event.screen_man, 
-                                      event.point, 
-                                      event.point_screen, 
-                                      self.dot_widget)
+            # self.__display_eyeTracker(whiteboardPupil, 
+            #                           event.screen_man, 
+            #                           event.point, 
+            #                           event.point_screen, 
+            #                           self.dot_widget)
 
 
             # self.__display_extended_gaze(frame,

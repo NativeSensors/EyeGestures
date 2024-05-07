@@ -109,11 +109,13 @@ class GazeTracker:
 
         self.face.process(image, face_mesh)
 
-        context = self.GContext.get(context_id, display, roi=dp.ScreenROI(
-            self.roi_x,
-            self.roi_y,
-            self.roi_width,
-            self.roi_height),
+        context = self.GContext.get(context_id, display,
+            face = None,
+            roi =dp.ScreenROI(
+                self.roi_x,
+                self.roi_y,
+                self.roi_width,
+                self.roi_height),
             edges=dp.ScreenROI(285, 105, 80, 15),
             cluster_boundaries=dp.ScreenROI(225, 125, 20, 20),
             buffor=Buffor(200),
@@ -125,6 +127,9 @@ class GazeTracker:
         context.calibration = calibration
 
         if not self.face is None:
+            
+            # if context.face == None:
+            #     context.face = self.face
 
             l_eye = self.face.getLeftEye()
             r_eye = self.face.getRightEye()
@@ -146,6 +151,28 @@ class GazeTracker:
             if blink != True:
                 context.gazeBuffor.add(compound_point)
 
+            # current face radius
+            # face_w,face_h = self.face.getBoundingBox()
+            # image_w = self.face.image_w
+            # image_h = self.face.image_h
+            
+            # face_w_perc = face_w/image_w
+            # face_h_perc = face_h/image_h
+
+            # # prev current face radius
+            # c_face_w,c_face_h = context.face.getBoundingBox()
+            # c_image_w = context.face.image_w
+            # c_image_h = context.face.image_h
+            
+            # c_face_w_perc = c_face_w/c_image_w
+            # c_face_h_perc = c_face_h/c_image_h
+
+            # # roi update
+
+            # roi.width  = roi.width * c_face_w_perc/face_w_perc
+            # roi.height = roi.height* c_face_h_perc/face_h_perc
+
+            print("processing")
             self.point_screen, roi, cluster = self.screen_man.process(context.gazeBuffor,
                                                                       context.roi,
                                                                       context.edges,

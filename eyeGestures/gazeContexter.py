@@ -54,6 +54,7 @@ class Gcontext:
 
     def __init__(self,
                  display,
+                 face,
                  roi,
                  edges,
                  cluster_boundaries,
@@ -66,6 +67,7 @@ class Gcontext:
                  calibration):
 
         self.roi = roi
+        self.face = face
         self.edges = edges
         self.cluster_boundaries = cluster_boundaries
         self.gazeBuffor = gazeBuffor
@@ -87,6 +89,7 @@ class GazeContext:
     def get(self,
             id,
             display,
+            face=None,
             roi=dp.ScreenROI(285, 105, 80, 15),
             edges=dp.ScreenROI(285, 105, 80, 15),
             cluster_boundaries=dp.ScreenROI(225, 125, 20, 20),
@@ -99,17 +102,18 @@ class GazeContext:
             calibration=False):
         """Function creating new context or returning if id already exists"""
 
-        context = Gcontext(display,
-                           roi,
-                           edges,
-                           cluster_boundaries,
-                           buffor,
-                           l_pupil,
-                           r_pupil,
-                           l_eye_buff,
-                           r_eye_buff,
-                           fixation,
-                           calibration)
+        context = Gcontext(display=display,
+                           face=face,
+                           roi=roi,
+                           edges=edges,
+                           cluster_boundaries=cluster_boundaries,
+                           gazeBuffor=buffor,
+                           l_pupil=l_pupil,
+                           r_pupil=r_pupil,
+                           l_eye_buff=l_eye_buff,
+                           r_eye_buff=r_eye_buff,
+                           fixation=fixation,
+                           calibration=calibration)
 
         if self.contexter.addContext(id, context):
             return context

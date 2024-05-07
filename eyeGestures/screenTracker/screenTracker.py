@@ -136,6 +136,7 @@ class ScreenProcessor:
         # ---------histogram obtained----------
         # =====================================
         new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
+        print(f"setting new center: {x,y}")
         new_roi.setCenter(x,y)
         edges.setCenter(x,y)
         # self.eyeScreen.setCenter(x,y) 
@@ -187,8 +188,10 @@ class ScreenManager:
         heatmap = Heatmap(screen.width,screen.height,buffor.getBuffor())
         cluster = Clusters(buffor.getBuffor()).getMainCluster()
 
+        print(f"cluster: {cluster}")
         if cluster is not None:
-   
+            
+            print(f"calibration: {calibration}")
             if calibration:
                 roi = self.screen_processor.update(roi, edges, cluster, heatmap)
 
