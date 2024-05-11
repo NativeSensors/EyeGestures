@@ -129,7 +129,8 @@ class Eye:
 
         return self.region
     
-    def getBoundingBox(self):
+    def getBoundingBox(self) -> (int,int,int,int):
+        ''' self.x,self.y,self.width,self.height '''
         return (self.x,self.y,self.width,self.height)
 
     def _process(self, image, region):
@@ -142,20 +143,28 @@ class Eye:
         masked_image = cv2.bitwise_not(background, cv2.cvtColor(
             image.copy(), cv2.COLOR_BGR2GRAY), mask=mask)
 
-        margin = 2
-        min_x = np.min(region[:, 0]) - margin
-        max_x = np.max(region[:, 0]) + margin
-        min_y = np.min(region[:, 1]) - margin
-        max_y = np.max(region[:, 1]) + margin
+        margin_x = 2
+        margin_y = 10
+        min_x_index = np.argmin(region[:, 0])
+        max_x_index = np.argmax(region[:, 0])
+        min_x = region[min_x_index, 0] - margin_x
+        max_x = region[max_x_index, 0] + margin_x
+        if self.side == "right":
+            min_y = region[min_x_index, 1] - margin_y
+            max_y = region[min_x_index, 1] + margin_y
+        else:
+            min_y = region[max_x_index, 1] - margin_y
+            max_y = region[max_x_index, 1] + margin_y
 
-        self.x = min_x
-        self.y = min_y
+        center = (region[min_x_index] + region[max_x_index])/2
+        self.center_x = center[0]
+        self.center_y = center[1]
 
-        self.width = np.max(region[:, 0]) - np.min(region[:, 0])
-        self.height = np.max(region[:, 1]) - np.min(region[:, 1])
+        self.width = min_x - max_x
+        self.height = max_y - min_y
 
-        self.center_x = (min_x + max_x)/2
-        self.center_y = (min_y + max_y)/2
+        self.x = self.center_x - self.width/2
+        self.y = min_y - self.height/2
 
         # HACKETY_HACK:
         # self.pupil[1] = np.min(region[:, 1])
@@ -169,10 +178,14 @@ class Eye:
             point = point - (min_x, min_y)
             cv2.circle(self.cut_image, point.astype(
                 int), 1, (255, 0, 0, 150), 1)
-
+    
+        center = center - (min_x, min_y)
+        cv2.circle(self.cut_image, center.astype(int), 1, (0, 0, 255, 150), 1)
+        
         pupil = self.pupil - (min_x, min_y)
 
         cv2.circle(self.cut_image, pupil.astype(int), 1, (0, 255, 0, 150), 1)
+
 
         self.res_cut_image = cv2.resize(self.cut_image, self.scale)
 
@@ -180,6 +193,12 @@ class Eye:
         self.pupil = self.pupil/(self.width,self.height) * self.scale
         self.region = self.region/(self.width,self.height) * self.scale
         self.landmarks = self.landmarks/(self.width,self.height) * self.scale
+
+        self.x = self.x/(self.width) * self.scale[0]
+        self.y = self.y/(self.height) * self.scale[1]
+
+        self.width  = self.width/(self.width) * self.scale[0]
+        self.height = self.height/(self.height) * self.scale[1]
 
         # save cut_image to buffor and get avg from previous buffors
         # self.eyeBuffer.add(self.cut_image)

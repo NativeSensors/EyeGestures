@@ -9,40 +9,22 @@ class EyeProcessor:
     def __init__(self, scale_w=250, scale_h=250):
         self.scale_w = scale_w
         self.scale_h = scale_h
-        self.min_x = 0
-        self.max_x = 0
-        self.min_y = 0
-        self.max_y = 0
         self.pupil = None
         self.landmarks = None
 
-    def append(self, pupil: (int, int), landmarks: np.ndarray, pupilBuffor):
+    def append(self, eye, pupilBuffor):
         """Function appending new pupil point to tracker."""
 
-        self.pupil = pupil
-        self.landmarks = landmarks
+        self.pupil = eye.getPupil()
+        x,y,width,height = eye.getBoundingBox()
+        # height = height/2
 
-        # get center:
-        margin = 2
-        self.min_x = np.min(self.landmarks[:, 0]) - margin
-        self.max_x = np.max(self.landmarks[:, 0]) + margin
-        self.min_y = np.min(self.landmarks[:, 1]) - margin
-        self.max_y = np.max(self.landmarks[:, 1]) + margin
-
-        assert self.pupil[0] > self.min_x
-        assert self.pupil[1] > self.min_y
-
-        width = self.max_x - self.min_x
-        print(f"width: {width}")
-        height = self.max_y - self.min_y
-        print(f"height: {height}")
-        
         # print(width,height)
         pupilBuffor.add(
             self.__convertPoint(self.pupil,
                                 width=self.scale_w, height=self.scale_h,
                                 scale_w=width, scale_h=height,
-                                offset=(self.min_x, self.min_y)))
+                                offset=(x,y)))
 
     def __convertPoint(self, point,
                        width=1.0,

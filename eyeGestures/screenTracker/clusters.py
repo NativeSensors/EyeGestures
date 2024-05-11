@@ -47,7 +47,10 @@ class Cluster:
     
     def getCenter(self):
         """Function returning center of ROI"""
-        return (self.__centroid)
+        (_,_,width,height) = self.getBoundaries()
+        x = self.x + width/2
+        y = self.y + height/2
+        return (self.__centroid + np.array([x,y]))/2
     
 class Clusters:
     """Algorithm dividing tracked points into clusters so it can be estimated were is center of ROI"""

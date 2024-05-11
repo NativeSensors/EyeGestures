@@ -87,7 +87,7 @@ class GazeTracker:
 
     def __pupil(self, eye, eyeProcessor, intersection_x, buffor):
 
-        eyeProcessor.append(eye.getPupil(), eye.getLandmarks(), buffor)
+        eyeProcessor.append(eye, buffor)
         point = eyeProcessor.getAvgPupil(
             self.eye_screen_w, self.eye_screen_h, buffor)
         point = np.array((point[0], point[1]))
@@ -156,8 +156,8 @@ class GazeTracker:
             compound_point = np.array(((l_point + r_point)/2), dtype=np.uint32)
             
             # # invert Y axis
-            # print(f"compound point: {compound_point}")
-            # compound_point[1] = 500 - compound_point[1]
+            print(f"compound point: {compound_point}")
+            compound_point[0] = 500 - compound_point[0]
             # compound_point[0] = compound_point[0]/20000 * 500
             # print(f"compound point: {compound_point}")
 

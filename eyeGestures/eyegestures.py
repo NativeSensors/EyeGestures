@@ -10,9 +10,9 @@ class EyeGestures:
     """Main class for EyeGesture tracker. It configures and manages entier algorithm"""
 
     def __init__(self,
-                 roi_x=225,
-                 roi_y=105,
-                 roi_width=80,
+                 roi_x=305,
+                 roi_y=305,
+                 roi_width=20,
                  roi_height=15):
 
         screen_width = 500

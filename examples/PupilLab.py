@@ -135,7 +135,7 @@ class Lab:
         self.step         = 10 
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
-        self.gestures = EyeGestures(285,115,80,15)
+        self.gestures = EyeGestures()
         self.eye_screen_w = 500
         self.eye_screen_h = 500
 

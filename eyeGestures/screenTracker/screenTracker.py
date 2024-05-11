@@ -141,7 +141,7 @@ class ScreenProcessor:
     def update(self, roi, edges, cluster, heatmap):
         """Function to update screen processor with new clusters and heatmaps"""
 
-        (x,y) = heatmap.getCenter()
+        (x,y) = cluster.getCenter()
         # =====================================
         # ---------histogram obtained----------
         # =====================================
