@@ -153,6 +153,9 @@ class GazeTracker:
             context.r_pupil = r_buffor
 
             compound_point = np.array(((l_point + r_point)/2), dtype=np.uint32)
+            
+            # invert Y axis
+            compound_point[1] = 500 - compound_point[1]
 
             blink = l_eye.getBlink() or r_eye.getBlink()
             if blink != True:

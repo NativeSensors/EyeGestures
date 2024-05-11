@@ -78,7 +78,6 @@ class Eye:
     def getPupil(self):
         """function returning pupil object"""
 
-        # return self.pupil.getCoords()
         return self.pupil
 
     def getBlink(self):
@@ -153,10 +152,9 @@ class Eye:
         self.center_y = (min_y + max_y)/2
 
         # HACKETY_HACK:
-        self.pupil[1] = np.min(region[:, 1])
+        # self.pupil[1] = np.min(region[:, 1])
 
         self.cut_image = masked_image[min_y:max_y, min_x:max_x]
-        # print(f"here: {self.cut_image.shape,min_y,max_y,min_x,max_x}")
         self.cut_image = cv2.cvtColor(self.cut_image, cv2.COLOR_GRAY2BGR)
 
         for point in self.region:
@@ -166,7 +164,6 @@ class Eye:
 
         pupil = self.pupil - (min_x, min_y)
 
-        # print(f"pupil: {pupil}")
         cv2.circle(self.cut_image, pupil.astype(int), 1, (0, 255, 0, 150), 1)
 
         self.cut_image = cv2.resize(self.cut_image, self.scale)

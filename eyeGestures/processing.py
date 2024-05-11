@@ -35,6 +35,7 @@ class EyeProcessor:
         width = self.max_x - self.min_x
         height = (self.max_y - self.min_y)/2
 
+        # print(width,height)
         pupilBuffor.add(
             self.__convertPoint(self.pupil,
                                 width=self.scale_w, height=self.scale_h,
