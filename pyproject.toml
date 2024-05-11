@@ -21,7 +21,7 @@ exclude = [
 
 [project]
 name = "eyeGestures"
-version = "1.4.4"
+version = "1.4.5"
 authors = [
   { name="Piotr Walas", email="piotr.walas@eyegestures.com" },
 ]
