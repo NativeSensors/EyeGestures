@@ -158,7 +158,6 @@ class GazeTracker:
             if blink != True:
                 context.gazeBuffor.add(compound_point)
 
-            print("adjusting roi")
             if blink != True:
                 # current face radius
                 face_x,face_y,face_w,face_h = self.face.getBoundingBox()
