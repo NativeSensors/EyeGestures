@@ -43,6 +43,7 @@ class Eye:
         self.region = None
         self.cut_image = None
         self.landmarks = None
+        self.res_cut_image = None
 
         # self._process(self.image,self.region)
 
@@ -85,11 +86,16 @@ class Eye:
         # return self.pupil.getCoords()
         return (self.height) <= 3  # 2x margin
 
+    def getRawImage(self):
+        """function returning raw image before resizeing of the eye cut from the entire face image"""
+
+        return self.cut_image
+
     def getImage(self):
         """function returning image of the eye cut from the entire face image"""
 
         # TODO: draw additional parameters
-        return self.cut_image
+        return self.res_cut_image
 
     def getGaze(self, gaze_buffor, y_correction=0, x_correction=0):
         """function returning gaze position"""
@@ -155,8 +161,10 @@ class Eye:
         # self.pupil[1] = np.min(region[:, 1])
 
         self.cut_image = masked_image[min_y:max_y, min_x:max_x]
+        print(f"self.cut_image: {self.cut_image.shape}")
         self.cut_image = cv2.cvtColor(self.cut_image, cv2.COLOR_GRAY2BGR)
-
+        print(f"self.cut_image: {self.cut_image.shape}")
+        
         for point in self.region:
             point = point - (min_x, min_y)
             cv2.circle(self.cut_image, point.astype(
@@ -166,7 +174,12 @@ class Eye:
 
         cv2.circle(self.cut_image, pupil.astype(int), 1, (0, 255, 0, 150), 1)
 
-        self.cut_image = cv2.resize(self.cut_image, self.scale)
+        self.res_cut_image = cv2.resize(self.cut_image, self.scale)
+
+        # trying to resize pupil
+        self.pupil = self.pupil/(self.width,self.height) * self.scale
+        self.region = self.region/(self.width,self.height) * self.scale
+        self.landmarks = self.landmarks/(self.width,self.height) * self.scale
 
         # save cut_image to buffor and get avg from previous buffors
         # self.eyeBuffer.add(self.cut_image)

@@ -90,7 +90,7 @@ class GazeTracker:
         eyeProcessor.append(eye.getPupil(), eye.getLandmarks(), buffor)
         point = eyeProcessor.getAvgPupil(
             self.eye_screen_w, self.eye_screen_h, buffor)
-        point = np.array((int(intersection_x), point[1]))
+        point = np.array((point[0], point[1]))
 
         return point, buffor
 
@@ -144,6 +144,7 @@ class GazeTracker:
             # TODO: check what happens here before with l_pupil
             intersection_x, _ = self.__gaze_intersection(
                 l_eye, r_eye, context.l_eye_buff, context.r_eye_buff)
+            print(f"intersection_x: {intersection_x}")
             l_point, l_buffor = self.__pupil(
                 l_eye, self.eyeProcessorLeft,  intersection_x, context.l_pupil)
             r_point, r_buffor = self.__pupil(
@@ -154,8 +155,11 @@ class GazeTracker:
 
             compound_point = np.array(((l_point + r_point)/2), dtype=np.uint32)
             
-            # invert Y axis
-            compound_point[1] = 500 - compound_point[1]
+            # # invert Y axis
+            # print(f"compound point: {compound_point}")
+            # compound_point[1] = 500 - compound_point[1]
+            # compound_point[0] = compound_point[0]/20000 * 500
+            # print(f"compound point: {compound_point}")
 
             blink = l_eye.getBlink() or r_eye.getBlink()
             if blink != True:

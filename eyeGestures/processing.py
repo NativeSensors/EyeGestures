@@ -23,7 +23,7 @@ class EyeProcessor:
         self.landmarks = landmarks
 
         # get center:
-        margin = 5
+        margin = 2
         self.min_x = np.min(self.landmarks[:, 0]) - margin
         self.max_x = np.max(self.landmarks[:, 0]) + margin
         self.min_y = np.min(self.landmarks[:, 1]) - margin
@@ -33,8 +33,10 @@ class EyeProcessor:
         assert self.pupil[1] > self.min_y
 
         width = self.max_x - self.min_x
-        height = (self.max_y - self.min_y)/2
-
+        print(f"width: {width}")
+        height = self.max_y - self.min_y
+        print(f"height: {height}")
+        
         # print(width,height)
         pupilBuffor.add(
             self.__convertPoint(self.pupil,

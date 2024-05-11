@@ -135,9 +135,9 @@ class Lab:
         self.step         = 10 
         self.monitor = list(filter(lambda monitor: monitor.is_primary == True ,get_monitors()))[0]
 
+        self.gestures = EyeGestures(285,115,80,15)
         self.eye_screen_w = 500
         self.eye_screen_h = 500
-        self.gestures = EyeGestures(285,115,80,15)
 
         self.dot_widget = DotWidget(diameter=100,color = (255,120,0))
         self.dot_widget.show()
@@ -223,8 +223,8 @@ class Lab:
         #            0.5, (0,0,0), 2, cv2.LINE_AA) 
    
         
-    def __display_eyeTracker(self, whiteboardPupil, screen_man, point, point_screen, dot_widget):
-
+    def __display_eyeTracker(self, whiteboardPupil, point):
+        print(f"displaying tracker point: {point}")
         cv2.circle(whiteboardPupil,point,5,(0,0,255),-1)            
         
     def __display_extended_gaze(self,display,eye,multiplier):
@@ -300,12 +300,8 @@ class Lab:
                                 event.edges,
                                 event.cluster)
 
-            # self.__display_eyeTracker(whiteboardPupil, 
-            #                           event.screen_man, 
-            #                           event.point, 
-            #                           event.point_screen, 
-            #                           self.dot_widget)
-
+            self.__display_eyeTracker(whiteboardPupil, 
+                                      event.point)
 
             # self.__display_extended_gaze(frame,
             #                              event.l_eye,
