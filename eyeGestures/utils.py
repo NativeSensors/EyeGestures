@@ -146,7 +146,8 @@ class VideoCapture:
             self.__openCam(name)
 
             self.q = queue.Queue()
-            self.t = threading.Thread(target=self.__reader).start()
+            self.t = threading.Thread(target=self.__reader)
+            self.t.start()
         else:
             self.frames = []
             with open(name, 'rb') as file:
@@ -193,3 +194,4 @@ class VideoCapture:
     def close(self):
         """Function closing stream"""
         self.run = False
+        self.t.join()
