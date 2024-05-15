@@ -194,4 +194,5 @@ class VideoCapture:
     def close(self):
         """Function closing stream"""
         self.run = False
+        self.cap.release()
         self.t.join()
