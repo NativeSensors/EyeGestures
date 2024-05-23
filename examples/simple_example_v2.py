@@ -1,12 +1,17 @@
+import os
+import sys
+import cv2
 import pygame
-import cv2 
 import numpy as np
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(f'{dir_path}/..')
+
 from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures_v1
+from eyeGestures.eyegestures import EyeGestures_v2
 
-gestures = EyeGestures(285,115,20,15)
-
-cap = VideoCapture(0)  
+gestures = EyeGestures_v2()
+cap = VideoCapture(0)
 
 # Initialize Pygame
 pygame.init()
@@ -22,6 +27,8 @@ pygame.display.set_caption("Fullscreen Red Cursor")
 
 # Set up colors
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
 
 clock = pygame.time.Clock()
 
@@ -35,34 +42,26 @@ while running:
             running = False
 
     # Generate new random position for the cursor
-    ret, frame = cap.read()     
+    ret, frame = cap.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame = cv2.flip(frame,1)
-    # frame = cv2.resize(frame, (360, 640))
 
-    calibrate = (iterator <= 300)
+    calibrate = (iterator <= 1000)
     iterator += 1
 
-    cursor_x, cursor_y = 0, 0
-    event = gestures.estimate(
-        frame,
-        "main",
-        True, # set calibration - switch to False to stop calibration
-        screen_width,
-        screen_height,
-        0, 0, 0.8,10)
+    point, fit_point, blink, fixation, acceptance_radius, calibration_radius = gestures.step(frame, calibrate, screen_width, screen_height)
 
-    cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
-    # frame = pygame.transform.scale(frame, (400, 400))
-    
+
     screen.fill((0, 0, 0))
     frame = np.rot90(frame)
     frame = pygame.surfarray.make_surface(frame)
     frame = pygame.transform.scale(frame, (400, 400))
-    
+
     # Display frame on Pygame screen
     screen.blit(frame, (0, 0))
-    pygame.draw.circle(screen, RED, (cursor_x, cursor_y), 100)
+    if calibrate:
+        # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
+        pygame.draw.circle(screen, BLUE, fit_point, acceptance_radius)
+    pygame.draw.circle(screen, RED, point, 50)
     pygame.display.flip()
 
     # Cap the frame rate

@@ -84,14 +84,32 @@ python3 apps/win_app.py
 
 Or download it from [`releases`](https://github.com/NativeSensors/EyeGestures/releases/tag/1.3.4_App_0.0.3)
 
-### 🔧 Develop 
+### 🔧 Use [WiP - adding Enginge V2]:
 
-To begin, you instantiate an EyeGestures object with initial Region of Interest (RoI) parameters. These parameters define a preliminary focus area for the tracker within a virtual 500x500 screen space, which helps in locating the user's gaze more efficiently.
+
+How to use EyeGesture Engine V2:
+
+```Python
+from eyeGestures.utils import VideoCapture
+from eyeGestures.eyegestures import EyeGestures_v2
+
+gestures = EyeGestures_v2()
+cap = VideoCapture(0)
+
+point, calibration_point, blink, fixation, acceptance_radius, calibration_radius = gestures.step(frame, calibrate, screen_width, screen_height)
+# point - x,y positions of cursor
+# calibration_point - x,y position of current calibration point
+# acceptance_radius - size of calibration point to (How precise you have to be)
+# calibration_radius - size of radius of when calibration starts collecting data, and pulling point towards calibration point
+```
+
+
+To begin, you instantiate an EyeGestures_v1 object with initial Region of Interest (RoI) parameters. These parameters define a preliminary focus area for the tracker within a virtual 500x500 screen space, which helps in locating the user's gaze more efficiently.
 
 Main `EyeGesture` object provides general configuration initial conditions: 
 
 ```python
-EyeGestures(  
+EyeGestures_v1(  
   roi_x = 285
   roi_y = 115
   roi_width = 80
@@ -150,9 +168,9 @@ Entire program:
 ```python
 import VideoCapture #change it to opencv for real applications
 from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures
+from eyeGestures.eyegestures import EyeGestures_v1
 
-gestures = EyeGestures(
+gestures = EyeGestures_v1(
   roi_x = 285
   roi_y = 115
   roi_width = 80

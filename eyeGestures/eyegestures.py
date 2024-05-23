@@ -1,13 +1,153 @@
 
 from eyeGestures.gazeEstimator import GazeTracker
 import eyeGestures.screenTracker.dataPoints as dp
-from calibration_v1 import Calibrator
+from eyeGestures.calibration_v1 import Calibrator as Calibrator1
+from eyeGestures.calibration_v2 import Calibrator as Calibrator2, euclidean_distance
 from eyeGestures.utils import timeit
+import numpy as np
+import cv2
 
-VERSION = "1.0.0"
+import random
+
+VERSION = "2.0.0"
 
 
-class EyeGestures:
+class EyeGestures_v2:
+    """Main class for EyeGesture tracker. It configures and manages entier algorithm"""
+
+
+    PRECISION_LIMIT = 50
+    PRECISION_STEP = 10
+    ACCEPTANCE_RADIUS = 500
+    CALIBRATION_RADIUS = 1000
+    EYEGESTURES_CALIBRATION_THRESH = 850
+
+    def __init__(self):
+
+        self.monitor_width  = 1
+        self.monitor_height = 1
+
+        self.clb = Calibrator2()
+        self.cap = None
+        self.gestures = EyeGestures_v1(285,115,40,15)
+
+        self.calibration = False
+
+        self.CN = 5
+
+        self.trackerSignal = None
+        self.fitSignal = None
+
+        self.average_points = np.zeros((20,2))
+        self.filled_points = 0
+        self.calibrate_gestures = True
+        self.fit_point = self.getNewRandomPoint()
+
+        self.output_points = np.zeros((5,2))
+
+        self.iterator = 0
+        self.fix = 0.8
+
+        self.precision_limit = self.PRECISION_LIMIT
+        self.precision_step = self.PRECISION_STEP
+        self.acceptance_radius = self.ACCEPTANCE_RADIUS
+        self.calibration_radius = self.CALIBRATION_RADIUS
+        # after corssing this thresh we are disabling classical calib
+        self.eyegestures_calibration_threshold = self.EYEGESTURES_CALIBRATION_THRESH
+
+    def getLandmarks(self, frame, calibrate = False):
+
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.flip(frame,1)
+        # frame = cv2.resize(frame, (360, 640))
+
+        cursor_x, cursor_y = 0, 0
+        event = self.gestures.step(
+            frame,
+            "main",
+            calibrate, # set calibration - switch to False to stop calibration
+            self.monitor_width,
+            self.monitor_height,
+            0, 0, self.fix, 100)
+
+        cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+        l_eye_landmarks = event.l_eye.getLandmarks()
+        r_eye_landmarks = event.r_eye.getLandmarks()
+
+        cursors = np.array([cursor_x,cursor_y]).reshape(1, 2)
+        eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
+        key_points = np.concatenate((cursors,l_eye_landmarks,r_eye_landmarks,eye_events))
+        return  np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation
+
+    def increase_precision(self):
+        if self.acceptance_radius > self.precision_limit:
+            self.acceptance_radius -= self.precision_step
+        if self.calibration_radius > self.precision_limit and self.acceptance_radius < self.calibration_radius:
+            self.calibration_radius -= self.precision_step
+
+    def setClassicImpact(self,impact):
+        self.CN = impact
+
+    def getNewRandomPoint(self):
+        return np.array([random.random() * self.monitor_width,random.random() * self.monitor_height])
+
+    def reset(self):
+        self.acceptance_radius = self.ACCEPTANCE_RADIUS
+        self.calibration_radius = self.CALIBRATION_RADIUS
+        self.average_points = np.zeros((20,2))
+        self.filled_points = 0
+        self.clb.unfit()
+
+    def setFixation(self,fix):
+        self.fix = fix
+
+    def setClassicalImpact(self,CN):
+        self.CN = CN
+
+    def step(self, frame, calibration, width, height):
+        self.calibration = calibration
+        self.monitor_width = width
+        self.monitor_height = height
+
+        classic_point, key_points, blink, fixation = self.getLandmarks(frame,self.calibrate_gestures)
+
+        margin = 10
+        if classic_point[0] <= margin and self.calibration:
+            self.calibrate_gestures = True
+        elif classic_point[0] >= width - margin and self.calibration:
+            self.calibrate_gestures = True
+        elif classic_point[1] <= margin and self.calibration:
+            self.calibrate_gestures = True
+        elif classic_point[1] >= height - margin and self.calibration:
+            self.calibrate_gestures = True
+        else:
+            self.calibrate_gestures = False
+
+        y_point = self.clb.predict(key_points)
+        self.average_points[1:,:] = self.average_points[:(self.average_points.shape[0] - 1),:]
+        if fixation <= self.fix:
+            self.average_points[0,:] = y_point
+
+        if self.filled_points < self.average_points.shape[0] and (y_point != np.array([0.0,0.0])).any():
+            self.filled_points += 1
+
+        averaged_point = (np.sum(self.average_points[:,:],axis=0) + (classic_point * self.CN))/(self.filled_points + self.CN)
+
+        if self.calibration and (euclidean_distance(averaged_point,self.fit_point) < self.calibration_radius or self.filled_points < self.average_points.shape[0] * 10):
+            self.clb.add(key_points,self.fit_point,classic_point,y_point)
+
+        if euclidean_distance(averaged_point,self.fit_point) < self.acceptance_radius:
+            self.iterator += 1
+            if self.iterator > 10:
+                self.iterator = 0
+                self.fit_point = self.getNewRandomPoint()
+                self.increase_precision()
+
+        return (averaged_point, self.fit_point, blink, fixation >= self.fix, self.acceptance_radius, self.calibration_radius)
+
+
+
+class EyeGestures_v1:
     """Main class for EyeGesture tracker. It configures and manages entier algorithm"""
 
     def __init__(self,
@@ -48,12 +188,12 @@ class EyeGestures:
 
         return self.gaze.getFeatures(image)
 
-    def reset(self):
-        self.calibrator.clear_up()
+    # def reset(self):
+    #     self.calibrator.clear_up()
 
     # @timeit
     # 0.011 - 0.015 s for execution
-    def estimate(self, image,
+    def step(self, image,
                  context,
                  calibration,
                  display_width,
