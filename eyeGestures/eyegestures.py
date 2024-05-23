@@ -11,7 +11,6 @@ import random
 
 VERSION = "2.0.0"
 
-
 class EyeGestures_v2:
     """Main class for EyeGesture tracker. It configures and manages entier algorithm"""
 

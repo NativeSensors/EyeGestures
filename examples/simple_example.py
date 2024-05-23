@@ -35,7 +35,7 @@ while running:
             running = False
 
     # Generate new random position for the cursor
-    ret, frame = cap.read()     
+    ret, frame = cap.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame = cv2.flip(frame,1)
     # frame = cv2.resize(frame, (360, 640))
@@ -54,12 +54,12 @@ while running:
 
     cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
     # frame = pygame.transform.scale(frame, (400, 400))
-    
+
     screen.fill((0, 0, 0))
     frame = np.rot90(frame)
     frame = pygame.surfarray.make_surface(frame)
     frame = pygame.transform.scale(frame, (400, 400))
-    
+
     # Display frame on Pygame screen
     screen.blit(frame, (0, 0))
     pygame.draw.circle(screen, RED, (cursor_x, cursor_y), 100)
