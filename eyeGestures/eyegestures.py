@@ -1,6 +1,7 @@
 
 from eyeGestures.gazeEstimator import GazeTracker
 import eyeGestures.screenTracker.dataPoints as dp
+from calibration_v1 import Calibrator
 from eyeGestures.utils import timeit
 
 VERSION = "1.0.0"
@@ -47,6 +48,9 @@ class EyeGestures:
 
         return self.gaze.getFeatures(image)
 
+    def reset(self):
+        self.calibrator.clear_up()
+
     # @timeit
     # 0.011 - 0.015 s for execution
     def estimate(self, image,
@@ -69,7 +73,7 @@ class EyeGestures:
             display_offset_y
         )
 
-        return self.gaze.estimate(image,
+        event = self.gaze.estimate(image,
                                   display,
                                   context,
                                   calibration,
@@ -78,17 +82,7 @@ class EyeGestures:
                                   offset_x,
                                   offset_y)
 
-    # def add_offset(self,x,y):
-    #     """Function adding x y offset to algorithm"""
+        #TODO: return this calibration point
+        calibration_point = (0,0)
 
-    #     self.gaze.add_offset(x,y)
-
-    # def get_contextes(self):
-    #     """Function returning currently stored contextes"""
-
-    #     return self.gaze.contextes()
-
-    # def rm_context(self,context):
-    #     """Function allowing to removing context from tracker"""
-
-    #     return self.gaze.rm_context(context)
+        return event
