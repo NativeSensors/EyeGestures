@@ -1,10 +1,16 @@
-import pygame
+import os
+import sys
 import cv2 
+import pygame
 import numpy as np
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(f'{dir_path}/..')
+
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures_v1
 
-gestures = EyeGestures(285,115,20,15)
+gestures = EyeGestures_v1(285,115,80,15)
 
 cap = VideoCapture(0)  
 
@@ -22,12 +28,15 @@ pygame.display.set_caption("Fullscreen Red Cursor")
 
 # Set up colors
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
 
 clock = pygame.time.Clock()
 
 # Main game loop
 running = True
 iterator = 0
+calibrate = True
 while running:
     # Event handling
     for event in pygame.event.get():
@@ -40,19 +49,19 @@ while running:
     frame = cv2.flip(frame,1)
     # frame = cv2.resize(frame, (360, 640))
 
-    calibrate = (iterator <= 300)
     iterator += 1
 
     cursor_x, cursor_y = 0, 0
-    event = gestures.estimate(
+    event, calibration = gestures.step(
         frame,
         "main",
-        True, # set calibration - switch to False to stop calibration
+        calibrate, # set calibration - switch to False to stop calibration
         screen_width,
         screen_height,
         0, 0, 0.8,10)
+    calibrate = calibration.calibration
 
-    cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+    cursor_x, cursor_y = event.point[0],event.point[1]
     # frame = pygame.transform.scale(frame, (400, 400))
 
     screen.fill((0, 0, 0))
@@ -62,6 +71,8 @@ while running:
 
     # Display frame on Pygame screen
     screen.blit(frame, (0, 0))
+    if calibration.point != (0,0):
+        pygame.draw.circle(screen, BLUE, calibration.point, 100)
     pygame.draw.circle(screen, RED, (cursor_x, cursor_y), 100)
     pygame.display.flip()
 
@@ -70,4 +81,3 @@ while running:
 
 # Quit Pygame
 pygame.quit()
-cap.release()

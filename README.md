@@ -106,7 +106,7 @@ event = gestures.estimate(
     screen_height,
     0, 0, 0.8, 10
 )
-cursor_x, cursor_y = event.point_screen[0], event.point_screen[1]
+cursor_x, cursor_y = event.point[0], event.point[1]
 ```
 
 Feel free to copy and paste the relevant code snippets for your project.

@@ -1,8 +1,9 @@
 
 from eyeGestures.gazeEstimator import GazeTracker
 import eyeGestures.screenTracker.dataPoints as dp
-from eyeGestures.calibration_v1 import Calibrator as Calibrator1
-from eyeGestures.calibration_v2 import Calibrator as Calibrator2, euclidean_distance
+from eyeGestures.calibration_v1 import Calibrator as Calibrator_v1
+from eyeGestures.calibration_v2 import Calibrator as Calibrator_v2, euclidean_distance
+from eyeGestures.gevent import Gevent, Cevent
 from eyeGestures.utils import timeit
 import numpy as np
 import cv2
@@ -26,7 +27,7 @@ class EyeGestures_v2:
         self.monitor_width  = 1
         self.monitor_height = 1
 
-        self.clb = Calibrator2()
+        self.clb = Calibrator_v2()
         self.cap = None
         self.gestures = EyeGestures_v1(285,115,40,15)
 
@@ -60,8 +61,7 @@ class EyeGestures_v2:
         frame = cv2.flip(frame,1)
         # frame = cv2.resize(frame, (360, 640))
 
-        cursor_x, cursor_y = 0, 0
-        event = self.gestures.step(
+        event, _ = self.gestures.step(
             frame,
             "main",
             calibrate, # set calibration - switch to False to stop calibration
@@ -69,7 +69,7 @@ class EyeGestures_v2:
             self.monitor_height,
             0, 0, self.fix, 100)
 
-        cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+        cursor_x, cursor_y = event.point[0],event.point[1]
         l_eye_landmarks = event.l_eye.getLandmarks()
         r_eye_landmarks = event.r_eye.getLandmarks()
 
@@ -142,9 +142,9 @@ class EyeGestures_v2:
                 self.fit_point = self.getNewRandomPoint()
                 self.increase_precision()
 
-        return (averaged_point, self.fit_point, blink, fixation >= self.fix, self.acceptance_radius, self.calibration_radius)
-
-
+        gevent = Gevent(averaged_point,blink,fixation >= self.fix)
+        cevent = Cevent(self.fit_point,self.acceptance_radius, self.calibration_radius)
+        return (gevent, cevent)
 
 class EyeGestures_v1:
     """Main class for EyeGesture tracker. It configures and manages entier algorithm"""
@@ -180,15 +180,14 @@ class EyeGestures_v1:
                                 roi_y,
                                 roi_width,
                                 roi_height)
-        pass
+        
+        self.calibrators = dict()
+        self.calibrate = False
 
     def getFeatures(self, image):
         """[NOT RECOMMENDED] Function allowing for extraction of gaze features from image"""
 
         return self.gaze.getFeatures(image)
-
-    # def reset(self):
-    #     self.calibrator.clear_up()
 
     # @timeit
     # 0.011 - 0.015 s for execution
@@ -212,6 +211,7 @@ class EyeGestures_v1:
             display_offset_y
         )
 
+        # allow for random recalibration shot
         event = self.gaze.estimate(image,
                                   display,
                                   context,
@@ -221,7 +221,15 @@ class EyeGestures_v1:
                                   offset_x,
                                   offset_y)
 
-        #TODO: return this calibration point
-        calibration_point = (0,0)
+        cursor_x,cursor_y = event.point[0],event.point[1]
+        if context in self.calibrators:
+            self.calibrate = self.calibrators[context].calibrate(cursor_x,cursor_y,event.fixation)
+        else:
+            self.calibrators[context] = Calibrator_v1(display_width,display_height,cursor_x,cursor_y)
+            self.calibrate = self.calibrators[context].calibrate(cursor_x,cursor_y,event.fixation)
 
-        return event
+        cpoint = self.calibrators[context].get_current_point()
+        calibration = self.calibrate and cpoint != (0,0)
+        cevent = Cevent(cpoint,100, 100, calibration)
+
+        return (event, cevent)
