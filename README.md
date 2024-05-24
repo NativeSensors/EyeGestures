@@ -1,15 +1,19 @@
 
 
+## EYEGESTURES
+
+EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eyetracking and eyedriven interfaces without requirement of obtaining expensive hardware.
+
+Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/Engine_v2/MISSION.md)! 
+
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/eyeGestures)
 <a href="https://polar.sh/NativeSensors"><img src="https://polar.sh/embed/seeks-funding-shield.svg?org=NativeSensors" /></a>
+### 💜 Sponsors: 
+
 ```
 For enterprise avoiding GPL3 licensing there is commercial license!
 ```
 We offer custom integration and managed services. For businesses requiring invoices message us `contact@eyegestures.com`.
-
-Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/Engine_v2/MISSION.md)! 
-
-### 💜 Sponsors: 
 
 ```
 Sponsor us and we can add your link, banner or other promo materials!
@@ -17,10 +21,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
 
 
-
 <!-- POLAR-END id=eizdelwu -->
-
-## 👁️ EyeGestures
 
 <p align="center">
   <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/2ad25252-e96e-47d4-b25f-c47ba7f0f4f3" width="300" height="150">
@@ -35,29 +36,6 @@ Sponsor us and we can add your link, banner or other promo materials!
 <p align="center">
   <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 </p>
-
-EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eyetracking and eyedriven interfaces without requirement of obtaining expensive hardware.
-
-### 📇 Find us:
-- [RSS](https://polar.sh/NativeSensors/rss?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRfaWQiOiJkMDYxMDFiOC0xYzYyLTQ1MTYtYjg3YS03NTFhOTM3OTIxZmUiLCJzY29wZXMiOiJhcnRpY2xlczpyZWFkIiwidHlwZSI6ImF1dGgiLCJleHAiOjE3NDMxNjg3ODh9.djoi5ARWHr-xFW_XJ6Fwal3JUT1fAbvx4Npl-daBC5U)
-- [discord](https://discord.gg/FV3RYTuV)
-- [twitter](https://twitter.com/PW4ltz)
-- email: contact@eyegestures.com
-
-Follow us on polar (it costs nothing but you help project!):
-
-<a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
-
-### 🔥 Web Demos:
-
-- [Main page](https://eyegestures.com/)
-- [Game demo](https://eyegestures.com/game)
-- [Cinema demo](https://eyegestures.com/cinema)
-- [Restaurant](https://eyegestures.com/restaurant)
-
-### 📢 Announcements:
-
-<a href="https://polar.sh/NativeSensors/posts"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/posts.svg?org=NativeSensors&darkmode"><img alt="Posts on Polar" src="https://polar.sh/embed/posts.svg?org=NativeSensors"></picture></a>
 
 ### 💻 Install
 ```
@@ -96,6 +74,10 @@ point, calibration_point, blink, fixation, acceptance_radius, calibration_radius
 # calibration_radius: radius for data collection during calibration
 ```
 
+<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+
+<!-- POLAR-END id=eizdelwu -->
+
 #### Using EyeGesture Engine V1 - Model-Based Approach:
 
 ```python
@@ -121,6 +103,14 @@ cursor_x, cursor_y = event.point_screen[0], event.point_screen[1]
 ```
 
 Feel free to copy and paste the relevant code snippets for your project.
+
+### 🔥 Web Demos:
+
+- [Main page](https://eyegestures.com/)
+- [Game demo](https://eyegestures.com/game)
+- [Cinema demo](https://eyegestures.com/cinema)
+- [Restaurant](https://eyegestures.com/restaurant)
+
 ### rules of using
 
 If you are building publicly available product, and have no commercial license, please mention us somewhere in your interface. 
@@ -137,6 +127,19 @@ https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-
 <img src="https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-bc96-3a6bb4159b37" width="200
 ">
 
+### 📇 Find us:
+- [RSS](https://polar.sh/NativeSensors/rss?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRfaWQiOiJkMDYxMDFiOC0xYzYyLTQ1MTYtYjg3YS03NTFhOTM3OTIxZmUiLCJzY29wZXMiOiJhcnRpY2xlczpyZWFkIiwidHlwZSI6ImF1dGgiLCJleHAiOjE3NDMxNjg3ODh9.djoi5ARWHr-xFW_XJ6Fwal3JUT1fAbvx4Npl-daBC5U)
+- [discord](https://discord.gg/FV3RYTuV)
+- [twitter](https://twitter.com/PW4ltz)
+- email: contact@eyegestures.com
+
+Follow us on polar (it costs nothing but you help project!):
+
+<a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
+
+### 📢 Announcements:
+
+<a href="https://polar.sh/NativeSensors/posts"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/posts.svg?org=NativeSensors&darkmode"><img alt="Posts on Polar" src="https://polar.sh/embed/posts.svg?org=NativeSensors"></picture></a>
 
 ### 💻 Contributors
 
