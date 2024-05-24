@@ -11,6 +11,8 @@ from PySide2.QtWidgets import QApplication
 import keyboard
 import os
 
+from eyeGestures.eyegestures import EyeGestures
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}/..')
 print(f'{dir_path}/..')
@@ -18,7 +20,6 @@ print(f'{dir_path}/..')
 from lab.pupillab import Worker
 
 from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures
 from apps.appUtils.dot import DotWidget
 from pynput import keyboard
 
