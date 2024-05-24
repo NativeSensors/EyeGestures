@@ -70,8 +70,6 @@ Follow us on polar (it costs nothing but you help project!):
 python3 -m pip install eyeGestures
 ```
 
-Note: you may need to change version of package `eyegestures-X.X.X`.
-
 ### ⚙️ Run 
 ```
 python3 examples/simple_example.py
