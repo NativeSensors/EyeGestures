@@ -7,6 +7,8 @@ For enterprise avoiding GPL3 licensing there is commercial license!
 ```
 We offer custom integration and managed services. For businesses requiring invoices message us `contact@eyegestures.com`.
 
+Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/Engine_v2/MISSION.md)! 
+
 ### 💜 Sponsors: 
 
 ```
