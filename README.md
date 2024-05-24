@@ -75,10 +75,9 @@ gestures = EyeGestures_v2()
 cap = VideoCapture(0)  
 
 # Process each frame
-point, calibration_point, blink, fixation, acceptance_radius, calibration_radius = gestures.step(frame, calibrate, screen_width, screen_height)
-# point: x, y positions of cursor
-# calibration_point: x, y position of current calibration point
-# acceptance_radius: precision required for calibration
+event, cevent = gestures.step(frame, calibrate, screen_width, screen_height)
+
+cursor_x, cursor_y = event.point[0], event.point[1]
 # calibration_radius: radius for data collection during calibration
 ```
 
@@ -101,7 +100,7 @@ cap = VideoCapture(0)
 ret, frame = cap.read()
 
 # Obtain estimations from camera frames
-event = gestures.estimate(
+event, cevent = gestures.estimate(
     frame,
     "main",
     True,  # set calibration - switch to False to stop calibration
@@ -110,6 +109,7 @@ event = gestures.estimate(
     0, 0, 0.8, 10
 )
 cursor_x, cursor_y = event.point[0], event.point[1]
+# cevent - is calibration event
 ```
 
 Feel free to copy and paste the relevant code snippets for your project.
