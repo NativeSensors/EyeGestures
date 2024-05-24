@@ -48,8 +48,7 @@ while running:
     calibrate = (iterator <= 1000)
     iterator += 1
 
-    point, fit_point, blink, fixation, acceptance_radius, calibration_radius = gestures.step(frame, calibrate, screen_width, screen_height)
-
+    event, calibration = gestures.step(frame, calibrate, screen_width, screen_height)
 
     screen.fill((0, 0, 0))
     frame = np.rot90(frame)
@@ -60,8 +59,8 @@ while running:
     screen.blit(frame, (0, 0))
     if calibrate:
         # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
-        pygame.draw.circle(screen, BLUE, fit_point, acceptance_radius)
-    pygame.draw.circle(screen, RED, point, 50)
+        pygame.draw.circle(screen, BLUE, calibration.point, calibration.acceptance_radius)
+    pygame.draw.circle(screen, RED, event.point, 50)
     pygame.display.flip()
 
     # Cap the frame rate
