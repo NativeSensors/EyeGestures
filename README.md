@@ -84,121 +84,51 @@ python3 apps/win_app.py
 
 Or download it from [`releases`](https://github.com/NativeSensors/EyeGestures/releases/tag/1.3.4_App_0.0.3)
 
-### 🔧 Use [WiP - adding Enginge V2]:
+### 🔧 How to use [WiP - adding Enginge V2]:
 
+#### Using EyeGesture Engine V2 - Machine Learning Approach:
 
-#### How to use EyeGesture Engine V2 - Machine learning based approach:
-
-```Python
+```python
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures_v2
 
+# Initialize gesture engine and video capture
 gestures = EyeGestures_v2()
-cap = VideoCapture(0)
+cap = VideoCapture(0)  
 
+# Process each frame
 point, calibration_point, blink, fixation, acceptance_radius, calibration_radius = gestures.step(frame, calibrate, screen_width, screen_height)
-# point - x,y positions of cursor
-# calibration_point - x,y position of current calibration point
-# acceptance_radius - size of calibration point to (How precise you have to be)
-# calibration_radius - size of radius of when calibration starts collecting data, and pulling point towards calibration point
+# point: x, y positions of cursor
+# calibration_point: x, y position of current calibration point
+# acceptance_radius: precision required for calibration
+# calibration_radius: radius for data collection during calibration
 ```
 
-#### How to use EyeGesture Engine V1 - Model based approach:
-
-To begin, you instantiate an EyeGestures_v1 object with initial Region of Interest (RoI) parameters. These parameters define a preliminary focus area for the tracker within a virtual 500x500 screen space, which helps in locating the user's gaze more efficiently.
-
-Main `EyeGesture` object provides general configuration initial conditions: 
+#### Using EyeGesture Engine V1 - Model-Based Approach:
 
 ```python
-EyeGestures_v1(  
-  roi_x = 285
-  roi_y = 115
-  roi_width = 80
-  roi_height = 15
-)
-```  
-
-The tracker operates within a virtual screen measuring 500x500, where it maps the positions of the pupils and other critical facial features to deduce the user's gaze direction. Within this space, the Region of Interest (RoI) serves as a representation of the user's display, inferred through a combination of eye movement and edge detection during calibration.
-
-After locating the RoI within the 500x500 space, its dimensions are adjusted to fit the resolution used in the estimate function, typically described as `display_width` by `display_height`.
-
-Calibration aims to precisely determine the RoI's dimensions. Prior to calibration, the tracker relies on initial optional parameters, including:
-
-- `roi_x`: The initial x-coordinate of the RoI (ranging from 0 to 500).
-- `roi_y`: The initial y-coordinate of the RoI (ranging from 0 to 500).
-- `roi_width`: The initial width of the RoI before calibration (ranging from 0 to 500 - x).
-- `roi_height`: The initial height of the RoI before calibration (ranging from 0 to 500 - x).
-
-Next part is obtaining estimations from camera frames (if you cannot get estimations, you may try to change color coding or rotation of image - check `simple_example.py`).
-
-```python
-event = gestures.estimate(
-    image = frame,
-    context = "main",
-    calibration = True, # set calibration - switch to False to stop calibration
-    display_width = screen_width,
-    display_height = screen_height,
-    display_offset_x = 0, 
-    display_offset_y = 0, 
-    fixation_freeze = 0.8,
-    freeze_radius = 10)
-```
-
-- `image` - is cv2 image frame
-- `context` - is name given to contect. If name changes then different tracker context is used. Tracker rembers previous points to estimate new one, but those points are assinged to single context. By changing names or passing new ones you can switch and create contextes.
-- `calibration` - if `True` then every few seconds tracker is recalibrating, if `False` then tracker setting is frozen. The best approach is to enable calibration when one of the edges is reached. 
-- `display_width` - width of display/screen used.
-- `display_height` - height of display/screen used.
-- `display_offset_x` - offset of x for display/screen used. Use it when having two displays and app is covering all screens, but you want to limit your cursor tracker to only specific display.
-- `display_offset_y` - offset of y for display/screen used. Use it when having two displays and app is covering all screens, but you want to limit your cursor tracker to only specific display.
-- `fixation_freeze` - threshold of user fixation on one point (it goes from 0.0 to 1.0). If threshold is crossed point is frozen till user breaks `freeze_radius` in pixels.
-- `freeze_radius` - distance cursor can move to reach fixation and freezing, if cursor movements are greater than distance then fixation measurement goes down to `0.0`.
-
-```
-Gevent event
-```
-
-`Gevent` is returned element having all data necessary to use tracker:
- 
-- `point_screen` is point coordinates on screen
-- `blink` is boolean value describing blink event. If `0` no blink occured, if `1` blink occured.
-- `fixation` value from `0.0` to `1.0` describing level of user fixation.
-
-Entire program: 
-
-```python
-import VideoCapture #change it to opencv for real applications
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures_v1
 
-gestures = EyeGestures_v1(
-  roi_x = 285
-  roi_y = 115
-  roi_width = 80
-  roi_height = 15
-)
+# Initialize gesture engine with RoI parameters
+gestures = EyeGestures_v1()
 
 cap = VideoCapture(0)  
+ret, frame = cap.read()
 
-# Main game loop
-running = True
-while running:
-
-    # Generate new random position for the cursor
-    ret, frame = cap.read()     
-
-    event = gestures.estimate(
-        frame,
-        "main",
-        True, # set calibration - switch to False to stop calibration
-        screen_width,
-        screen_height,
-        0, 0, 0.8,10)
-
-    cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
-
+# Obtain estimations from camera frames
+event = gestures.estimate(
+    frame,
+    "main",
+    True,  # set calibration - switch to False to stop calibration
+    screen_width,
+    screen_height,
+    0, 0, 0.8, 10
+)
+cursor_x, cursor_y = event.point_screen[0], event.point_screen[1]
 ```
 
+Feel free to copy and paste the relevant code snippets for your project.
 ### rules of using
 
 If you are building publicly available product, and have no commercial license, please mention us somewhere in your interface. 
