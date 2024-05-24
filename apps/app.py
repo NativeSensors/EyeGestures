@@ -343,7 +343,7 @@ class Lab:
             self.monitor.height,
             0, 0, 0.8, 10)
 
-        cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+        cursor_x, cursor_y = event.point[0],event.point[1]
 
         if self.iterations < 3:
             self.iterations += 1
@@ -359,7 +359,7 @@ class Lab:
             rois_to_save = self.eyegesture_widget.get_rois_w_detection(cursor_x,cursor_y)
 
             (w,h) = (self.dot_widget.size().width(),self.dot_widget.size().height()) 
-            self.dot_widget.move(event.point_screen[0]-int(w/2),event.point_screen[1]-int(h/2))
+            self.dot_widget.move(event.point[0]-int(w/2),event.point[1]-int(h/2))
             self.save_data(event,rois_to_save)
 
             # during calibration update visuals

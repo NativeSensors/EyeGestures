@@ -343,7 +343,7 @@ class Lab:
             self.monitor.height,
             0, 0, 0.8, 10)
 
-        cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
+        cursor_x, cursor_y = event.point[0],event.point[1]
 
         if self.iterations < 3:
             self.iterations += 1

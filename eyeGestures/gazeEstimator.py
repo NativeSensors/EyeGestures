@@ -224,8 +224,7 @@ class GazeTracker:
                 if not isInside(self.freezed_point[0], self.freezed_point[1], r, self.point_screen[0], self.point_screen[1]):
                     self.freezed_point = self.point_screen
 
-                event = Gevent(compound_point,
-                               self.freezed_point,
+                event = Gevent(self.freezed_point,
                                blink,
                                fix,
                                l_eye,
@@ -237,8 +236,7 @@ class GazeTracker:
                                context_id)
             else:
                 self.freezed_point = self.point_screen
-                event = Gevent(compound_point,
-                               self.point_screen,
+                event = Gevent(self.point_screen,
                                blink,
                                fix,
                                l_eye,

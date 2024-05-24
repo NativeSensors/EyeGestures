@@ -1,4 +1,3 @@
-
 import time
 
 
@@ -10,7 +9,7 @@ class CalibrationPositions:
 
 class Calibrator:
 
-    def __init__(self,width,height,start_x, start_y, show, disappear):
+    def __init__(self, width, height, start_x, start_y):
         self.width = width
         self.height = height
         self.start_x = start_x
@@ -22,8 +21,6 @@ class Calibrator:
         self.calibration_margin = 200
         self.calibration_steps = []
         self.__set_order()
-        self.show = show
-        self.disappear = disappear
 
         self.calibrate_left = False
         self.calibrate_right = False
@@ -35,11 +32,6 @@ class Calibrator:
         self.prev_point = None
         self.last_calib = time.time()
         pass
-
-    def display_next_calibration_target(self):
-        if len(self.calibration_steps) > 0 and not self.drawn:
-            self.drawn = True
-            self.show(self.calibration_steps[0])
 
     def __add_left(self):
         self.calibration_steps.append(CalibrationPositions.LEFT)
@@ -72,6 +64,18 @@ class Calibrator:
         if recalibrate_step not in self.calibration_steps:
             self.calibration_steps.append(recalibrate_step)
 
+    def get_current_point(self):
+        if len(self.calibration_steps) > 0:
+            if CalibrationPositions.LEFT == self.calibration_steps[0]:
+                return (self.calibration_margin, int(self.height/2))
+            elif CalibrationPositions.RIGHT == self.calibration_steps[0]:
+                return (self.width - self.calibration_margin, int(self.height/2))
+            elif CalibrationPositions.TOP == self.calibration_steps[0]:
+                return (int(self.width/2), self.calibration_margin)
+            elif CalibrationPositions.BOTTOM == self.calibration_steps[0]:
+                return (int(self.width/2), self.height - self.calibration_margin)
+        else:
+            return (0,0)
 
     def calibrate(self,x,y,fix):
 
@@ -93,11 +97,9 @@ class Calibrator:
             self.prev_point = None
             return False
 
-        self.display_next_calibration_target()
         fixation_thresh = 0.3
         if fix > fixation_thresh and (time.time() - self.last_calib) > 5.0:
             if CalibrationPositions.LEFT == self.calibration_steps[0] and x < self.calibration_margin:
-                self.disappear(self.calibration_steps[0])
                 if CalibrationPositions.LEFT in self.calibration_steps:
                     self.calibration_steps.remove(CalibrationPositions.LEFT)
                 self.prev_point = CalibrationPositions.LEFT
@@ -105,7 +107,6 @@ class Calibrator:
                 self.last_calib = time.time()
                 return True
             elif CalibrationPositions.RIGHT == self.calibration_steps[0] and x > self.width - self.calibration_margin:
-                self.disappear(self.calibration_steps[0])
                 if CalibrationPositions.RIGHT in self.calibration_steps:
                     self.calibration_steps.remove(CalibrationPositions.RIGHT)
                 self.prev_point = CalibrationPositions.RIGHT
@@ -113,7 +114,6 @@ class Calibrator:
                 self.last_calib = time.time()
                 return True
             elif CalibrationPositions.TOP == self.calibration_steps[0] and y < self.calibration_margin:
-                self.disappear(self.calibration_steps[0])
                 if CalibrationPositions.TOP in self.calibration_steps:
                     self.calibration_steps.remove(CalibrationPositions.TOP)
                 self.prev_point = CalibrationPositions.TOP
@@ -121,7 +121,6 @@ class Calibrator:
                 self.last_calib = time.time()
                 return True
             elif CalibrationPositions.BOTTOM == self.calibration_steps[0] and y > self.height - self.calibration_margin:
-                self.disappear(self.calibration_steps[0])
                 if CalibrationPositions.BOTTOM in self.calibration_steps:
                     self.calibration_steps.remove(CalibrationPositions.BOTTOM)
                 self.prev_point = CalibrationPositions.BOTTOM
@@ -131,7 +130,6 @@ class Calibrator:
             else:
                 # TODO: somewhere here is bug breaking entire program
                 self.last_calib = time.time()
-                self.disappear(self.calibration_steps[0])
                 self.drawn = False
                 self.prev_point = None
 
@@ -159,7 +157,4 @@ class Calibrator:
     def calibrated(self):
         return len(self.calibration_steps) <= 0
 
-    def clear_up(self):
-        for calibration_step in self.calibration_steps:
-            self.disappear(calibration_step)
 

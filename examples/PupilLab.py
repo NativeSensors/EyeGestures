@@ -11,6 +11,8 @@ from PySide2.QtWidgets import QApplication
 import keyboard
 import os
 
+from eyeGestures.eyegestures import EyeGestures
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}/..')
 print(f'{dir_path}/..')
@@ -18,7 +20,6 @@ print(f'{dir_path}/..')
 from lab.pupillab import Worker
 
 from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures
 from apps.appUtils.dot import DotWidget
 from pynput import keyboard
 
@@ -270,13 +271,13 @@ class Lab:
         self.prev_event = event    
 
         if not event is None:
-            self.calibrator.check(main_id,event.point_screen)
+            self.calibrator.check(main_id,event.point)
             self.frame_counter += 1
 
             if not event.blink:
                 self.dot_widget.setColour((int(255*(1-event.fixation)),120,int(255*event.fixation)))
             else:
-                pyautogui.moveTo(event.point_screen[0], event.point_screen[1])
+                pyautogui.moveTo(event.point[0], event.point[1])
                 self.dot_widget.setColour((255,120,255))
 
             whiteboardPupil = np.full((self.eye_screen_h,self.eye_screen_w,3),255.0,dtype = np.uint8)
@@ -285,7 +286,7 @@ class Lab:
             r_eye = event.r_eye
             
             (w,h) = (self.dot_widget.size().width(),self.dot_widget.size().height()) 
-            self.dot_widget.move(event.point_screen[0]-int(w/2),event.point_screen[1]-int(h/2))
+            self.dot_widget.move(event.point[0]-int(w/2),event.point[1]-int(h/2))
 
             # here we are having prossed points:
 
@@ -303,7 +304,7 @@ class Lab:
             # self.__display_eyeTracker(whiteboardPupil, 
             #                           event.screen_man, 
             #                           event.point, 
-            #                           event.point_screen, 
+            #                           event.point, 
             #                           self.dot_widget)
 
 
