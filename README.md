@@ -139,7 +139,7 @@ https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-
 
 ### 📇 Find us:
 - [RSS](https://polar.sh/NativeSensors/rss?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRfaWQiOiJkMDYxMDFiOC0xYzYyLTQ1MTYtYjg3YS03NTFhOTM3OTIxZmUiLCJzY29wZXMiOiJhcnRpY2xlczpyZWFkIiwidHlwZSI6ImF1dGgiLCJleHAiOjE3NDMxNjg3ODh9.djoi5ARWHr-xFW_XJ6Fwal3JUT1fAbvx4Npl-daBC5U)
-- [discord](https://discord.gg/FV3RYTuV)
+- [discord](https://discord.gg/EnFu7hYy)
 - [twitter](https://twitter.com/PW4ltz)
 - email: contact@eyegestures.com
 
