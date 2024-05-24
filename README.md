@@ -87,7 +87,7 @@ Or download it from [`releases`](https://github.com/NativeSensors/EyeGestures/re
 ### 🔧 Use [WiP - adding Enginge V2]:
 
 
-How to use EyeGesture Engine V2:
+#### How to use EyeGesture Engine V2 - Machine learning based approach:
 
 ```Python
 from eyeGestures.utils import VideoCapture
@@ -103,6 +103,7 @@ point, calibration_point, blink, fixation, acceptance_radius, calibration_radius
 # calibration_radius - size of radius of when calibration starts collecting data, and pulling point towards calibration point
 ```
 
+#### How to use EyeGesture Engine V1 - Model based approach:
 
 To begin, you instantiate an EyeGestures_v1 object with initial Region of Interest (RoI) parameters. These parameters define a preliminary focus area for the tracker within a virtual 500x500 screen space, which helps in locating the user's gaze more efficiently.
 
@@ -196,40 +197,6 @@ while running:
 
     cursor_x, cursor_y = event.point_screen[0],event.point_screen[1]
 
-```
-
-
-### 🌐 Web Embedd [Paid API]
-
-For now more info can be found here: https://eyegestures.com/user_portal
-
-```html
-// ... rest of html client ...
-
-<script>
-// ... your code ...
-
-function onTile(id, fix, blink) {
-  // ... do something here ...
-}
-
-function onCalibration() {
-  // ... do something here ...
-}
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
-<script src="https://eyegestures.com/eyeTiles.min.js"></script>
-<script>
-  EyeTilesAPI(
-    key = "YOUR_API_KEY",
-    tiles = [1, 2, 1],
-    fixThresh = 0.1,
-    fixRadius = 500,
-    sightGrid = true,
-    onTile = onTile,
-    onCalibration = onCalibration,
-  );
-</script>    
 ```
 
 ### rules of using
