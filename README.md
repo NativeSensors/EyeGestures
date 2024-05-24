@@ -1,7 +1,7 @@
 
 
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/eyeGestures)
-
+<a href="https://polar.sh/NativeSensors"><img src="https://polar.sh/embed/seeks-funding-shield.svg?org=NativeSensors" /></a>
 ```
 For enterprise avoiding GPL3 licensing there is commercial license!
 ```
@@ -33,16 +33,6 @@ EyeGestures is open source eyetracking software/library using native webcams and
 <img src="https://github.com/NativeSensors/EyeGestures/assets/40773550/84aa7436-6153-49bc-b8e6-ccda535f25e6)" width="600
 " height="300">
 </p>
-
-### ⭐ Mission
-
-There is no one-size-fits-all solution, and we believe that diversifying interfaces brings accessibility to digital spaces. Designing eye-driven interfaces provides greater control over computers for those unable to fully utilize their capabilities due to various disabilities, while also offering an additional means of computer control for all users.
-
-Such technology should not be hindered by expensive eye-tracking hardware, particularly when it is essential for individuals to navigate the digital realm and operate their computers. Many current consumer electronics devices feature built-in native cameras, and ongoing research suggests that achieving eye tracking with reasonable accuracy using these native cameras is feasible.
-
-Our mission is to democratize eye-tracking technology, making it accessible to as many people as possible.
-
-While our technology is not flawless, we are committed to continuous improvement and strive for excellence.
 
 ### 📇 Find us:
 - [RSS](https://polar.sh/NativeSensors/rss?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRfaWQiOiJkMDYxMDFiOC0xYzYyLTQ1MTYtYjg3YS03NTFhOTM3OTIxZmUiLCJzY29wZXMiOiJhcnRpY2xlczpyZWFkIiwidHlwZSI6ImF1dGgiLCJleHAiOjE3NDMxNjg3ODh9.djoi5ARWHr-xFW_XJ6Fwal3JUT1fAbvx4Npl-daBC5U)
