@@ -59,6 +59,10 @@ python3 -m pip install eyeGestures
 python3 examples/simple_example.py
 ```
 
+```
+python3 examples/simple_example_v2.py
+```
+
 ### 🪟 Run Windows App [Not updated to latest engine, may crash]
 ```
 python3 apps/win_app.py
