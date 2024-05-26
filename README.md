@@ -82,9 +82,12 @@ from eyeGestures.eyegestures import EyeGestures_v2
 gestures = EyeGestures_v2()
 cap = VideoCapture(0)  
 ret, frame = cap.read()
+calibrate = True
+screen_width = 500
+screen_height= 500
 
 # Process each frame
-event, cevent = gestures.step(frame, calibrate, screen_width, screen_height)
+event, cevent = gestures.step(frame, True, screen_width, screen_height)
 
 cursor_x, cursor_y = event.point[0], event.point[1]
 # calibration_radius: radius for data collection during calibration
@@ -107,12 +110,15 @@ gestures = EyeGestures_v1()
 
 cap = VideoCapture(0)  
 ret, frame = cap.read()
+calibrate = True
+screen_width = 500
+screen_height= 500
 
 # Obtain estimations from camera frames
 event, cevent = gestures.estimate(
     frame,
     "main",
-    True,  # set calibration - switch to False to stop calibration
+    calibrate,  # set calibration - switch to False to stop calibration
     screen_width,
     screen_height,
     0, 0, 0.8, 10
