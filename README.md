@@ -77,6 +77,7 @@ from eyeGestures.eyegestures import EyeGestures_v2
 # Initialize gesture engine and video capture
 gestures = EyeGestures_v2()
 cap = VideoCapture(0)  
+ret, frame = cap.read()
 
 # Process each frame
 event, cevent = gestures.step(frame, calibrate, screen_width, screen_height)
