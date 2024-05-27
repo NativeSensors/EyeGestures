@@ -11,7 +11,7 @@ Before you start, please take a moment to review our [Code of Conduct](./CODE_OF
 ### Join the Community
 
 Join our Discord server to connect with other contributors, ask questions, and collaborate on ideas:
-[![Discord](https://img.shields.io/discord/3QfRCBzb.svg?label=Join%20our%20Discord&logo=discord)](https://discord.gg/3QfRCBzb)
+[Join Here](https://discord.gg/3QfRCBzb)
 
 ### Fork the Repository
 
