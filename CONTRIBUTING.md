@@ -48,6 +48,10 @@ Make your changes to the codebase. Ensure your code adheres to the existing styl
    ```sh
    git push origin your-branch-name
    ```
+3. Add proper tags
+
+   - [WiP] for commit without finished feature, if you want to commit your work for "today" but it is not yet finished, not working, or may break.
+   - [Fix] if you found and fixed bug fixing
 
 ### Open a Pull Request
 
