@@ -6,6 +6,7 @@ from eyeGestures.calibration_v2 import Calibrator as Calibrator_v2, CalibrationM
 from eyeGestures.gevent import Gevent, Cevent
 from eyeGestures.utils import timeit
 import numpy as np
+import pickle
 import cv2
 
 import random
@@ -21,9 +22,9 @@ class EyeGestures_v2:
     ACCEPTANCE_RADIUS = 500
     CALIBRATION_RADIUS = 1000
     EYEGESTURES_CALIBRATION_THRESH = 850
+    EYEGESTURES_CALIBRATION_FILENAME = 'eygestures_calib.eyec'
 
     def __init__(self):
-
         self.monitor_width  = 1
         self.monitor_height = 1
 
@@ -53,6 +54,12 @@ class EyeGestures_v2:
         self.calibration_radius = self.CALIBRATION_RADIUS
         # after corssing this thresh we are disabling classical calib
         self.eyegestures_calibration_threshold = self.EYEGESTURES_CALIBRATION_THRESH
+
+    def saveModel(self):
+        return pickle.dumps(self.clb)
+
+    def loadModel(self,model):
+        self.clb = pickle.loads(model)
 
     def getLandmarks(self, frame, calibrate = False):
 
