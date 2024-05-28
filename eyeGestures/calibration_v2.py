@@ -15,7 +15,7 @@ class Calibrator:
         self.reg_y = scireg.Ridge(alpha=1.0)
         self.fitted = False
 
-    def add(self,x,y,ref_point,fit_point):
+    def add(self,x,y):
         self.X.append(x.flatten())
         self.Y_y.append(y[1])
         self.Y_x.append(y[0])
@@ -40,3 +40,22 @@ class Calibrator:
 
     def unfit(self):
         self.fitted = False
+
+class CalibrationMatrix:
+
+    def __init__(self):
+
+        self.iterator = 0
+        self.points = np.array([[1,0.5],[0.75,0.5],[0.5,0.5],[0.25,0.5],[0.0,0.5],
+                                [1.0,1.0],[0.75,1.0],[0.5,1.0],[0.25,1.0],[0.0,1.0],
+                                [1.0,0.0],[0.75,0.0],[0.5,0.0],[0.25,0.0],[0.0,0.0],
+                                [0.0,0.75],[0.75,0.75],[0.5,0.75],[0.25,0.75],[0.0,0.75],
+                                [1.0,0.25],[0.75,0.25],[0.5,0.25],[0.25,0.25],[0.0,0.25]])
+        pass
+
+    def getNextPoint(self,width=1.0,height=1.0):
+        it = self.iterator
+        self.iterator += 1
+        self.iterator %= len(self.points)
+
+        return np.array([self.points[it,0] * width, self.points[it,1] * height])

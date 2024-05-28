@@ -2,7 +2,7 @@
 from eyeGestures.gazeEstimator import GazeTracker
 import eyeGestures.screenTracker.dataPoints as dp
 from eyeGestures.calibration_v1 import Calibrator as Calibrator_v1
-from eyeGestures.calibration_v2 import Calibrator as Calibrator_v2, euclidean_distance
+from eyeGestures.calibration_v2 import Calibrator as Calibrator_v2, CalibrationMatrix, euclidean_distance
 from eyeGestures.gevent import Gevent, Cevent
 from eyeGestures.utils import timeit
 import numpy as np
@@ -13,7 +13,7 @@ import random
 VERSION = "2.0.0"
 
 class EyeGestures_v2:
-    """Main class for EyeGesture tracker. It configures and manages entier algorithm"""
+    """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
 
 
     PRECISION_LIMIT = 50
@@ -41,9 +41,8 @@ class EyeGestures_v2:
         self.average_points = np.zeros((20,2))
         self.filled_points = 0
         self.calibrate_gestures = True
-        self.fit_point = self.getNewRandomPoint()
-
-        self.output_points = np.zeros((5,2))
+        self.calibrationMat = CalibrationMatrix()
+        self.fit_point = self.calibrationMat.getNextPoint()
 
         self.iterator = 0
         self.fix = 0.8
@@ -86,9 +85,6 @@ class EyeGestures_v2:
 
     def setClassicImpact(self,impact):
         self.CN = impact
-
-    def getNewRandomPoint(self):
-        return np.array([random.random() * self.monitor_width,random.random() * self.monitor_height])
 
     def reset(self):
         self.acceptance_radius = self.ACCEPTANCE_RADIUS
@@ -133,13 +129,13 @@ class EyeGestures_v2:
         averaged_point = (np.sum(self.average_points[:,:],axis=0) + (classic_point * self.CN))/(self.filled_points + self.CN)
 
         if self.calibration and (euclidean_distance(averaged_point,self.fit_point) < self.calibration_radius or self.filled_points < self.average_points.shape[0] * 10):
-            self.clb.add(key_points,self.fit_point,classic_point,y_point)
+            self.clb.add(key_points,self.fit_point)
 
         if euclidean_distance(averaged_point,self.fit_point) < self.acceptance_radius:
             self.iterator += 1
             if self.iterator > 10:
                 self.iterator = 0
-                self.fit_point = self.getNewRandomPoint()
+                self.fit_point = self.calibrationMat.getNextPoint(width,height)
                 self.increase_precision()
 
         gevent = Gevent(averaged_point,blink,fixation >= self.fix)
