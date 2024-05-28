@@ -40,6 +40,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                running = False
+
 
     # Generate new random position for the cursor
     ret, frame = cap.read()

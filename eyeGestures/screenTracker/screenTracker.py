@@ -146,7 +146,7 @@ class ScreenProcessor:
         # ---------histogram obtained----------
         # =====================================
         new_roi = dp.ScreenROI(roi.x,roi.y,roi.width,roi.height)
-        print(f"setting new center: {x,y}")
+
         new_roi.setCenter(x,y)
         edges.setCenter(x,y)
         # self.eyeScreen.setCenter(x,y) 

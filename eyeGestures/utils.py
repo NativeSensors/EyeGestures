@@ -180,7 +180,11 @@ class VideoCapture:
                     pass
             self.q.put((ret, frame))
 
-        self.run = False
+        self.flush()
+
+    def flush(self):
+        while not self.q.empty():
+            self.q.get()
 
     def read(self):
         """Function returning latest frame"""
