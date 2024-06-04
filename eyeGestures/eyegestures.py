@@ -30,7 +30,7 @@ class EyeGestures_v2:
 
         self.clb = Calibrator_v2()
         self.cap = None
-        self.gestures = EyeGestures_v1(285,115,40,15)
+        self.gestures = EyeGestures_v1(285,115,200,100)
 
         self.calibration = False
 
@@ -41,7 +41,8 @@ class EyeGestures_v2:
 
         self.average_points = np.zeros((20,2))
         self.filled_points = 0
-        self.calibrate_gestures = True
+        self.enable_CN = False
+        self.calibrate_gestures = False
         self.calibrationMat = CalibrationMatrix()
         self.fit_point = self.calibrationMat.getNextPoint()
 
@@ -106,12 +107,18 @@ class EyeGestures_v2:
     def setClassicalImpact(self,CN):
         self.CN = CN
 
+    def enableCNCalib(self):
+        self.enable_CN = True
+
+    def disableCNCalib(self):
+        self.enable_CN = False
+
     def step(self, frame, calibration, width, height):
         self.calibration = calibration
         self.monitor_width = width
         self.monitor_height = height
 
-        classic_point, key_points, blink, fixation = self.getLandmarks(frame,self.calibrate_gestures)
+        classic_point, key_points, blink, fixation = self.getLandmarks(frame,self.calibrate_gestures and self.enable_CN)
 
         margin = 10
         if classic_point[0] <= margin and self.calibration:
