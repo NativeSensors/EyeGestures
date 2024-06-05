@@ -11,7 +11,7 @@
 
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eye-tracking and eye-driven interfaces without requirement of obtaining expensive hardware.
 
-Our [Mission](https://github.com/NativeSensors/EyeGestures/MISSION.md)! 
+Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)! 
 
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/eyeGestures)
 <a href="https://polar.sh/NativeSensors"><img src="https://polar.sh/embed/seeks-funding-shield.svg?org=NativeSensors" /></a>
