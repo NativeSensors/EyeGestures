@@ -6,6 +6,7 @@ from eyeGestures.calibration_v2 import Calibrator as Calibrator_v2, CalibrationM
 from eyeGestures.gevent import Gevent, Cevent
 from eyeGestures.utils import timeit
 import numpy as np
+import pickle
 import cv2
 
 import random
@@ -21,15 +22,15 @@ class EyeGestures_v2:
     ACCEPTANCE_RADIUS = 500
     CALIBRATION_RADIUS = 1000
     EYEGESTURES_CALIBRATION_THRESH = 850
+    EYEGESTURES_CALIBRATION_FILENAME = 'eygestures_calib.eyec'
 
     def __init__(self):
-
         self.monitor_width  = 1
         self.monitor_height = 1
 
         self.clb = Calibrator_v2()
         self.cap = None
-        self.gestures = EyeGestures_v1(285,115,40,15)
+        self.gestures = EyeGestures_v1(285,115,200,100)
 
         self.calibration = False
 
@@ -40,7 +41,8 @@ class EyeGestures_v2:
 
         self.average_points = np.zeros((20,2))
         self.filled_points = 0
-        self.calibrate_gestures = True
+        self.enable_CN = False
+        self.calibrate_gestures = False
         self.calibrationMat = CalibrationMatrix()
         self.fit_point = self.calibrationMat.getNextPoint()
 
@@ -54,13 +56,19 @@ class EyeGestures_v2:
         # after corssing this thresh we are disabling classical calib
         self.eyegestures_calibration_threshold = self.EYEGESTURES_CALIBRATION_THRESH
 
+    def saveModel(self):
+        return pickle.dumps(self.clb)
+
+    def loadModel(self,model):
+        self.clb = pickle.loads(model)
+
     def getLandmarks(self, frame, calibrate = False):
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame,1)
         # frame = cv2.resize(frame, (360, 640))
 
-        event, _ = self.gestures.step(
+        event, cevent = self.gestures.step(
             frame,
             "main",
             calibrate, # set calibration - switch to False to stop calibration
@@ -75,7 +83,7 @@ class EyeGestures_v2:
         cursors = np.array([cursor_x,cursor_y]).reshape(1, 2)
         eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
         key_points = np.concatenate((cursors,l_eye_landmarks,r_eye_landmarks,eye_events))
-        return  np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation
+        return  np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation, cevent
 
     def increase_precision(self):
         if self.acceptance_radius > self.precision_limit:
@@ -99,22 +107,28 @@ class EyeGestures_v2:
     def setClassicalImpact(self,CN):
         self.CN = CN
 
+    def enableCNCalib(self):
+        self.enable_CN = True
+
+    def disableCNCalib(self):
+        self.enable_CN = False
+
     def step(self, frame, calibration, width, height):
         self.calibration = calibration
         self.monitor_width = width
         self.monitor_height = height
 
-        classic_point, key_points, blink, fixation = self.getLandmarks(frame,self.calibrate_gestures)
+        classic_point, key_points, blink, fixation, cevent = self.getLandmarks(frame,self.calibrate_gestures and self.enable_CN)
 
         margin = 10
         if classic_point[0] <= margin and self.calibration:
-            self.calibrate_gestures = True
+            self.calibrate_gestures = cevent.calibration
         elif classic_point[0] >= width - margin and self.calibration:
-            self.calibrate_gestures = True
-        elif classic_point[1] <= margin and self.calibration:
-            self.calibrate_gestures = True
+            self.calibrate_gestures = cevent.calibration
+        elif cevent.point[1] <= margin and self.calibration:
+            self.calibrate_gestures = cevent.calibration
         elif classic_point[1] >= height - margin and self.calibration:
-            self.calibrate_gestures = True
+            self.calibrate_gestures = cevent.calibration
         else:
             self.calibrate_gestures = False
 
@@ -176,7 +190,7 @@ class EyeGestures_v1:
                                 roi_y,
                                 roi_width,
                                 roi_height)
-        
+
         self.calibrators = dict()
         self.calibrate = False
 
