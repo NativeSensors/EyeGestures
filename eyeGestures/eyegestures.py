@@ -68,7 +68,7 @@ class EyeGestures_v2:
         frame = cv2.flip(frame,1)
         # frame = cv2.resize(frame, (360, 640))
 
-        event, _ = self.gestures.step(
+        event, cevent = self.gestures.step(
             frame,
             "main",
             calibrate, # set calibration - switch to False to stop calibration
@@ -83,7 +83,7 @@ class EyeGestures_v2:
         cursors = np.array([cursor_x,cursor_y]).reshape(1, 2)
         eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
         key_points = np.concatenate((cursors,l_eye_landmarks,r_eye_landmarks,eye_events))
-        return  np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation
+        return  np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation, cevent
 
     def increase_precision(self):
         if self.acceptance_radius > self.precision_limit:
@@ -118,17 +118,17 @@ class EyeGestures_v2:
         self.monitor_width = width
         self.monitor_height = height
 
-        classic_point, key_points, blink, fixation = self.getLandmarks(frame,self.calibrate_gestures and self.enable_CN)
+        classic_point, key_points, blink, fixation, cevent = self.getLandmarks(frame,self.calibrate_gestures and self.enable_CN)
 
         margin = 10
         if classic_point[0] <= margin and self.calibration:
-            self.calibrate_gestures = True
+            self.calibrate_gestures = cevent.calibration
         elif classic_point[0] >= width - margin and self.calibration:
-            self.calibrate_gestures = True
-        elif classic_point[1] <= margin and self.calibration:
-            self.calibrate_gestures = True
+            self.calibrate_gestures = cevent.calibration
+        elif cevent.point[1] <= margin and self.calibration:
+            self.calibrate_gestures = cevent.calibration
         elif classic_point[1] >= height - margin and self.calibration:
-            self.calibrate_gestures = True
+            self.calibrate_gestures = cevent.calibration
         else:
             self.calibrate_gestures = False
 
@@ -190,7 +190,7 @@ class EyeGestures_v1:
                                 roi_y,
                                 roi_width,
                                 roi_height)
-        
+
         self.calibrators = dict()
         self.calibrate = False
 
