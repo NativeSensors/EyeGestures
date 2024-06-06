@@ -70,7 +70,7 @@ python3 apps/win_app.py
 
 Or download it from [`releases`](https://github.com/NativeSensors/EyeGestures/releases/tag/1.3.4_App_0.0.3)
 
-### 🔧 How to use [WiP - adding Enginge V2]:
+### 🔧 How to use:
 
 #### Using EyeGesture Engine V2 - Machine Learning Approach:
 
