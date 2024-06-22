@@ -50,9 +50,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 ### 💜 Projects build with EyeGestures: 
 
 - [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18)
-
 - [EyePather](https://polar.sh/NativeSensors/products/cbf72fe2-125b-4ded-bb8a-b3d2f1da0f4b)
-
 - Add your project! contact@eyegestures.com or PR
 
 ### 💻 Install
