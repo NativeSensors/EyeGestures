@@ -11,7 +11,7 @@
 
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eye-tracking and eye-driven interfaces without requirement of obtaining expensive hardware.
 
-Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/Engine_v2/MISSION.md)! 
+Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)! 
 
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/eyeGestures)
 <a href="https://polar.sh/NativeSensors"><img src="https://polar.sh/embed/seeks-funding-shield.svg?org=NativeSensors" /></a>
@@ -48,6 +48,11 @@ Sponsor us and we can add your link, banner or other promo materials!
   <a href="https://ko-fi.com/Y8Y1SGTBV"><picture><img src="https://ko-fi.com/img/githubbutton_sm.svg"/></a>
 </p>
 
+### 🔨 Projects build with EyeGestures: 
+
+- [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18)
+- [EyePather](https://polar.sh/NativeSensors/posts/eyepather-new-tool-in-eyegestures-ecosystem)
+- Add your project! contact@eyegestures.com or PR
 
 ### 💻 Install
 ```
@@ -63,14 +68,7 @@ python3 examples/simple_example.py
 python3 examples/simple_example_v2.py
 ```
 
-### 🪟 Run Windows App [Not updated to latest engine, may crash]
-```
-python3 apps/win_app.py
-```
-
-Or download it from [`releases`](https://github.com/NativeSensors/EyeGestures/releases/tag/1.3.4_App_0.0.3)
-
-### 🔧 How to use [WiP - adding Enginge V2]:
+### 🔧 How to use:
 
 #### Using EyeGesture Engine V2 - Machine Learning Approach:
 
@@ -140,22 +138,11 @@ Feel free to copy and paste the relevant code snippets for your project.
 
 If you are building publicly available product, and have no commercial license, please mention us somewhere in your interface. 
 
-**Promo Materials:**
-
-https://github.com/NativeSensors/EyeGestures/assets/40773550/4ca842b9-ba32-4ffd-b2e4-179ff67ee47f
-
-<img src="https://github.com/NativeSensors/EyeGestures/assets/40773550/4ca842b9-ba32-4ffd-b2e4-179ff67ee47f" width="300
-">
-
-https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-bc96-3a6bb4159b37
-
-<img src="https://github.com/NativeSensors/EyeGestures/assets/40773550/6a7c74b5-b069-4eec-bc96-3a6bb4159b37" width="200
-">
-
 ### 📇 Find us:
 - [RSS](https://polar.sh/NativeSensors/rss?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRfaWQiOiJkMDYxMDFiOC0xYzYyLTQ1MTYtYjg3YS03NTFhOTM3OTIxZmUiLCJzY29wZXMiOiJhcnRpY2xlczpyZWFkIiwidHlwZSI6ImF1dGgiLCJleHAiOjE3NDMxNjg3ODh9.djoi5ARWHr-xFW_XJ6Fwal3JUT1fAbvx4Npl-daBC5U)
-- [discord](https://discord.gg/EnFu7hYy)
+- [discord](https://discord.gg/KmEgWVgn)
 - [twitter](https://twitter.com/PW4ltz)
+- [daily.dev](https://dly.to/JEe1Sz6vLey)
 - email: contact@eyegestures.com
 
 Follow us on polar (it costs nothing but you help project!):
