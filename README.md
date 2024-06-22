@@ -68,13 +68,6 @@ python3 examples/simple_example.py
 python3 examples/simple_example_v2.py
 ```
 
-### 🪟 Run Windows App [Not updated to latest engine, may crash]
-```
-python3 apps/win_app.py
-```
-
-Or download it from [`releases`](https://github.com/NativeSensors/EyeGestures/releases/tag/1.3.4_App_0.0.3)
-
 ### 🔧 How to use:
 
 #### Using EyeGesture Engine V2 - Machine Learning Approach:
