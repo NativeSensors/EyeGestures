@@ -121,13 +121,13 @@ class EyeGestures_v2:
         classic_point, key_points, blink, fixation, cevent = self.getLandmarks(frame,self.calibrate_gestures and self.enable_CN)
 
         margin = 10
-        if classic_point[0] <= margin and self.calibration:
+        if (classic_point[0] <= margin) and self.calibration:
             self.calibrate_gestures = cevent.calibration
-        elif classic_point[0] >= width - margin and self.calibration:
+        elif (classic_point[0] >= width - margin) and self.calibration:
             self.calibrate_gestures = cevent.calibration
-        elif cevent.point[1] <= margin and self.calibration:
+        elif (cevent.point[1] <= margin) and self.calibration:
             self.calibrate_gestures = cevent.calibration
-        elif classic_point[1] >= height - margin and self.calibration:
+        elif (classic_point[1] >= height - margin) and self.calibration:
             self.calibrate_gestures = cevent.calibration
         else:
             self.calibrate_gestures = False
@@ -145,7 +145,7 @@ class EyeGestures_v2:
         if self.calibration and (euclidean_distance(averaged_point,self.fit_point) < self.calibration_radius or self.filled_points < self.average_points.shape[0] * 10):
             self.clb.add(key_points,self.fit_point)
 
-        if euclidean_distance(averaged_point,self.fit_point) < self.acceptance_radius:
+        if self.calibration and (euclidean_distance(averaged_point,self.fit_point) < self.acceptance_radius):
             self.iterator += 1
             if self.iterator > 10:
                 self.iterator = 0

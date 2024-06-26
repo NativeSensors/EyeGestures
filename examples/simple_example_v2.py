@@ -29,6 +29,7 @@ pygame.display.set_caption("Fullscreen Red Cursor")
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
+YELLOW = (255,255,0)
 
 clock = pygame.time.Clock()
 
@@ -49,7 +50,7 @@ while running:
     ret, frame = cap.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    calibrate = (iterator <= 1000)
+    calibrate = (iterator <= 300)
     iterator += 1
 
     event, calibration = gestures.step(frame, calibrate, screen_width, screen_height)
@@ -64,6 +65,8 @@ while running:
     if calibrate:
         # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
         pygame.draw.circle(screen, BLUE, calibration.point, calibration.acceptance_radius)
+    else:
+        pygame.draw.circle(screen, YELLOW, calibration.point, calibration.acceptance_radius)
     pygame.draw.circle(screen, RED, event.point, 50)
     pygame.display.flip()
 
