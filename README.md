@@ -79,16 +79,17 @@ from eyeGestures.eyegestures import EyeGestures_v2
 # Initialize gesture engine and video capture
 gestures = EyeGestures_v2()
 cap = VideoCapture(0)  
-ret, frame = cap.read()
 calibrate = True
 screen_width = 500
 screen_height= 500
 
 # Process each frame
-event, cevent = gestures.step(frame, True, screen_width, screen_height)
-
-cursor_x, cursor_y = event.point[0], event.point[1]
-# calibration_radius: radius for data collection during calibration
+while true:
+  ret, frame = cap.read()
+  event, cevent = gestures.step(frame, calibrate, screen_width, screen_height)
+  
+  cursor_x, cursor_y = event.point[0], event.point[1]
+  # calibration_radius: radius for data collection during calibration
 ```
 
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
