@@ -62,6 +62,10 @@ class EyeGestures_v2:
     def loadModel(self,model):
         self.clb = pickle.loads(model)
 
+    def uploadCalibrationMap(self,points):
+        self.calibrationMat.update_calibration_matrix(points)
+        self.fit_point = self.calibrationMat.getNextPoint()
+
     def getLandmarks(self, frame, calibrate = False):
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

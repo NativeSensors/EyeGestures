@@ -53,6 +53,10 @@ class CalibrationMatrix:
                                 [1.0,0.25],[0.75,0.25],[0.5,0.25],[0.25,0.25],[0.0,0.25]])
         pass
 
+    def update_calibration_matrix(self,points):
+        self.points = points
+        self.iterator = 0
+
     def getNextPoint(self,width=1.0,height=1.0):
         it = self.iterator
         self.iterator += 1
