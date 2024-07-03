@@ -63,7 +63,7 @@ class EyeGestures_v2:
         self.clb = pickle.loads(model)
 
     def uploadCalibrationMap(self,points):
-        self.calibrationMat.update_calibration_matrix(points)
+        self.calibrationMat.update_calibration_matrix(np.array(points))
         self.fit_point = self.calibrationMat.getNextPoint()
 
     def getLandmarks(self, frame, calibrate = False):
