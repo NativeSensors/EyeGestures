@@ -1,3 +1,5 @@
 @REM .\venv\Scripts\activate
-pyinstaller ./apps/app_win.spec
+@REM pyinstaller ./apps/app_win.spec
 @REM deactivate;
+
+python -m build
