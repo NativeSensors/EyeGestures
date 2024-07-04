@@ -58,7 +58,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 python3 -m pip install eyeGestures
 ```
 
-### ⚙️ Run 
+### ⚙️ Try 
 ```
 python3 examples/simple_example.py
 ```
@@ -67,7 +67,7 @@ python3 examples/simple_example.py
 python3 examples/simple_example_v2.py
 ```
 
-### 🔧 How to use:
+### 🔧 Build your own:
 
 #### Using EyeGesture Engine V2 - Machine Learning Approach:
 
@@ -93,7 +93,14 @@ while true:
 
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
 
+#### Customize:
 
+You can customize your calibration points/map to fit your solutions. Simple copy snippet below, and place your calibration poitns on x,y planes from 0.0 to 1.0. It will be then automatically scaled to your display.
+
+```python
+gestures = EyeGestures_v2()
+gestures.uploadCalibrationMap([[0,0],[0,1],[1,0],[1,1]])
+```
 
 <!-- POLAR-END id=eizdelwu -->
 
