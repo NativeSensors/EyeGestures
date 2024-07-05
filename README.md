@@ -92,6 +92,7 @@ while true:
 ```
 
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+<!-- POLAR-END id=eizdelwu -->
 
 #### Customize:
 
@@ -101,8 +102,6 @@ You can customize your calibration points/map to fit your solutions. Simple copy
 gestures = EyeGestures_v2()
 gestures.uploadCalibrationMap([[0,0],[0,1],[1,0],[1,1]])
 ```
-
-<!-- POLAR-END id=eizdelwu -->
 
 #### Using EyeGesture Engine V1 - Model-Based Approach:
 
