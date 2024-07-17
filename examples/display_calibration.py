@@ -11,6 +11,7 @@ from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures_v2
 
 gestures = EyeGestures_v2()
+gestures.uploadCalibrationMap([[0,0],[0,1],[1,0],[1,1]])
 cap = VideoCapture(0)
 
 # Initialize Pygame
@@ -36,6 +37,7 @@ clock = pygame.time.Clock()
 # Main game loop
 running = True
 iterator = 0
+first = [0,0]
 while running:
     # Event handling
     for event in pygame.event.get():
@@ -45,33 +47,19 @@ while running:
             if event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 running = False
 
+    calibration = gestures.calibrationMat.getNextPoint(screen_width,screen_height)
+    
+    if calibration[0] == first[0] and calibration[1] == first[1]:
+        screen.fill((0, 0, 0))
 
-    # Generate new random position for the cursor
-    ret, frame = cap.read()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    calibrate = (iterator <= 600)
-    iterator += 1
-
-    event, calibration = gestures.step(frame, calibrate, screen_width, screen_height)
-
-    screen.fill((0, 0, 0))
-    frame = np.rot90(frame)
-    frame = pygame.surfarray.make_surface(frame)
-    frame = pygame.transform.scale(frame, (400, 400))
-
+    if first[0] == 0 and first[1] == 0:
+        first = calibration
     # Display frame on Pygame screen
-    screen.blit(frame, (0, 0))
-    if calibrate:
-        # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
-        pygame.draw.circle(screen, BLUE, calibration.point, calibration.acceptance_radius)
-    else:
-        pygame.draw.circle(screen, YELLOW, calibration.point, calibration.acceptance_radius)
-    pygame.draw.circle(screen, RED, event.point, 50)
+    pygame.draw.circle(screen, YELLOW, calibration, 200)
     pygame.display.flip()
 
     # Cap the frame rate
-    clock.tick(60)
+    clock.tick(10)
 
 # Quit Pygame
 pygame.quit()
