@@ -133,7 +133,7 @@ class EyeGestures_v2:
 
         averaged_point = (np.sum(self.average_points[context][:,:],axis=0) + (classic_point * self.CN))/(self.filled_points[context] + self.CN)
 
-        if self.calibration[context] and self.clb[context].insideClbRadius(averaged_point,width,height) or self.filled_points[context] < self.average_points[context].shape[0] * 10:
+        if self.calibration[context] and (self.clb[context].insideClbRadius(averaged_point,width,height) or self.filled_points[context] < self.average_points[context].shape[0] * 10):
             self.clb[context].add(key_points,self.clb[context].getCurrentPoint(width,height))
 
         if self.calibration[context] and self.clb[context].insideAcptcRadius(averaged_point,width,height):
