@@ -92,6 +92,7 @@ while true:
 ```
 
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+<!-- POLAR-END id=eizdelwu -->
 
 #### Customize:
 
@@ -101,8 +102,6 @@ You can customize your calibration points/map to fit your solutions. Simple copy
 gestures = EyeGestures_v2()
 gestures.uploadCalibrationMap([[0,0],[0,1],[1,0],[1,1]])
 ```
-
-<!-- POLAR-END id=eizdelwu -->
 
 #### Using EyeGesture Engine V1 - Model-Based Approach:
 
@@ -152,7 +151,7 @@ If you are building publicly available product, and have no commercial license, 
 - [daily.dev](https://dly.to/JEe1Sz6vLey)
 - email: contact@eyegestures.com
 
-Follow us on polar (it costs nothing but you help project!):
+Follow us on Polar (if you want to help, you can support us there!):
 
 <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 
