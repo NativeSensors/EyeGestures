@@ -114,6 +114,9 @@ class Buffor:
     def getLen(self):
         return len(self.__buffor)
     
+    def isFull(self):
+        return len(self.__buffor) >= self.length
+
     def flush(self):
         tmp = self.__buffor[-1]
         self.__buffor = []
