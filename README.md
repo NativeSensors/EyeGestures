@@ -85,7 +85,11 @@ screen_height= 500
 # Process each frame
 while true:
   ret, frame = cap.read()
-  event, cevent = gestures.step(frame, calibrate, screen_width, screen_height)
+  event, cevent = gestures.step(frame,
+    calibrate,
+    screen_width,
+    screen_height,
+    context="my_context")
   
   cursor_x, cursor_y = event.point[0], event.point[1]
   # calibration_radius: radius for data collection during calibration
