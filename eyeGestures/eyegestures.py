@@ -61,14 +61,16 @@ class EyeGestures_v2:
             self.monitor_height,
             0, 0, self.fix, 100)
 
-        cursor_x, cursor_y = event.point[0],event.point[1]
-        l_eye_landmarks = event.l_eye.getLandmarks()
-        r_eye_landmarks = event.r_eye.getLandmarks()
+        if event is not None or cevent is not None: 
+            cursor_x, cursor_y = event.point[0],event.point[1]
+            l_eye_landmarks = event.l_eye.getLandmarks()
+            r_eye_landmarks = event.r_eye.getLandmarks()
 
-        cursors = np.array([cursor_x,cursor_y]).reshape(1, 2)
-        eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
-        key_points = np.concatenate((cursors,l_eye_landmarks,r_eye_landmarks,eye_events))
-        return np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation, cevent
+            cursors = np.array([cursor_x,cursor_y]).reshape(1, 2)
+            eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
+            key_points = np.concatenate((cursors,l_eye_landmarks,r_eye_landmarks,eye_events))
+            return np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation, cevent
+        return np.array((0.0, 0.0)), np.array([]), 0, 0, None
 
     def setClassicImpact(self,impact):
         self.CN = impact
@@ -110,6 +112,9 @@ class EyeGestures_v2:
         classic_point, key_points, blink, fixation, cevent = self.getLandmarks(frame,
                                                                                self.calibrate_gestures and self.enable_CN,
                                                                                context = context)
+
+        if cevent is None:
+            return (None, None)
 
         margin = 10
         if (classic_point[0] <= margin) and self.calibration[context]:
@@ -221,16 +226,18 @@ class EyeGestures_v1:
                                   freeze_radius,
                                   offset_x,
                                   offset_y)
+        cevent = None
 
-        cursor_x,cursor_y = event.point[0],event.point[1]
-        if context in self.calibrators:
-            self.calibrate = self.calibrators[context].calibrate(cursor_x,cursor_y,event.fixation)
-        else:
-            self.calibrators[context] = Calibrator_v1(display_width,display_height,cursor_x,cursor_y)
-            self.calibrate = self.calibrators[context].calibrate(cursor_x,cursor_y,event.fixation)
+        if event is not None:
+            cursor_x,cursor_y = event.point[0],event.point[1]
+            if context in self.calibrators:
+                self.calibrate = self.calibrators[context].calibrate(cursor_x,cursor_y,event.fixation)
+            else:
+                self.calibrators[context] = Calibrator_v1(display_width,display_height,cursor_x,cursor_y)
+                self.calibrate = self.calibrators[context].calibrate(cursor_x,cursor_y,event.fixation)
 
-        cpoint = self.calibrators[context].get_current_point()
-        calibration = self.calibrate and cpoint != (0,0)
-        cevent = Cevent(cpoint,100, 100, calibration)
+            cpoint = self.calibrators[context].get_current_point()
+            calibration = self.calibrate and cpoint != (0,0)
+            cevent = Cevent(cpoint,100, 100, calibration)
 
         return (event, cevent)
