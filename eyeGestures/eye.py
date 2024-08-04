@@ -7,6 +7,7 @@ import mediapipe as mp
 
 class Eye:
     """Class storing data related and representing a eye"""
+
     LEFT_EYE_KEYPOINTS = np.array(
         list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:, 0]
     RIGHT_EYE_KEYPOINTS = np.array(
@@ -166,7 +167,6 @@ class Eye:
 
         pupil = self.pupil - (min_x, min_y)
 
-        # print(f"pupil: {pupil}")
         cv2.circle(self.cut_image, pupil.astype(int), 1, (0, 255, 0, 150), 1)
 
         self.cut_image = cv2.resize(self.cut_image, self.scale)

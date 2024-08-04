@@ -131,6 +131,9 @@ class GazeTracker:
 
         if not self.face is None:
 
+            if self.face.landmarks is None:
+                return event
+
             if context.face == None:
                 x,y,w,h=self.face.getBoundingBox()
                 i_w = self.face.image_w
