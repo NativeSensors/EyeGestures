@@ -92,6 +92,7 @@ while true:
     context="my_context")
   
   cursor_x, cursor_y = event.point[0], event.point[1]
+  fixation = event.fixation
   # calibration_radius: radius for data collection during calibration
 ```
 
@@ -132,6 +133,7 @@ event, cevent = gestures.estimate(
     0, 0, 0.8, 10
 )
 cursor_x, cursor_y = event.point[0], event.point[1]
+fixation = event.fixation
 # cevent - is calibration event
 ```
 
