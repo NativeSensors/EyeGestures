@@ -15,6 +15,7 @@ cap = VideoCapture(0)
 
 # Initialize Pygame
 pygame.init()
+pygame.font.init()
 
 # Get the display dimensions
 screen_info = pygame.display.Info()
@@ -63,6 +64,9 @@ while running:
     if event is not None or calibration is not None:
         # Display frame on Pygame screen
         screen.blit(frame, (0, 0))
+        my_font = pygame.font.SysFont('Comic Sans MS', 30)
+        text_surface = my_font.render(f'{event.fixation}', False, (0, 0, 0))
+        screen.blit(text_surface, (0,0))
         if calibrate:
             # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
             pygame.draw.circle(screen, BLUE, calibration.point, calibration.acceptance_radius)

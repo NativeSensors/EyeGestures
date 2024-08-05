@@ -148,7 +148,7 @@ class EyeGestures_v2:
                 self.clb[context].movePoint()
                 self.clb[context].increase_precision()
 
-        gevent = Gevent(averaged_point,blink,fixation >= self.fix)
+        gevent = Gevent(averaged_point,blink,fixation)
         cevent = Cevent(self.clb[context].getCurrentPoint(width,height),self.clb[context].acceptance_radius, self.clb[context].calibration_radius)
         return (gevent, cevent)
 
