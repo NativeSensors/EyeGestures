@@ -157,7 +157,7 @@ If you are building publicly available product, and have no commercial license, 
 - [daily.dev](https://dly.to/JEe1Sz6vLey)
 - email: contact@eyegestures.com
 
-Support project on Polar (if you want to help we provide our access to our alphas and premium content!):
+Support project on Polar (if you want to help we provide access to alphas versions and premium content!):
 
 <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 
