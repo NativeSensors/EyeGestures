@@ -109,7 +109,7 @@ gestures = EyeGestures_v2()
 gestures.uploadCalibrationMap([[0,0],[0,1],[1,0],[1,1]])
 ```
 
-You can change how much V1 affects V2 by:
+V2 is two stage tracker. It runs V1 under the hood but then uses it as feature extractor for V2 machine learning component, and combines both outputs to generate new gaze point. It is possible to control how much V1 affects V2 by:
 
 ```python
 gestures.setClassicImpact(N) # setting N = 2 is working best for my testing 
