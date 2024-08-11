@@ -117,7 +117,7 @@ gestures.setClassicImpact(N) # setting N = 2 is working best for my testing
 This makes that sample obtained from V2 is averaged with N times sample from V1 (same sample copied that many times). In outcome having V2 impacting output in `1/N+1` and V1 `N/N+1`.
 
 It is also worth to know that you can enable hidden calibration for V1 (same calibration when using only V1, but now it is invisible to user):
-```
+```python
 gestures.enableCNCalib()
 ```
  
