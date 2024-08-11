@@ -90,10 +90,11 @@ while true:
     screen_width,
     screen_height,
     context="my_context")
-  
-  cursor_x, cursor_y = event.point[0], event.point[1]
-  fixation = event.fixation
-  # calibration_radius: radius for data collection during calibration
+
+  if event:
+    cursor_x, cursor_y = event.point[0], event.point[1]
+    fixation = event.fixation
+    # calibration_radius: radius for data collection during calibration
 ```
 
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
@@ -132,9 +133,11 @@ event, cevent = gestures.estimate(
     screen_height,
     0, 0, 0.8, 10
 )
-cursor_x, cursor_y = event.point[0], event.point[1]
-fixation = event.fixation
-# cevent - is calibration event
+
+if event:
+  cursor_x, cursor_y = event.point[0], event.point[1]
+  fixation = event.fixation
+  # calibration_radius: radius for data collection during calibration
 ```
 
 Feel free to copy and paste the relevant code snippets for your project.
