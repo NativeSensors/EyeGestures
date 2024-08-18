@@ -10,7 +10,7 @@ sys.path.append(f'{dir_path}/..')
 from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures_v2
 
-gestures = EyeGestures_v2()
+gestures = EyeGestures_v2(calibration_radius=500)
 cap = VideoCapture(0)
 
 # Initialize Pygame

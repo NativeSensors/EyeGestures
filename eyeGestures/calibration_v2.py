@@ -9,9 +9,8 @@ class Calibrator:
     PRECISION_LIMIT = 50
     PRECISION_STEP = 10
     ACCEPTANCE_RADIUS = 500
-    CALIBRATION_RADIUS = 1000
 
-    def __init__(self):
+    def __init__(self,CALIBRATION_RADIUS=1000):
         self.X = []
         self.Y_y = []
         self.Y_x = []
@@ -24,8 +23,8 @@ class Calibrator:
         
         self.precision_limit = self.PRECISION_LIMIT
         self.precision_step = self.PRECISION_STEP
-        self.acceptance_radius = self.ACCEPTANCE_RADIUS
-        self.calibration_radius = self.CALIBRATION_RADIUS
+        self.acceptance_radius = int(CALIBRATION_RADIUS/2)
+        self.calibration_radius = int(CALIBRATION_RADIUS)
 
     def add(self,x,y):
         self.X.append(x.flatten())
