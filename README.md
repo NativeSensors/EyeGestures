@@ -25,9 +25,7 @@ We offer custom integration and managed services. For businesses requiring invoi
 ```
 Sponsor us and we can add your link, banner or other promo materials!
 ```
-<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
-
-
+<!-- POLAR type=ads id=203bbe subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
 
 <!-- POLAR-END id=eizdelwu -->
 
