@@ -81,7 +81,7 @@ screen_width = 500
 screen_height= 500
 
 # Process each frame
-while true:
+while True:
   ret, frame = cap.read()
   event, cevent = gestures.step(frame,
     calibrate,
