@@ -17,6 +17,8 @@ Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)
 <a href="https://polar.sh/NativeSensors"><img src="https://polar.sh/embed/seeks-funding-shield.svg?org=NativeSensors" /></a>
 ### 💜 Sponsors: 
 
+📢📢 **We are looking for business partnerships and sponsors!** 📢📢
+
 ```
 For enterprise avoiding GPL3 licensing there is commercial license!
 ```
