@@ -51,6 +51,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 
 - [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18)
 - [EyePather](https://polar.sh/NativeSensors/posts/eyepather-new-tool-in-eyegestures-ecosystem)
+- [EyeFocus](https://polar.sh/NativeSensors/products/3756d557-134e-4e7e-ac50-d850126aa325?ref=producthunt)
 - Add your project! contact@eyegestures.com or PR
 
 ### 💻 Install
