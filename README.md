@@ -61,6 +61,9 @@ Sponsor us and we can add your link, banner or other promo materials!
 python3 -m pip install eyeGestures
 ```
 
+>[!WARNING]
+>some users report that mediapipe, scikit-learn or opencv is not installing together with eyegestures. To fix it, just install it with pip.
+
 ### ⚙️ Try 
 ```
 python3 examples/simple_example.py
