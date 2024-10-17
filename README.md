@@ -51,9 +51,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 
 - [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18)
 - [EyePather](https://polar.sh/NativeSensors/posts/eyepather-new-tool-in-eyegestures-ecosystem)
-- [EyeFocus](https://polar.sh/NativeSensors/products/3756d557-134e-4e7e-ac50-d850126aa325?ref=producthunt)
-
-<a href="https://www.producthunt.com/posts/eyefocus?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-eyefocus" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=498781&theme=light&period=daily" alt="EyeFocus - Blur&#0032;your&#0032;screen&#0032;when&#0032;you&#0032;look&#0032;away&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+- [EyeFocus](https://polar.sh/NativeSensors/products/3756d557-134e-4e7e-ac50-d850126aa325?ref=producthunt) <- 4th best product on PH!
 - Add your project! contact@eyegestures.com or PR
 
 ### 💻 Install
@@ -186,10 +184,6 @@ Support project on Polar (if you want to help we provide access to alphas versio
 
 1) some users report that `mediapipe`, `scikit-learn` or `opencv` is not installing together with `eyegestures`. To fix it, just install it with `pip`.
 
-### 📢 Announcements:
-
-<a href="https://polar.sh/NativeSensors/posts"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/posts.svg?org=NativeSensors&darkmode"><img alt="Posts on Polar" src="https://polar.sh/embed/posts.svg?org=NativeSensors"></picture></a>
-
 ### 💻 Contributors
 
 <a href="https://github.com/OWNER/REPO/graphs/contributors">
@@ -198,7 +192,7 @@ Support project on Polar (if you want to help we provide access to alphas versio
 
 ### 💵 Support the project 
 
-<a href="https://polar.sh/NativeSensors/subscriptions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/tiers.svg?org=NativeSensors&darkmode"><img alt="Subscription Tiers on Polar" src="https://polar.sh/embed/tiers.svg?org=NativeSensors"></picture></a>
+We will be extremely grateful for your support via polar.sh: https://polar.sh/NativeSensors/ it helps to keep server running + fuels my brain with coffee. 
 
 <picture>
   <source
