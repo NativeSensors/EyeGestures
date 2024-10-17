@@ -16,9 +16,10 @@ VERSION = "2.0.0"
 class EyeGestures_v2:
     """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
 
-    def __init__(self):
+    def __init__(self, calibration_radius = 1000):
         self.monitor_width  = 1
         self.monitor_height = 1
+        self.calibration_radius = calibration_radius 
 
         self.clb = dict() # Calibrator_v2()
         self.cap = None
@@ -94,7 +95,7 @@ class EyeGestures_v2:
 
     def addContext(self, context):
         if context not in self.clb:
-            self.clb[context] = Calibrator_v2()
+            self.clb[context] = Calibrator_v2(self.calibration_radius)
             self.average_points[context] = Buffor(20)
             self.iterator[context] = 0
             self.average_points[context] = np.zeros((20,2))

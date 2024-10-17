@@ -11,6 +11,10 @@ from eyeGestures.utils import VideoCapture
 from eyeGestures.eyegestures import EyeGestures_v2
 
 gestures = EyeGestures_v2()
+gestures.uploadCalibrationMap([[1,0],[1,1],[0,1],[0.01,0.01],[0.5,0.5],[0.5,1],[0.5,0],[0,0.5],[1,0.5]])
+gestures.enableCNCalib()
+gestures.setClassicalImpact(2)
+gestures.setFixation(1.0)
 cap = VideoCapture(0)
 
 # Initialize Pygame
@@ -23,7 +27,7 @@ screen_width = screen_info.current_w
 screen_height = screen_info.current_h
 
 # Set up the screen
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Fullscreen Red Cursor")
 
 # Set up colors
@@ -80,4 +84,3 @@ while running:
 
 # Quit Pygame
 pygame.quit()
-cap.release()
