@@ -19,6 +19,7 @@ cap = VideoCapture(0)
 
 # Initialize Pygame
 pygame.init()
+pygame.font.init()
 
 # Get the display dimensions
 screen_info = pygame.display.Info()
@@ -57,21 +58,25 @@ while running:
     calibrate = (iterator <= 600)
     iterator += 1
 
-    event, calibration = gestures.step(frame, calibrate, screen_width, screen_height)
-
+    event, calibration = gestures.step(frame, calibrate, screen_width, screen_height, context="my_context")
+    
     screen.fill((0, 0, 0))
     frame = np.rot90(frame)
     frame = pygame.surfarray.make_surface(frame)
     frame = pygame.transform.scale(frame, (400, 400))
 
-    # Display frame on Pygame screen
-    screen.blit(frame, (0, 0))
-    if calibrate:
-        # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
-        pygame.draw.circle(screen, BLUE, calibration.point, calibration.acceptance_radius)
-    else:
-        pygame.draw.circle(screen, YELLOW, calibration.point, calibration.acceptance_radius)
-    pygame.draw.circle(screen, RED, event.point, 50)
+    if event is not None or calibration is not None:
+        # Display frame on Pygame screen
+        screen.blit(frame, (0, 0))
+        my_font = pygame.font.SysFont('Comic Sans MS', 30)
+        text_surface = my_font.render(f'{event.fixation}', False, (0, 0, 0))
+        screen.blit(text_surface, (0,0))
+        if calibrate:
+            # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
+            pygame.draw.circle(screen, BLUE, calibration.point, calibration.acceptance_radius)
+        else:
+            pygame.draw.circle(screen, YELLOW, calibration.point, calibration.acceptance_radius)
+        pygame.draw.circle(screen, RED, event.point, 50)
     pygame.display.flip()
 
     # Cap the frame rate

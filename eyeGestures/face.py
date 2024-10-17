@@ -35,19 +35,22 @@ class Face:
     def __init__(self):
         self.eyeLeft = eye.Eye(0)
         self.eyeRight = eye.Eye(1)
+        self.landmarks = None
 
     def getBoundingBox(self):
-        margin = 0
-        min_x = np.min(self.landmarks[:, 0]) - margin
-        max_x = np.max(self.landmarks[:, 0]) + margin
-        min_y = np.min(self.landmarks[:, 1]) - margin
-        max_y = np.max(self.landmarks[:, 1]) + margin
+        if self.landmarks is not None:
+            margin = 0
+            min_x = np.min(self.landmarks[:, 0]) - margin
+            max_x = np.max(self.landmarks[:, 0]) + margin
+            min_y = np.min(self.landmarks[:, 1]) - margin
+            max_y = np.max(self.landmarks[:, 1]) + margin
 
-        width = int((max_x - min_x))
-        height = int((max_y - min_y))
-        x = int(min_x)
-        y = int(min_y)
-        return (x, y, width, height)
+            width = int((max_x - min_x))
+            height = int((max_y - min_y))
+            x = int(min_x)
+            y = int(min_y)
+            return (x, y, width, height)
+        return (0, 0, 0, 0)
 
     def getLeftEye(self):
         return self.eyeLeft

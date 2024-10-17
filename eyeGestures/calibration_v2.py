@@ -6,7 +6,11 @@ def euclidean_distance(point1, point2):
 
 class Calibrator:
 
-    def __init__(self):
+    PRECISION_LIMIT = 50
+    PRECISION_STEP = 10
+    ACCEPTANCE_RADIUS = 500
+
+    def __init__(self,CALIBRATION_RADIUS=1000):
         self.X = []
         self.Y_y = []
         self.Y_x = []
@@ -14,6 +18,13 @@ class Calibrator:
         self.reg_x = scireg.Ridge(alpha=1.0)
         self.reg_y = scireg.Ridge(alpha=1.0)
         self.fitted = False
+
+        self.matrix = CalibrationMatrix()
+        
+        self.precision_limit = self.PRECISION_LIMIT
+        self.precision_step = self.PRECISION_STEP
+        self.acceptance_radius = int(CALIBRATION_RADIUS/2)
+        self.calibration_radius = int(CALIBRATION_RADIUS)
 
     def add(self,x,y):
         self.X.append(x.flatten())
@@ -38,9 +49,32 @@ class Calibrator:
         else:
             return np.array([0.0,0.0])
 
+    def movePoint(self):
+        self.matrix.movePoint()
+
+    def getCurrentPoint(self,width,heigth):
+        return self.matrix.getCurrentPoint(width,heigth)
+
+    def updMatrix(self,points):
+        return self.matrix.updMatrix(points)
+
     def unfit(self):
+        self.acceptance_radius = self.ACCEPTANCE_RADIUS
+        self.calibration_radius = self.CALIBRATION_RADIUS
         self.fitted = False
 
+    def increase_precision(self):
+        if self.acceptance_radius > self.precision_limit:
+            self.acceptance_radius -= self.precision_step
+        if self.calibration_radius > self.precision_limit and self.acceptance_radius < self.calibration_radius:
+            self.calibration_radius -= self.precision_step
+
+    def insideClbRadius(self,point,width,height):
+        return euclidean_distance(point,self.getCurrentPoint(width,height)) < self.calibration_radius
+    
+    def insideAcptcRadius(self,point,width,height):
+        return euclidean_distance(point,self.getCurrentPoint(width,height)) < self.acceptance_radius
+    
 class CalibrationMatrix:
 
     def __init__(self):
@@ -53,13 +87,14 @@ class CalibrationMatrix:
                                 [1.0,0.25],[0.75,0.25],[0.5,0.25],[0.25,0.25],[0.0,0.25]])
         pass
 
-    def update_calibration_matrix(self,points):
+    def updMatrix(self,points):
         self.points = points
         self.iterator = 0
 
-    def getNextPoint(self,width=1.0,height=1.0):
-        it = self.iterator
+    def movePoint(self):
         self.iterator += 1
         self.iterator %= len(self.points)
 
+    def getCurrentPoint(self,width=1.0,height=1.0):
+        it = self.iterator
         return np.array([self.points[it,0] * width, self.points[it,1] * height])
