@@ -48,7 +48,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 - Add your project! contact@eyegestures.com or PR
 
 Subscribe and get access to our software:
-<p align="center">
+<p align="left">
   <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 
 ### 💻 Install
