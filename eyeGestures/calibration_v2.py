@@ -15,8 +15,8 @@ class Calibrator:
         self.Y_y = []
         self.Y_x = []
         self.reg = None
-        self.reg_x = scireg.Ridge(alpha=1.0)
-        self.reg_y = scireg.Ridge(alpha=1.0)
+        self.reg_x = scireg.Ridge(alpha=1.0,fit_intercept=True)
+        self.reg_y = scireg.Ridge(alpha=1.0,fit_intercept=True)
         self.fitted = False
 
         self.matrix = CalibrationMatrix()
