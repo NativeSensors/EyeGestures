@@ -147,7 +147,7 @@ class EyeGestures_v2:
             if self.iterator[context] > 10:
                 self.iterator[context] = 0
                 self.clb[context].movePoint()
-                self.clb[context].increase_precision()
+                # self.clb[context].increase_precision()
 
         gevent = Gevent(averaged_point,blink,fixation)
         cevent = Cevent(self.clb[context].getCurrentPoint(width,height),self.clb[context].acceptance_radius, self.clb[context].calibration_radius)

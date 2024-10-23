@@ -1,5 +1,7 @@
 import numpy as np
 import sklearn.linear_model as scireg
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
 
 def euclidean_distance(point1, point2):
     return np.linalg.norm(point1 - point2)
@@ -15,8 +17,8 @@ class Calibrator:
         self.Y_y = []
         self.Y_x = []
         self.reg = None
-        self.reg_x = scireg.Ridge(alpha=1.0)
-        self.reg_y = scireg.Ridge(alpha=1.0)
+        self.reg_x = scireg.Lasso(alpha=0.5)
+        self.reg_y = scireg.Lasso(alpha=0.5)
         self.fitted = False
 
         self.matrix = CalibrationMatrix()
@@ -31,9 +33,9 @@ class Calibrator:
         self.Y_y.append(y[1])
         self.Y_x.append(y[0])
 
-        __tmp_X =np.array(self.X)
-        __tmp_Y_y =np.array(self.Y_y)
-        __tmp_Y_x =np.array(self.Y_x)
+        __tmp_X   = np.array(self.X)
+        __tmp_Y_y = np.array(self.Y_y)
+        __tmp_Y_x = np.array(self.Y_x)
 
         self.reg_x.fit(__tmp_X,__tmp_Y_x)
         self.reg_y.fit(__tmp_X,__tmp_Y_y)
