@@ -40,19 +40,16 @@ Sponsor us and we can add your link, banner or other promo materials!
   <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/1715b4df-7ac3-479e-b51a-f6d800ea8ea5" width="300" height="150">
 </p>
 
-<p align="center">
-  <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
-</p>
-<p align="center">
-  <a href="https://ko-fi.com/Y8Y1SGTBV"><picture><img src="https://ko-fi.com/img/githubbutton_sm.svg"/></a>
-</p>
-
 ### 🔨 Projects build with EyeGestures: 
 
 - [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18)
 - [EyePather](https://polar.sh/NativeSensors/posts/eyepather-new-tool-in-eyegestures-ecosystem)
 - [EyeFocus](https://polar.sh/NativeSensors/products/3756d557-134e-4e7e-ac50-d850126aa325?ref=producthunt) <- 4th best product on PH!
 - Add your project! contact@eyegestures.com or PR
+
+Subscribe and get access to our software:
+<p align="left">
+  <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 
 ### 💻 Install
 ```
