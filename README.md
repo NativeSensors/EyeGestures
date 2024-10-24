@@ -37,7 +37,7 @@ Sponsor us and we can add your link, banner or other promo materials!
   </p>
 <p align="center">
   <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/3b38d73d-bb6f-4f31-b67d-231ac4cd04cb" width="300" height="150">
-  <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/1715b4df-7ac3-479e-b51a-f6d800ea8ea5" width="300" height="150">
+  <img src="https://github.com/user-attachments/assets/33e7782b-7977-4f88-ad54-c43d44c6dced" width="300" height="150">
 </p>
 
 ### 🔨 Projects build with EyeGestures: 
