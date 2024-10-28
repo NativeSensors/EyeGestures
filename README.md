@@ -59,13 +59,16 @@ python3 -m pip install eyeGestures
 >[!WARNING]
 >some users report that mediapipe, scikit-learn or opencv is not installing together with eyegestures. To fix it, just install it with pip.
 
-### ⚙️ Try 
-```
-python3 examples/simple_example.py
-```
+### ⚙️ Try
+
+Tracker works best when your camera or laptop is at arm's length, similar to how you would typically use it. If you are further away, it may be less responsive for now - currently working on solving this issue.
 
 ```
 python3 examples/simple_example_v2.py
+```
+
+```
+python3 examples/simple_example.py [legacy tracker, will become obsolete]
 ```
 
 ### 🔧 Build your own:
