@@ -17,9 +17,10 @@ class Calibrator:
         self.Y_y = []
         self.Y_x = []
         self.reg = None
-        self.reg_x = scireg.Lasso(alpha=0.5)
-        self.reg_y = scireg.Lasso(alpha=0.5)
+        self.reg_x = scireg.Ridge(alpha=0.5)
+        self.reg_y = scireg.Ridge(alpha=0.5)
         self.fitted = False
+        self.cv_not_set = True
 
         self.matrix = CalibrationMatrix()
         
@@ -41,7 +42,24 @@ class Calibrator:
         self.reg_y.fit(__tmp_X,__tmp_Y_y)
         self.fitted = True
 
+    def post_fit(self):
+        if self.cv_not_set:
+            self.reg_x = scireg.LassoCV(cv=50)
+            self.reg_y = scireg.LassoCV(cv=50)
+
+            __tmp_X   = np.array(self.X)
+            __tmp_Y_y = np.array(self.Y_y)
+            __tmp_Y_x = np.array(self.Y_x)
+
+            self.reg_x.fit(__tmp_X,__tmp_Y_x)
+            self.reg_y.fit(__tmp_X,__tmp_Y_y)
+            self.fitted = True
+
+            self.cv_not_set = False
+
+
     def predict(self,x):
+
         if self.fitted:
             x = x.flatten()
             x = x.reshape(1, -1)

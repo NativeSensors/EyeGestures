@@ -136,18 +136,19 @@ class EyeGestures_v2:
 
         if self.filled_points[context] < self.average_points[context].shape[0] and (y_point != np.array([0.0,0.0])).any():
             self.filled_points[context] += 1
-
         averaged_point = (np.sum(self.average_points[context][:,:],axis=0) + (classic_point * self.CN))/(self.filled_points[context] + self.CN)
 
         if self.calibration[context] and (self.clb[context].insideClbRadius(averaged_point,width,height) or self.filled_points[context] < self.average_points[context].shape[0] * 10):
             self.clb[context].add(key_points,self.clb[context].getCurrentPoint(width,height))
+        else: 
+            self.clb[context].post_fit()
 
         if self.calibration[context] and self.clb[context].insideAcptcRadius(averaged_point,width,height):
             self.iterator[context] += 1
             if self.iterator[context] > 10:
                 self.iterator[context] = 0
                 self.clb[context].movePoint()
-                # self.clb[context].increase_precision()
+        
 
         gevent = Gevent(averaged_point,blink,fixation)
         cevent = Cevent(self.clb[context].getCurrentPoint(width,height),self.clb[context].acceptance_radius, self.clb[context].calibration_radius)
