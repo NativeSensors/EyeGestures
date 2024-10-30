@@ -12,11 +12,17 @@ class Calibrator:
     PRECISION_STEP = 10
     ACCEPTANCE_RADIUS = 500
 
+    # Maybe this one is better for saccadic movements?
     def __init__(self,CALIBRATION_RADIUS=1000):
         self.X = []
         self.Y_y = []
         self.Y_x = []
         self.reg = None
+        self.saccades_x = scireg.Ridge(alpha=0.5)
+        self.saccades_y = scireg.Ridge(alpha=0.5)
+        self.fixations_x = scireg.Ridge(alpha=0.5)
+        self.fixations_y = scireg.Ridge(alpha=0.5)
+
         self.reg_x = scireg.Ridge(alpha=0.5)
         self.reg_y = scireg.Ridge(alpha=0.5)
         self.fitted = False
@@ -38,21 +44,25 @@ class Calibrator:
         __tmp_Y_y = np.array(self.Y_y)
         __tmp_Y_x = np.array(self.Y_x)
 
-        self.reg_x.fit(__tmp_X,__tmp_Y_x)
-        self.reg_y.fit(__tmp_X,__tmp_Y_y)
+        self.fixations_x.fit(__tmp_X,__tmp_Y_x)
+        self.fixations_y.fit(__tmp_X,__tmp_Y_y)
+        self.saccades_x.fit(__tmp_X,__tmp_Y_x)
+        self.saccades_y.fit(__tmp_X,__tmp_Y_y)
+        
         self.fitted = True
 
+    # maybe this tracker is better for fixation or slow movements
     def post_fit(self):
         if self.cv_not_set:
-            self.reg_x = scireg.LassoCV(cv=50)
-            self.reg_y = scireg.LassoCV(cv=50)
+            self.fixations_x = scireg.LassoCV(cv=50,max_iter=5000)
+            self.fixations_y = scireg.LassoCV(cv=50,max_iter=5000)
 
             __tmp_X   = np.array(self.X)
             __tmp_Y_y = np.array(self.Y_y)
             __tmp_Y_x = np.array(self.Y_x)
 
-            self.reg_x.fit(__tmp_X,__tmp_Y_x)
-            self.reg_y.fit(__tmp_X,__tmp_Y_y)
+            self.fixations_x.fit(__tmp_X,__tmp_Y_x)
+            self.fixations_y.fit(__tmp_X,__tmp_Y_y)
             self.fitted = True
 
             self.cv_not_set = False
@@ -65,6 +75,28 @@ class Calibrator:
             x = x.reshape(1, -1)
             y_x = self.reg_x.predict(x)[0]
             y_y = self.reg_y.predict(x)[0]
+            return np.array([y_x,y_y])
+        else:
+            return np.array([0.0,0.0])
+
+    def predict_saccadess(self,x):
+
+        if self.fitted:
+            x = x.flatten()
+            x = x.reshape(1, -1)
+            y_x = self.saccades_x.predict(x)[0]
+            y_y = self.saccades_y.predict(x)[0]
+            return np.array([y_x,y_y])
+        else:
+            return np.array([0.0,0.0])
+    
+    def predict_fixations(self,x):
+
+        if self.fitted:
+            x = x.flatten()
+            x = x.reshape(1, -1)
+            y_x = self.fixations_x.predict(x)[0]
+            y_y = self.fixations_y.predict(x)[0]
             return np.array([y_x,y_y])
         else:
             return np.array([0.0,0.0])
