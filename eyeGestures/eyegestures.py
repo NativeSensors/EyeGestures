@@ -30,6 +30,8 @@ class EyeGestures_v2:
         self.CN = 5
 
         self.average_points = dict()
+        self.average_points_saccades = dict()
+        self.average_points_fixations = dict()
         self.iterator = dict()
         self.filled_points= dict()
         self.enable_CN = False
@@ -73,6 +75,12 @@ class EyeGestures_v2:
             return np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation, cevent
         return np.array((0.0, 0.0)), np.array([]), 0, 0, None
 
+    def whichAlgorithm(self,context="main"):
+        if context in self.clb:
+            return self.clb[context].whichAlgorithm()
+        else:
+            return "None"
+
     def setClassicImpact(self,impact):
         self.CN = impact
 
@@ -97,8 +105,12 @@ class EyeGestures_v2:
         if context not in self.clb:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
             self.average_points[context] = Buffor(20)
+            self.average_points_saccades[context] = Buffor(20)
+            self.average_points_fixations[context] = Buffor(20)
             self.iterator[context] = 0
             self.average_points[context] = np.zeros((20,2))
+            self.average_points_saccades[context] = np.zeros((20,2))
+            self.average_points_fixations[context] = np.zeros((20,2))
             self.filled_points[context] = 0
             self.calibration[context] = False
 
@@ -137,7 +149,7 @@ class EyeGestures_v2:
         if self.filled_points[context] < self.average_points[context].shape[0] and (y_point != np.array([0.0,0.0])).any():
             self.filled_points[context] += 1
         averaged_point = (np.sum(self.average_points[context][:,:],axis=0) + (classic_point * self.CN))/(self.filled_points[context] + self.CN)
-
+        
         if self.calibration[context] and (self.clb[context].insideClbRadius(averaged_point,width,height) or self.filled_points[context] < self.average_points[context].shape[0] * 10):
             self.clb[context].add(key_points,self.clb[context].getCurrentPoint(width,height))
         else: 

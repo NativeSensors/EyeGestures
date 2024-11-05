@@ -67,7 +67,7 @@ while running:
     ret, frame = cap.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    calibrate = (iterator <= 25) # calibrate 25 points
+    calibrate = (iterator <= 10) # calibrate 25 points
 
     event, calibration = gestures.step(frame, calibrate, screen_width, screen_height, context="my_context")
     
@@ -95,6 +95,10 @@ while running:
         else:
             pass
         pygame.draw.circle(screen, RED, event.point, 50)
+        my_font = pygame.font.SysFont('Comic Sans MS', 30)
+        text_surface = my_font.render(f'{gestures.whichAlgorithm(context="my_context")}', False, (0, 0, 0))
+        screen.blit(text_surface, event.point)
+        
     pygame.display.flip()
 
     # Cap the frame rate

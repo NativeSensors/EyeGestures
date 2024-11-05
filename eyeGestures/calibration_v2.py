@@ -2,6 +2,8 @@ import numpy as np
 import sklearn.linear_model as scireg
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
+import asyncio
+import threading
 
 def euclidean_distance(point1, point2):
     return np.linalg.norm(point1 - point2)
@@ -19,6 +21,7 @@ class Calibrator:
         self.reg = None
         self.reg_x = scireg.Ridge(alpha=0.5)
         self.reg_y = scireg.Ridge(alpha=0.5)
+        self.current_algorithm = "Ridge"
         self.fitted = False
         self.cv_not_set = True
 
@@ -28,6 +31,9 @@ class Calibrator:
         self.precision_step = self.PRECISION_STEP
         self.acceptance_radius = int(CALIBRATION_RADIUS/2)
         self.calibration_radius = int(CALIBRATION_RADIUS)
+
+        self.lock = threading.Lock()
+        self.calcualtion_coroutine = threading.Thread(target=self.__async_fit)
 
     def add(self,x,y):
         self.X.append(x.flatten())
@@ -42,32 +48,47 @@ class Calibrator:
         self.reg_y.fit(__tmp_X,__tmp_Y_y)
         self.fitted = True
 
-    def post_fit(self):
-        if self.cv_not_set:
-            self.reg_x = scireg.LassoCV(cv=50)
-            self.reg_y = scireg.LassoCV(cv=50)
+    # This coroutine helps to asynchronously recalculate results
+    def __async_fit(self):
+        try:
+            tmp_fixations_x = scireg.LassoCV(cv=50,max_iter=5000)
+            tmp_fixations_y = scireg.LassoCV(cv=50,max_iter=5000)
 
             __tmp_X   = np.array(self.X)
             __tmp_Y_y = np.array(self.Y_y)
             __tmp_Y_x = np.array(self.Y_x)
 
-            self.reg_x.fit(__tmp_X,__tmp_Y_x)
-            self.reg_y.fit(__tmp_X,__tmp_Y_y)
-            self.fitted = True
+            tmp_fixations_x.fit(__tmp_X,__tmp_Y_x)
+            tmp_fixations_y.fit(__tmp_X,__tmp_Y_y)
 
+            with self.lock:
+                self.fixations_x = tmp_fixations_x
+                self.fixations_y = tmp_fixations_y
+                self.fitted = True
+                self.current_algorithm = "LassoCV"
+        except Exception as e:
+            print(f"Exception as {e}")
+            self.cv_not_set = True
+
+    def post_fit(self):
+        if self.cv_not_set:
+            self.calcualtion_coroutine.start()
             self.cv_not_set = False
 
+    def whichAlgorithm(self):
+        with self.lock:
+            return self.current_algorithm
 
     def predict(self,x):
-
-        if self.fitted:
-            x = x.flatten()
-            x = x.reshape(1, -1)
-            y_x = self.reg_x.predict(x)[0]
-            y_y = self.reg_y.predict(x)[0]
-            return np.array([y_x,y_y])
-        else:
-            return np.array([0.0,0.0])
+        with self.lock:
+            if self.fitted:
+                x = x.flatten()
+                x = x.reshape(1, -1)
+                y_x = self.reg_x.predict(x)[0]
+                y_y = self.reg_y.predict(x)[0]
+                return np.array([y_x,y_y])
+            else:
+                return np.array([0.0,0.0])
 
     def movePoint(self):
         self.matrix.movePoint()
