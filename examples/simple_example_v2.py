@@ -67,7 +67,7 @@ while running:
     ret, frame = cap.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    calibrate = (iterator <= 10) # calibrate 25 points
+    calibrate = (iterator <= 25) # calibrate 25 points
 
     event, calibration = gestures.step(frame, calibrate, screen_width, screen_height, context="my_context")
     
