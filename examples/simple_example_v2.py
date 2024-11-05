@@ -94,7 +94,10 @@ while running:
             screen.blit(text_surface, text_square)
         else:
             pass
-        pygame.draw.circle(screen, RED, event.point, 50)
+        if gestures.whichAlgorithm(context="my_context") == "Ridge":
+            pygame.draw.circle(screen, RED, event.point, 50)
+        if gestures.whichAlgorithm(context="my_context") == "LassoCV":
+            pygame.draw.circle(screen, BLUE, event.point, 50)
         my_font = pygame.font.SysFont('Comic Sans MS', 30)
         text_surface = my_font.render(f'{gestures.whichAlgorithm(context="my_context")}', False, (0, 0, 0))
         screen.blit(text_surface, event.point)
