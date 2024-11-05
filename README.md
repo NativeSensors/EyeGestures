@@ -195,11 +195,6 @@ Support project on Polar (if you want to help we provide access to alphas versio
 
 <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 
-Or buy our merch on redbubble: 
-https://www.redbubble.com/shop/ap/165874966?asc=u
-![image](https://github.com/user-attachments/assets/9b863bbb-fc30-4ee0-bd36-f1d0b8015888)
-
-
 <picture>
   <source
     media="(prefers-color-scheme: dark)"
