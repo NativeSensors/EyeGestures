@@ -36,7 +36,7 @@ class Heatmap():
         if len(retArray[0]) > 0:
             ret = retArray[0][- int(last)] * self.step
 
-            if not ret == np.NAN:
+            if not ret == np.nan:
                 ret = int(ret)
 
         return ret
