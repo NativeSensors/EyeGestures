@@ -8,13 +8,19 @@
 
 ## EYEGESTURES
 
-
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eye-tracking and eye-driven interfaces without requirement of obtaining expensive hardware.
 
 Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)! 
 
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/eyeGestures)
 <a href="https://polar.sh/NativeSensors"><img src="https://polar.sh/embed/seeks-funding-shield.svg?org=NativeSensors" /></a>
+
+> [!IMPORTANT]  
+> EyeGestures is a fully volunteer-based project and exists thanks to your donations and support.
+>
+> <a href="https://buy.polar.sh/polar_cl_H2FqQHunwgXtU7i9mP7VJ95OZ10XVO3vm6MpSimoPPg"><img src="https://polar.sh/embed/product.svg?organizationId=95cd73d8-20dc-4457-9b70-618d9a6a4799&productId=dcf62f17-a82d-4c27-b58f-2db5ca7531ba&productPriceId=17a8e9ba-6705-41fd-a45e-120257b9775d&darkmode" alt="Donation" /></a>
+
+
 ### 💜 Sponsors: 
 
 📢📢 **We are looking for business partnerships and sponsors!** 📢📢
@@ -171,7 +177,7 @@ If you are building publicly available product, and have no commercial license, 
 
 ### 📇 Find us:
 - [RSS](https://polar.sh/NativeSensors/rss?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRfaWQiOiJkMDYxMDFiOC0xYzYyLTQ1MTYtYjg3YS03NTFhOTM3OTIxZmUiLCJzY29wZXMiOiJhcnRpY2xlczpyZWFkIiwidHlwZSI6ImF1dGgiLCJleHAiOjE3NDMxNjg3ODh9.djoi5ARWHr-xFW_XJ6Fwal3JUT1fAbvx4Npl-daBC5U)
-- [discord](https://discord.gg/KmEgWVgn)
+- [discord](https://discord.gg/sqKdKBJ6)
 - [twitter](https://twitter.com/PW4ltz)
 - [daily.dev](https://dly.to/JEe1Sz6vLey)
 - email: contact@eyegestures.com
