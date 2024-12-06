@@ -33,23 +33,43 @@ class Calibrator:
         self.calibration_radius = int(CALIBRATION_RADIUS)
 
         self.lock = threading.Lock()
-        self.calcualtion_coroutine = threading.Thread(target=self.__async_fit)
+        self.calcualtion_coroutine = threading.Thread(target=self.__async_post_fit)
+        self.fit_coroutines = [] 
+
+    def __launch_fit(self):
+        coroutine = threading.Thread(target=self.__async_fit)
+        self.fit_coroutines.append(coroutine)
+        coroutine.start()
+        self.__join_finished()
+
+    def __join_finished(self):
+        for coroutine in self.fit_coroutines:
+            if not coroutine.is_alive():
+                coroutine.join()
+
 
     def add(self,x,y):
         self.X.append(x.flatten())
         self.Y_y.append(y[1])
         self.Y_x.append(y[0])
 
-        __tmp_X   = np.array(self.X)
-        __tmp_Y_y = np.array(self.Y_y)
-        __tmp_Y_x = np.array(self.Y_x)
-
-        self.reg_x.fit(__tmp_X,__tmp_Y_x)
-        self.reg_y.fit(__tmp_X,__tmp_Y_y)
-        self.fitted = True
+        self.__launch_fit()
 
     # This coroutine helps to asynchronously recalculate results
     def __async_fit(self):
+        try:
+            with self.lock:
+                __tmp_X   = np.array(self.X)
+                __tmp_Y_y = np.array(self.Y_y)
+                __tmp_Y_x = np.array(self.Y_x)
+                self.reg_x.fit(__tmp_X,__tmp_Y_x)
+                self.reg_y.fit(__tmp_X,__tmp_Y_y)
+                self.fitted = True
+        except Exception as e:
+            print(f"Exception as {e}")
+
+    # This coroutine helps to asynchronously recalculate results
+    def __async_post_fit(self):
         try:
             tmp_fixations_x = scireg.LassoCV(cv=50,max_iter=5000)
             tmp_fixations_y = scireg.LassoCV(cv=50,max_iter=5000)
@@ -138,4 +158,6 @@ class CalibrationMatrix:
 
     def getCurrentPoint(self,width=1.0,height=1.0):
         it = self.iterator
+        print(self.points[it,0], width, self.points[it,1], height)
+        print(self.points[it,0]* width, self.points[it,1]* height)
         return np.array([self.points[it,0] * width, self.points[it,1] * height])
