@@ -35,10 +35,10 @@ Sponsor us and we can add your link, banner or other promo materials!
 ```
 <!-- POLAR type=ads id=203bbe subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
 
-<!-- POLAR-END id=eizdelwu -->
+<!-- POLAR-END id=eizdelw -->
 
 <p align="center">
-  <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/2ad25252-e96e-47d4-b25f-c47ba7f0f4f3" width="300" height="150">
+  <img src="https://github.com/user-attachments/assets/3ce0130a-1daa-4710-ae8c-0ee76ee3d35b" width="300" height="150">
   <img src="https://github.com/NativeSensors/EyeGestures/assets/40773550/923e22a1-7fd7-4c06-9804-256aca22be21" width="300" height="150">
   </p>
 <p align="center">
