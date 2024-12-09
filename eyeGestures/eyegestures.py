@@ -13,6 +13,145 @@ import random
 
 VERSION = "2.0.0"
 
+class EyeGestures_v3:
+    """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
+
+    def __init__(self, calibration_radius = 1000):
+        self.monitor_width  = 1
+        self.monitor_height = 1
+        self.calibration_radius = calibration_radius 
+
+        self.clb = dict() # Calibrator_v2()
+        self.cap = None
+        self.gestures = EyeGestures_v1(285,115,200,100)
+
+        self.calibration = dict()
+
+        self.average_points = dict()
+        self.iterator = dict()
+        self.filled_points= dict()
+        self.enable_CN = False
+        self.calibrate_gestures = False
+
+        self.fix = 0.8
+
+    def saveModel(self, context = "main"):
+        if context in self.clb:
+            return pickle.dumps(self.clb[context])
+
+    def loadModel(self,model, context = "main"):
+        self.clb[context] = pickle.loads(model)
+
+    def uploadCalibrationMap(self,points,context = "main"):
+        self.addContext(context)
+        self.clb[context].updMatrix(np.array(points))
+
+    def getLandmarks(self, frame, calibrate = False, context="main"):
+
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.flip(frame,1)
+        # frame = cv2.resize(frame, (360, 640))
+
+        event, cevent = self.gestures.step(
+            frame,
+            context,
+            calibrate, # set calibration - switch to False to stop calibration
+            self.monitor_width,
+            self.monitor_height,
+            0, 0, self.fix, 100)
+
+        if event is not None or cevent is not None: 
+            cursor_x, cursor_y = event.point[0],event.point[1]
+            l_eye_landmarks = event.l_eye.getLandmarks()
+            r_eye_landmarks = event.r_eye.getLandmarks()
+
+            # eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
+            key_points = np.concatenate((l_eye_landmarks,r_eye_landmarks))
+            return np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation, cevent
+        return np.array((0.0, 0.0)), np.array([]), 0, 0, None
+
+    def whichAlgorithm(self,context="main"):
+        if context in self.clb:
+            return self.clb[context].whichAlgorithm()
+        else:
+            return "None"
+
+    def reset(self, context = "main"):
+        self.filled_points[context] = 0
+        if context in self.clb:
+           self.addContext(context)
+
+    def setFixation(self,fix):
+        self.fix = fix
+
+    def enableCNCalib(self):
+        self.enable_CN = True
+
+    def disableCNCalib(self):
+        self.enable_CN = False
+
+    def addContext(self, context):
+        if context not in self.clb:
+            self.clb[context] = Calibrator_v2(self.calibration_radius)
+            self.average_points[context] = Buffor(5)
+            self.iterator[context] = 0
+            self.average_points[context] = np.zeros((20,2))
+            self.filled_points[context] = 0
+            self.calibration[context] = False
+
+
+    def step(self, frame, calibration, width, height, context="main"):
+        self.addContext(context)
+
+        self.calibration[context] = calibration
+        self.monitor_width = width
+        self.monitor_height = height
+
+        classic_point, key_points, blink, fixation, cevent = self.getLandmarks(frame,
+                                                                               self.calibrate_gestures and self.enable_CN,
+                                                                               context = context)
+
+        if cevent is None:
+            return (None, None)
+
+        margin = 10
+        if (classic_point[0] <= margin) and self.calibration[context]:
+            self.calibrate_gestures = cevent.calibration
+        elif (classic_point[0] >= width - margin) and self.calibration[context]:
+            self.calibrate_gestures = cevent.calibration
+        elif (cevent.point[1] <= margin) and self.calibration[context]:
+            self.calibrate_gestures = cevent.calibration
+        elif (classic_point[1] >= height - margin) and self.calibration[context]:
+            self.calibrate_gestures = cevent.calibration
+        else:
+            self.calibrate_gestures = False
+
+        y_point = self.clb[context].predict(key_points)
+        self.average_points[context][1:,:] = self.average_points[context][:(self.average_points[context].shape[0] - 1),:]
+        if fixation <= self.fix:
+            self.average_points[context][0,:] = y_point
+
+        if self.filled_points[context] < self.average_points[context].shape[0] and (y_point != np.array([0.0,0.0])).any():
+            self.filled_points[context] += 1
+        averaged_point = np.sum(self.average_points[context][:,:],axis=0)/(self.filled_points[context])
+
+        if self.calibration[context] and (self.clb[context].insideClbRadius(averaged_point,width,height) or self.filled_points[context] < self.average_points[context].shape[0] * 10):
+            self.clb[context].add(key_points,self.clb[context].getCurrentPoint(width,height))
+        else: 
+            self.clb[context].post_fit()
+
+        if self.calibration[context] and self.clb[context].insideAcptcRadius(averaged_point,width,height):
+            self.iterator[context] += 1
+            if self.iterator[context] > 10:
+                self.iterator[context] = 0
+                self.clb[context].movePoint()
+        
+
+        gevent = Gevent(averaged_point,blink,fixation)
+        cevent = Cevent(self.clb[context].getCurrentPoint(width,height),self.clb[context].acceptance_radius, self.clb[context].calibration_radius)
+        return (gevent, cevent)
+
+
 class EyeGestures_v2:
     """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
 
@@ -30,8 +169,6 @@ class EyeGestures_v2:
         self.CN = 5
 
         self.average_points = dict()
-        self.average_points_saccades = dict()
-        self.average_points_fixations = dict()
         self.iterator = dict()
         self.filled_points= dict()
         self.enable_CN = False
@@ -104,13 +241,9 @@ class EyeGestures_v2:
     def addContext(self, context):
         if context not in self.clb:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
-            self.average_points[context] = Buffor(20)
-            self.average_points_saccades[context] = Buffor(20)
-            self.average_points_fixations[context] = Buffor(20)
+            self.average_points[context] = Buffor(5)
             self.iterator[context] = 0
-            self.average_points[context] = np.zeros((20,2))
-            self.average_points_saccades[context] = np.zeros((20,2))
-            self.average_points_fixations[context] = np.zeros((20,2))
+            self.average_points[context] = np.zeros((5,2))
             self.filled_points[context] = 0
             self.calibration[context] = False
 
