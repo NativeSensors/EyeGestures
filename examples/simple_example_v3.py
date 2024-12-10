@@ -34,9 +34,9 @@ y = np.arange(0, 1.1, 0.2)
 xx, yy = np.meshgrid(x, y)
 
 targets = [
-    (0.6,0.3,0.1,0.05),
-    (0.85,0.6,0.15,0.1),
-    (0.1,0.9,0.1,0.5)
+    (0.6,0.3,0.1,0.05,"target_1"),
+    (0.8,0.6,0.15,0.1,"target_2"),
+    (0.1,0.9,0.1,0.1,"target_3")
 ]
 
 calibration_map = np.column_stack([xx.ravel(), yy.ravel()])
@@ -114,13 +114,16 @@ while running:
                 int(target[0] * screen_width),
                 int(target[1] * screen_height),
                 int(target[2] * screen_width),
-                int(target[3] * screen_height)
+                int(target[3] * screen_height),
             ))
+            text_surface = my_font.render(f'{target[4]}', False, (0, 0, 0))
+            screen.blit(text_surface, (int(target[0] * screen_width),int(target[1] * screen_height)))
+
 
         my_font = pygame.font.SysFont('Comic Sans MS', 30)
         text_surface = my_font.render(f'{gestures.whichAlgorithm(context="my_context")}', False, (0, 0, 0))
         screen.blit(text_surface, event.point)
-        
+
     pygame.display.flip()
 
     # Cap the frame rate
