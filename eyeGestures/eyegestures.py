@@ -26,7 +26,6 @@ class EyeGestures_v3:
 
         self.clb = dict() # Calibrator_v2()
         self.cap = None
-        self.gestures = EyeGestures_v1(285,115,200,100)
 
         self.calibration = dict()
 
@@ -40,14 +39,12 @@ class EyeGestures_v3:
         self.face = Face()
 
         # this has to be contexted
-        self.prev_timestamp = time.time()
-        self.prev_point = np.array((0.0,0.0))
-        self.fix = 0.8
-
-        self.velocity_max = 0
-        self.velocity_min = 1000000000
-
-        self.fixationTracker = Fixation(0,0,100)
+        self.prev_timestamp     = dict()
+        self.prev_point         = dict()
+        self.fix                = dict()
+        self.velocity_max       = dict()
+        self.velocity_min       = dict()
+        self.fixationTracker    = dict()
 
     def saveModel(self, context = "main"):
         if context in self.clb:
@@ -107,6 +104,12 @@ class EyeGestures_v3:
             self.average_points[context] = np.zeros((20,2))
             self.filled_points[context] = 0
             self.calibration[context] = False
+            self.prev_timestamp[context] = time.time()
+            self.prev_point[context] = np.array((0.0,0.0))
+            self.fix[context] = 0.8
+            self.velocity_max[context] = 0
+            self.velocity_min[context] = 100000000
+            self.fixationTracker[context] = Fixation(0,0,100)
 
 
     def step(self, frame, calibration, width, height, context="main"):
@@ -127,19 +130,19 @@ class EyeGestures_v3:
             self.filled_points[context] += 1
         averaged_point = np.sum(self.average_points[context][:,:],axis=0)/(self.filled_points[context])
 
-        fixation = self.fixationTracker.process(
+        fixation = self.fixationTracker[context].process(
             averaged_point[0], averaged_point[1])
 
-        duration = time.time() - self.prev_timestamp
-        velocity = abs(averaged_point - self.prev_point)/duration
+        duration = time.time() - self.prev_timestamp[context]
+        velocity = abs(averaged_point - self.prev_point[context])/duration
         velocity = np.sqrt(velocity[0]**2+velocity[1]**2)
-        self.prev_point = averaged_point
-        self.prev_timestamp = time.time()
+        self.prev_point[context] = averaged_point
+        self.prev_timestamp[context] = time.time()
  
-        self.velocity_max = max(self.velocity_max,velocity)
-        self.velocity_min = min(self.velocity_min,velocity)
+        self.velocity_max[context] = max(self.velocity_max[context],velocity)
+        self.velocity_min[context] = min(self.velocity_min[context],velocity)
 
-        saccades = velocity > (self.velocity_max+self.velocity_min)/4
+        saccades = velocity > (self.velocity_max[context]+self.velocity_min[context])/4
 
         if self.calibration[context] and (self.clb[context].insideClbRadius(averaged_point,width,height) or self.filled_points[context] < self.average_points[context].shape[0] * 10):
             self.clb[context].add(key_points,self.clb[context].getCurrentPoint(width,height))

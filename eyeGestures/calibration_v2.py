@@ -158,6 +158,4 @@ class CalibrationMatrix:
 
     def getCurrentPoint(self,width=1.0,height=1.0):
         it = self.iterator
-        print(self.points[it,0], width, self.points[it,1], height)
-        print(self.points[it,0]* width, self.points[it,1]* height)
         return np.array([self.points[it,0] * width, self.points[it,1] * height])

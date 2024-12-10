@@ -33,6 +33,12 @@ y = np.arange(0, 1.1, 0.2)
 
 xx, yy = np.meshgrid(x, y)
 
+targets = [
+    (0.6,0.3,0.1,0.05),
+    (0.85,0.6,0.15,0.1),
+    (0.1,0.9,0.1,0.5)
+]
+
 calibration_map = np.column_stack([xx.ravel(), yy.ravel()])
 np.random.shuffle(calibration_map)
 gestures.uploadCalibrationMap(calibration_map,context="my_context")
@@ -99,6 +105,18 @@ while running:
             pygame.draw.circle(screen, BLUE, event.point, 50)
         if event.saccades:
             pygame.draw.circle(screen, GREEN, event.point, 50)
+
+        for target in targets:
+            pygame.draw.rect(
+                screen,
+                RED,
+                pygame.Rect(
+                int(target[0] * screen_width),
+                int(target[1] * screen_height),
+                int(target[2] * screen_width),
+                int(target[3] * screen_height)
+            ))
+
         my_font = pygame.font.SysFont('Comic Sans MS', 30)
         text_surface = my_font.render(f'{gestures.whichAlgorithm(context="my_context")}', False, (0, 0, 0))
         screen.blit(text_surface, event.point)
