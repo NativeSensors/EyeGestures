@@ -79,11 +79,43 @@ python3 examples/simple_example.py [legacy tracker, will become obsolete]
 
 ### 🔧 Build your own:
 
+#### Using EyeGesture Engine V3 - Faster smaller better:
+
+```python
+from eyeGestures.utils import VideoCapture
+from eyeGestures import EyeGestures_v3
+
+# Initialize gesture engine and video capture
+gestures = EyeGestures_v3()
+cap = VideoCapture(0)
+calibrate = True
+screen_width = 500
+screen_height= 500
+
+# Process each frame
+while True:
+  ret, frame = cap.read()
+  event, cevent = gestures.step(frame,
+    calibrate,
+    screen_width,
+    screen_height,
+    context="my_context")
+
+  if event:
+    cursor_x, cursor_y = event.point[0], event.point[1]
+    fixation = event.fixation
+    saccadess = event.saccadess # saccadess movement detector
+    # calibration_radius: radius for data collection during calibration
+```
+
+<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+<!-- POLAR-END id=eizdelwu -->
+
 #### Using EyeGesture Engine V2 - Machine Learning Approach:
 
 ```python
 from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures_v2
+from eyeGestures import EyeGestures_v2
 
 # Initialize gesture engine and video capture
 gestures = EyeGestures_v2()
@@ -131,11 +163,11 @@ It is also worth to know that you can enable hidden calibration for V1 (same cal
 gestures.enableCNCalib()
 ```
  
-#### Using EyeGesture Engine V1 - Model-Based Approach:
+#### Using EyeGesture Engine V1 - Model-Based Approach [not recommended]:
 
 ```python
 from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures_v1
+from eyeGestures import EyeGestures_v1
 
 # Initialize gesture engine with RoI parameters
 gestures = EyeGestures_v1()

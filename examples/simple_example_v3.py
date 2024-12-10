@@ -23,7 +23,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}/..')
 
 from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures_v3 import EyeGestures_v3
+from eyeGestures import EyeGestures_v3
 
 gestures = EyeGestures_v3()
 cap = VideoCapture(0)
