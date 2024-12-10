@@ -104,7 +104,7 @@ while True:
   if event:
     cursor_x, cursor_y = event.point[0], event.point[1]
     fixation = event.fixation
-    saccadess = event.saccadess # saccadess movement detector
+    saccades = event.saccadess # saccadess movement detector
     # calibration_radius: radius for data collection during calibration
 ```
 
