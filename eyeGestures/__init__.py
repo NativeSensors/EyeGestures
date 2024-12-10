@@ -121,6 +121,9 @@ class EyeGestures_v3:
 
         if self.filled_points[context] < self.average_points[context].shape[0] and (y_point != np.array([0.0,0.0])).any():
             self.filled_points[context] += 1
+        if self.filled_points[context] == 0:
+            self.filled_points[context] = 1
+
         averaged_point = np.sum(self.average_points[context][:,:],axis=0)/(self.filled_points[context])
 
         fixation = self.fixationTracker[context].process(
@@ -156,7 +159,6 @@ class EyeGestures_v3:
         )
         cevent = Cevent(self.clb[context].getCurrentPoint(width,height),self.clb[context].acceptance_radius, self.clb[context].calibration_radius)
         return (gevent, cevent)
-
 
 class EyeGestures_v2:
     """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
@@ -249,7 +251,7 @@ class EyeGestures_v2:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
             self.average_points[context] = Buffor(20)
             self.iterator[context] = 0
-            self.average_points[context] = np.zeros((5,2))
+            self.average_points[context] = np.zeros((20,2))
             self.filled_points[context] = 0
             self.calibration[context] = False
 
@@ -299,6 +301,7 @@ class EyeGestures_v2:
             if self.iterator[context] > 10:
                 self.iterator[context] = 0
                 self.clb[context].movePoint()
+        
 
         gevent = Gevent(averaged_point,blink,fixation)
         cevent = Cevent(self.clb[context].getCurrentPoint(width,height),self.clb[context].acceptance_radius, self.clb[context].calibration_radius)
