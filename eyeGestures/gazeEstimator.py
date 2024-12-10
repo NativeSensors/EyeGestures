@@ -54,6 +54,7 @@ class GazeTracker:
         self.screen_man = ScreenManager()
 
         self.finder = FaceFinder()
+        self.face = Face()
 
         # those are used for analysis
         self.__headDir = [0.5, 0.5]
@@ -61,7 +62,6 @@ class GazeTracker:
         self.point_screen = [0.0, 0.0]
         self.freezed_point = [0.0, 0.0]
 
-        self.face = Face()
         self.GContext = GazeContext()
     #     self.calibration = False
 

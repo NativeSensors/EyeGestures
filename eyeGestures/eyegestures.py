@@ -1,12 +1,15 @@
 
 from eyeGestures.gazeEstimator import GazeTracker
 import eyeGestures.screenTracker.dataPoints as dp
+from eyeGestures.face import FaceFinder, Face
+from eyeGestures.Fixation import Fixation
 from eyeGestures.calibration_v1 import Calibrator as Calibrator_v1
 from eyeGestures.calibration_v2 import Calibrator as Calibrator_v2, CalibrationMatrix, euclidean_distance
 from eyeGestures.gevent import Gevent, Cevent
 from eyeGestures.utils import timeit, Buffor
 import numpy as np
 import pickle
+import time
 import cv2
 
 import random
@@ -33,7 +36,18 @@ class EyeGestures_v3:
         self.enable_CN = False
         self.calibrate_gestures = False
 
+        self.finder = FaceFinder()
+        self.face = Face()
+
+        # this has to be contexted
+        self.prev_timestamp = time.time()
+        self.prev_point = np.array((0.0,0.0))
         self.fix = 0.8
+
+        self.velocity_max = 0
+        self.velocity_min = 1000000000
+
+        self.fixationTracker = Fixation(0,0,100)
 
     def saveModel(self, context = "main"):
         if context in self.clb:
@@ -46,29 +60,30 @@ class EyeGestures_v3:
         self.addContext(context)
         self.clb[context].updMatrix(np.array(points))
 
-    def getLandmarks(self, frame, calibrate = False, context="main"):
+    def getLandmarks(self, frame):
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame,1)
         # frame = cv2.resize(frame, (360, 640))
 
-        event, cevent = self.gestures.step(
-            frame,
-            context,
-            calibrate, # set calibration - switch to False to stop calibration
-            self.monitor_width,
-            self.monitor_height,
-            0, 0, self.fix, 100)
-
-        if event is not None or cevent is not None: 
-            cursor_x, cursor_y = event.point[0],event.point[1]
-            l_eye_landmarks = event.l_eye.getLandmarks()
-            r_eye_landmarks = event.r_eye.getLandmarks()
-
+        try:
+            # decoupling from V1
+            self.face.process(
+                frame,
+                self.finder.find(frame)
+            )
+            l_eye = self.face.getLeftEye()
+            r_eye = self.face.getRightEye()
+            l_eye_landmarks = l_eye.getLandmarks()
+            r_eye_landmarks = r_eye.getLandmarks()
+            blink = l_eye.getBlink() and r_eye.getBlink()
+            
             # eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
             key_points = np.concatenate((l_eye_landmarks,r_eye_landmarks))
-            return np.array((cursor_x, cursor_y)), key_points, event.blink, event.fixation, cevent
-        return np.array((0.0, 0.0)), np.array([]), 0, 0, None
+            return key_points, blink
+        except:
+            pass
+        return np.array([]), 0
 
     def whichAlgorithm(self,context="main"):
         if context in self.clb:
@@ -83,12 +98,6 @@ class EyeGestures_v3:
 
     def setFixation(self,fix):
         self.fix = fix
-
-    def enableCNCalib(self):
-        self.enable_CN = True
-
-    def disableCNCalib(self):
-        self.enable_CN = False
 
     def addContext(self, context):
         if context not in self.clb:
@@ -107,33 +116,30 @@ class EyeGestures_v3:
         self.monitor_width = width
         self.monitor_height = height
 
-        classic_point, key_points, blink, fixation, cevent = self.getLandmarks(frame,
-                                                                               self.calibrate_gestures and self.enable_CN,
-                                                                               context = context)
+        key_points, blink = self.getLandmarks(frame)
 
-        if cevent is None:
-            return (None, None)
-
-        margin = 10
-        if (classic_point[0] <= margin) and self.calibration[context]:
-            self.calibrate_gestures = cevent.calibration
-        elif (classic_point[0] >= width - margin) and self.calibration[context]:
-            self.calibrate_gestures = cevent.calibration
-        elif (cevent.point[1] <= margin) and self.calibration[context]:
-            self.calibrate_gestures = cevent.calibration
-        elif (classic_point[1] >= height - margin) and self.calibration[context]:
-            self.calibrate_gestures = cevent.calibration
-        else:
-            self.calibrate_gestures = False
 
         y_point = self.clb[context].predict(key_points)
         self.average_points[context][1:,:] = self.average_points[context][:(self.average_points[context].shape[0] - 1),:]
-        if fixation <= self.fix:
-            self.average_points[context][0,:] = y_point
+        self.average_points[context][0,:] = y_point
 
         if self.filled_points[context] < self.average_points[context].shape[0] and (y_point != np.array([0.0,0.0])).any():
             self.filled_points[context] += 1
         averaged_point = np.sum(self.average_points[context][:,:],axis=0)/(self.filled_points[context])
+
+        fixation = self.fixationTracker.process(
+            averaged_point[0], averaged_point[1])
+
+        duration = time.time() - self.prev_timestamp
+        velocity = abs(averaged_point - self.prev_point)/duration
+        velocity = np.sqrt(velocity[0]**2+velocity[1]**2)
+        self.prev_point = averaged_point
+        self.prev_timestamp = time.time()
+ 
+        self.velocity_max = max(self.velocity_max,velocity)
+        self.velocity_min = min(self.velocity_min,velocity)
+
+        saccades = velocity > (self.velocity_max+self.velocity_min)/4
 
         if self.calibration[context] and (self.clb[context].insideClbRadius(averaged_point,width,height) or self.filled_points[context] < self.average_points[context].shape[0] * 10):
             self.clb[context].add(key_points,self.clb[context].getCurrentPoint(width,height))
@@ -145,9 +151,13 @@ class EyeGestures_v3:
             if self.iterator[context] > 10:
                 self.iterator[context] = 0
                 self.clb[context].movePoint()
-        
 
-        gevent = Gevent(averaged_point,blink,fixation)
+        gevent = Gevent(
+            point=averaged_point,
+            blink=blink,
+            fixation=fixation,
+            saccades=saccades
+        )
         cevent = Cevent(self.clb[context].getCurrentPoint(width,height),self.clb[context].acceptance_radius, self.clb[context].calibration_radius)
         return (gevent, cevent)
 
