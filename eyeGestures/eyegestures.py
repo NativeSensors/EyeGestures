@@ -100,7 +100,7 @@ class EyeGestures_v2:
     def addContext(self, context):
         if context not in self.clb:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
-            self.average_points[context] = Buffor(5)
+            self.average_points[context] = Buffor(20)
             self.iterator[context] = 0
             self.average_points[context] = np.zeros((5,2))
             self.filled_points[context] = 0
