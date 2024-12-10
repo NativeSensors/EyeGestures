@@ -14,11 +14,13 @@ class Gevent:
                  roi = None,
                  edges = None,
                  cluster = None,
-                 context = None):
+                 context = None,
+                 saccades = False):
 
         self.point = point
         self.blink = blink
         self.fixation = fixation
+        self.saccades = saccades
 
         # ALL DEBUG DATA
         self.roi = roi
