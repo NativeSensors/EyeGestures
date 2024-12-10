@@ -59,7 +59,7 @@ class Calibrator:
     def __async_fit(self):
         try:
             with self.lock:
-                __tmp_X   = np.array(self.X)
+                __tmp_X   = np.array(self.X, dtype=object)
                 __tmp_Y_y = np.array(self.Y_y)
                 __tmp_Y_x = np.array(self.Y_x)
                 self.reg_x.fit(__tmp_X,__tmp_Y_x)
