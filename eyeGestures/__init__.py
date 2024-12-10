@@ -102,7 +102,6 @@ class EyeGestures_v3:
             self.calibration[context] = False
             self.prev_timestamp[context] = time.time()
             self.prev_point[context] = np.array((0.0,0.0))
-            self.fix[context] = 0.8
             self.velocity_max[context] = 0
             self.velocity_min[context] = 100000000
             self.fixationTracker[context] = Fixation(0,0,100)
