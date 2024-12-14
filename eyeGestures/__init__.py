@@ -42,6 +42,8 @@ class EyeGestures_v3:
         self.velocity_min       = dict()
         self.fixationTracker    = dict()
 
+        self.starting_head_position = np.zeros((1,2))
+
     def saveModel(self, context = "main"):
         if context in self.clb:
             return pickle.dumps(self.clb[context])
@@ -57,26 +59,40 @@ class EyeGestures_v3:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame,1)
-        # frame = cv2.resize(frame, (360, 640))
 
-        try:
-            # decoupling from V1
-            self.face.process(
-                frame,
-                self.finder.find(frame)
-            )
-            l_eye = self.face.getLeftEye()
-            r_eye = self.face.getRightEye()
-            l_eye_landmarks = l_eye.getLandmarks()
-            r_eye_landmarks = r_eye.getLandmarks()
-            blink = l_eye.getBlink() and r_eye.getBlink()
-            
-            # eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
-            key_points = np.concatenate((l_eye_landmarks,r_eye_landmarks))
-            return key_points, blink
-        except:
-            pass
-        return np.array([]), 0
+        # try:
+        self.face.process(
+            frame,
+            self.finder.find(frame)
+        )
+
+        face_landmarks = self.face.getLandmarks()
+        l_eye = self.face.getLeftEye()
+        r_eye = self.face.getRightEye()
+        l_eye_landmarks = l_eye.getLandmarks()
+        r_eye_landmarks = r_eye.getLandmarks()
+        blink = l_eye.getBlink() and r_eye.getBlink()
+
+        # get x,y offset
+        x_offset = np.min(face_landmarks[:,0])
+        y_offset = np.min(face_landmarks[:,1])
+        x_width = np.max(face_landmarks[:,0]) - x_offset
+        y_width = np.max(face_landmarks[:,1]) - y_offset
+
+        # get head position
+        head_offset = np.zeros((2))
+        if np.array_equal(self.starting_head_position, np.zeros((2))):
+            self.starting_head_position = np.array([x_offset,y_offset])
+        else:
+            head_offset = np.array([x_offset,y_offset]) - self.starting_head_position
+
+        # eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
+        key_points = np.concatenate((l_eye_landmarks,r_eye_landmarks))
+        key_points[:,0] = key_points[:,0] - head_offset[:,0]
+        key_points[:,1] = key_points[:,1] - head_offset[:,1]
+
+        subframe = frame[int(y_offset):int(y_offset+y_width),int(x_offset):int(x_offset+x_width)]
+        return key_points, blink, subframe
 
     def whichAlgorithm(self,context="main"):
         if context in self.clb:
@@ -95,7 +111,6 @@ class EyeGestures_v3:
     def addContext(self, context):
         if context not in self.clb:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
-            self.average_points[context] = Buffor(5)
             self.iterator[context] = 0
             self.average_points[context] = np.zeros((20,2))
             self.filled_points[context] = 0
@@ -112,8 +127,7 @@ class EyeGestures_v3:
 
         self.calibration[context] = calibration
 
-        key_points, blink = self.getLandmarks(frame)
-
+        key_points, blink, sub_frame = self.getLandmarks(frame)
 
         y_point = self.clb[context].predict(key_points)
         self.average_points[context][1:,:] = self.average_points[context][:(self.average_points[context].shape[0] - 1),:]
@@ -155,7 +169,8 @@ class EyeGestures_v3:
             point=averaged_point,
             blink=blink,
             fixation=fixation,
-            saccades=saccades
+            saccades=saccades,
+            sub_frame=sub_frame
         )
         cevent = Cevent(self.clb[context].getCurrentPoint(width,height),self.clb[context].acceptance_radius, self.clb[context].calibration_radius)
         return (gevent, cevent)

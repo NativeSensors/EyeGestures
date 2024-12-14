@@ -15,7 +15,8 @@ class Gevent:
                  edges = None,
                  cluster = None,
                  context = None,
-                 saccades = False):
+                 saccades = False,
+                 sub_frame = None):
 
         self.point = point
         self.blink = blink
@@ -30,6 +31,7 @@ class Gevent:
         self.cluster = cluster
         self.context = context
         self.screen_man = screen_man
+        self.sub_frame = sub_frame
 
 
 class Cevent:
