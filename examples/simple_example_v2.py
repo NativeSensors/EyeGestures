@@ -13,7 +13,7 @@ screen_width = screen_info.current_w
 screen_height = screen_info.current_h
 
 # Set up the screen
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("EyeGestures v2 example")
 font_size = 48
 bold_font = pygame.font.Font(None, font_size)
@@ -23,7 +23,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}/..')
 
 from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures_v2
+from eyeGestures import EyeGestures_v2
 
 gestures = EyeGestures_v2()
 cap = VideoCapture(0)

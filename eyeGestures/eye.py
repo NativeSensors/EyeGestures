@@ -57,11 +57,13 @@ class Eye:
         # check if eye is left or right
         if self.side == "right":
             self.region = np.array(
-                landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
+                landmarks[self.RIGHT_EYE_KEYPOINTS])
+                # landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
 
         elif self.side == "left":
             self.region = np.array(
-                landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
+                landmarks[self.LEFT_EYE_KEYPOINTS])
+                # landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
 
         self.pupil = landmarks[self.pupil_index][0]
         self._process(self.image, self.region)
@@ -133,22 +135,24 @@ class Eye:
 
         mask = np.full((h, w), 0, dtype=np.uint8)
         background = np.zeros((h, w), dtype=np.uint8)
-        cv2.fillPoly(mask, [region], 0)
+
+        region_int = np.array(region,dtype=np.int32)
+        cv2.fillPoly(mask, [region_int], 0)
 
         masked_image = cv2.bitwise_not(background, cv2.cvtColor(
             image.copy(), cv2.COLOR_BGR2GRAY), mask=mask)
 
         margin = 2
-        min_x = np.min(region[:, 0]) - margin
-        max_x = np.max(region[:, 0]) + margin
-        min_y = np.min(region[:, 1]) - margin
-        max_y = np.max(region[:, 1]) + margin
+        min_x = np.min(region_int[:, 0]) - margin
+        max_x = np.max(region_int[:, 0]) + margin
+        min_y = np.min(region_int[:, 1]) - margin
+        max_y = np.max(region_int[:, 1]) + margin
 
         self.x = min_x
         self.y = min_y
 
-        self.width = np.max(region[:, 0]) - np.min(region[:, 0])
-        self.height = np.max(region[:, 1]) - np.min(region[:, 1])
+        self.width = np.max(region_int[:, 0]) - np.min(region_int[:, 0])
+        self.height = np.max(region_int[:, 1]) - np.min(region_int[:, 1])
 
         self.center_x = (min_x + max_x)/2
         self.center_y = (min_y + max_y)/2
@@ -158,18 +162,18 @@ class Eye:
 
         self.cut_image = masked_image[min_y:max_y, min_x:max_x]
         # print(f"here: {self.cut_image.shape,min_y,max_y,min_x,max_x}")
-        self.cut_image = cv2.cvtColor(self.cut_image, cv2.COLOR_GRAY2BGR)
+        # self.cut_image = cv2.cvtColor(self.cut_image, cv2.COLOR_GRAY2BGR)
 
-        for point in self.region:
-            point = point - (min_x, min_y)
-            cv2.circle(self.cut_image, point.astype(
-                int), 1, (255, 0, 0, 150), 1)
+        # for point in self.region:
+        #     point = point - (min_x, min_y)
+        #     cv2.circle(self.cut_image, point.astype(
+        #         int), 1, (255, 0, 0, 150), 1)
 
-        pupil = self.pupil - (min_x, min_y)
+        # pupil = self.pupil - (min_x, min_y)
 
-        cv2.circle(self.cut_image, pupil.astype(int), 1, (0, 255, 0, 150), 1)
+        # cv2.circle(self.cut_image, pupil.astype(int), 1, (0, 255, 0, 150), 1)
 
-        self.cut_image = cv2.resize(self.cut_image, self.scale)
+        # self.cut_image = cv2.resize(self.cut_image, self.scale)
 
         # save cut_image to buffor and get avg from previous buffors
         # self.eyeBuffer.add(self.cut_image)

@@ -23,26 +23,21 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}/..')
 
 from eyeGestures.utils import VideoCapture
-from eyeGestures import EyeGestures_v3
+from eyeGestures import EyeGestures_v2
 
-gestures = EyeGestures_v3()
+gestures = EyeGestures_v2()
 cap = VideoCapture(0)
 
-x = np.arange(0, 1.1, 0.2)
-y = np.arange(0, 1.1, 0.2)
+x = np.arange(0, 1.1, 0.5)
+y = np.arange(0, 1.1, 0.5)
 
 xx, yy = np.meshgrid(x, y)
 
-targets = [
-    (0.6,0.3,0.1,0.05,"target_1"),
-    (0.8,0.6,0.15,0.1,"target_2"),
-    (0.1,0.9,0.1,0.1,"target_3")
-]
-
 calibration_map = np.column_stack([xx.ravel(), yy.ravel()])
-n_points = min(len(calibration_map),25)
+n_points = len(calibration_map)
 np.random.shuffle(calibration_map)
 gestures.uploadCalibrationMap(calibration_map,context="my_context")
+gestures.setClassicalImpact(2)
 gestures.setFixation(1.0)
 # Initialize Pygame
 # Set up colors
@@ -84,12 +79,7 @@ while running:
 
     if event is not None or calibration is not None:
         # Display frame on Pygame screen
-        screen.blit(
-            pygame.surfarray.make_surface(
-                np.rot90(event.sub_frame)
-            ),
-            (0, 0)
-        )
+        screen.blit(frame, (0, 0))
         my_font = pygame.font.SysFont('Comic Sans MS', 30)
         text_surface = my_font.render(f'{event.fixation}', False, (0, 0, 0))
         screen.blit(text_surface, (0,0))
@@ -109,27 +99,10 @@ while running:
             pygame.draw.circle(screen, RED, event.point, 50)
         if gestures.whichAlgorithm(context="my_context") == "LassoCV":
             pygame.draw.circle(screen, BLUE, event.point, 50)
-        if event.saccades:
-            pygame.draw.circle(screen, GREEN, event.point, 50)
-
-        for target in targets:
-            pygame.draw.rect(
-                screen,
-                RED,
-                pygame.Rect(
-                int(target[0] * screen_width),
-                int(target[1] * screen_height),
-                int(target[2] * screen_width),
-                int(target[3] * screen_height),
-            ))
-            text_surface = my_font.render(f'{target[4]}', False, (0, 0, 0))
-            screen.blit(text_surface, (int(target[0] * screen_width),int(target[1] * screen_height)))
-
-
         my_font = pygame.font.SysFont('Comic Sans MS', 30)
         text_surface = my_font.render(f'{gestures.whichAlgorithm(context="my_context")}', False, (0, 0, 0))
         screen.blit(text_surface, event.point)
-
+        
     pygame.display.flip()
 
     # Cap the frame rate
