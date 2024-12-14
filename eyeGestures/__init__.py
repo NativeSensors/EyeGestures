@@ -13,7 +13,6 @@ import cv2
 
 VERSION = "3.0.0"
 
-
 class EyeGestures_v3:
     """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
 
@@ -43,6 +42,7 @@ class EyeGestures_v3:
         self.fixationTracker    = dict()
 
         self.starting_head_position = np.zeros((1,2))
+        self.starting_size = np.zeros((1,2))
 
     def saveModel(self, context = "main"):
         if context in self.clb:
@@ -80,17 +80,26 @@ class EyeGestures_v3:
         y_width = np.max(face_landmarks[:,1]) - y_offset
 
         # get head position
-        head_offset = np.zeros((2))
-        if np.array_equal(self.starting_head_position, np.zeros((2))):
-            self.starting_head_position = np.array([x_offset,y_offset])
+        head_offset = np.zeros((1,2))
+        scale_x = 1
+        scale_y = 1
+        if np.array_equal(self.starting_head_position, np.zeros((1,2))):
+            self.starting_head_position = np.array([[x_offset,y_offset]])
+            self.starting_size = np.array([[x_width,y_width]])
+            print(self.starting_size,x_width,y_width)
         else:
-            head_offset = np.array([x_offset,y_offset]) - self.starting_head_position
+            head_offset = np.array([[x_offset,y_offset]]) - self.starting_head_position
+            scale_x = self.starting_size[0,0]/x_width
+            scale_y = self.starting_size[0,1]/y_width
 
         # eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
-        key_points = np.concatenate((l_eye_landmarks,r_eye_landmarks))
+        key_points = np.concatenate((l_eye_landmarks,r_eye_landmarks,np.array([[scale_x,scale_y]]),head_offset))
         key_points[:,0] = key_points[:,0] - head_offset[:,0]
         key_points[:,1] = key_points[:,1] - head_offset[:,1]
 
+        key_points[:,0] = key_points[:,0] * scale_x
+        key_points[:,1] = key_points[:,1] * scale_y
+        # print(self.starting_size,x_width,y_width)
         subframe = frame[int(y_offset):int(y_offset+y_width),int(x_offset):int(x_offset+x_width)]
         return key_points, blink, subframe
 
