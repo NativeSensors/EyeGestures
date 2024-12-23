@@ -20,7 +20,6 @@ Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)
 >
 > <a href="https://buy.polar.sh/polar_cl_H2FqQHunwgXtU7i9mP7VJ95OZ10XVO3vm6MpSimoPPg"><img src="https://polar.sh/embed/product.svg?organizationId=95cd73d8-20dc-4457-9b70-618d9a6a4799&productId=dcf62f17-a82d-4c27-b58f-2db5ca7531ba&productPriceId=17a8e9ba-6705-41fd-a45e-120257b9775d&darkmode" alt="Donation" /></a>
 
-
 ### 💜 Sponsors: 
 
 📢📢 **We are looking for business partnerships and sponsors!** 📢📢
@@ -40,7 +39,7 @@ Sponsor us and we can add your link, banner or other promo materials!
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3ce0130a-1daa-4710-ae8c-0ee76ee3d35b" width="300" height="150">
   <img src="https://github.com/NativeSensors/EyeGestures/assets/40773550/923e22a1-7fd7-4c06-9804-256aca22be21" width="300" height="150">
-  </p>
+</p>
 <p align="center">
   <img src="https://github.com/PeterWaIIace/PeterWaIIace/assets/40773550/3b38d73d-bb6f-4f31-b67d-231ac4cd04cb" width="300" height="150">
   <img src="https://github.com/user-attachments/assets/33e7782b-7977-4f88-ad54-c43d44c6dced" width="300" height="150">
@@ -56,6 +55,10 @@ Sponsor us and we can add your link, banner or other promo materials!
 Subscribe and get access to our software:
 <p align="left">
   <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0a5c5363-f389-4b99-a75a-8ebe9a8bd7f5" width="500" height="250">
+</p>
 
 ### 💻 Install
 ```
