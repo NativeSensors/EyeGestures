@@ -6,39 +6,35 @@
   </picture>
 </p>
 
-## EYEGESTURES
-
+![PyPI - Downloads](https://img.shields.io/pypi/dm/eyeGestures)
+<a href="https://polar.sh/NativeSensors"><img src="https://polar.sh/embed/seeks-funding-shield.svg?org=NativeSensors" /></a>
 <a href="https://github.com/pedromxavier/flag-badges">
     <img src="https://raw.githubusercontent.com/pedromxavier/flag-badges/main/badges/PL.svg" alt="made in PL">
 </a>
+
+## EYEGESTURES
 
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eye-tracking and eye-driven interfaces without requirement of obtaining expensive hardware.
 
 Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)! 
 
-![PyPI - Downloads](https://img.shields.io/pypi/dm/eyeGestures)
-<a href="https://polar.sh/NativeSensors"><img src="https://polar.sh/embed/seeks-funding-shield.svg?org=NativeSensors" /></a>
+### 💜 Sponsors: 
 
 > [!IMPORTANT]  
 > EyeGestures is a fully volunteer-based project and exists thanks to your donations and support.
 >
 > <a href="https://buy.polar.sh/polar_cl_H2FqQHunwgXtU7i9mP7VJ95OZ10XVO3vm6MpSimoPPg">Donation</a>
-
-### 💜 Sponsors: 
-
-📢📢 **We are looking for business partnerships and sponsors!** 📢📢
-
-```
-For enterprise avoiding GPL3 licensing there is commercial license!
-```
-We offer custom integration and managed services. For businesses requiring invoices message us `contact@eyegestures.com`.
-
-```
-Sponsor us and we can add your link, banner or other promo materials!
-```
-<!-- POLAR type=ads id=203bbe subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
-
-<!-- POLAR-END id=eizdelw -->
+>
+> 📢📢 **If you are bussiness and would like to collaborate, reach us: contact@eyegestures.com** 📢📢
+>
+> We can provide custom comercial license and invoices if needed.
+>
+> <!-- POLAR type=ads id=203bbe subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+> 
+> <!-- POLAR-END id=eizdelw -->
+>
+---------
+### 🔨 Projects build with EyeGestures: 
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3ce0130a-1daa-4710-ae8c-0ee76ee3d35b" width="300" height="150">
@@ -49,8 +45,6 @@ Sponsor us and we can add your link, banner or other promo materials!
   <img src="https://github.com/user-attachments/assets/33e7782b-7977-4f88-ad54-c43d44c6dced" width="300" height="150">
 </p>
 
-### 🔨 Projects build with EyeGestures: 
-
 - [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18) 
 - [EyePather](https://polar.sh/NativeSensors/posts/eyepather-new-tool-in-eyegestures-ecosystem) - discontinued
 - [EyeFocus](https://polar.sh/NativeSensors/products/3756d557-134e-4e7e-ac50-d850126aa325?ref=producthunt) <- 4th best product on PH!
@@ -60,6 +54,7 @@ Subscribe and get access to our software:
 <p align="left">
   <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 
+--------
 <p align="center">
   <img src="https://github.com/user-attachments/assets/0a5c5363-f389-4b99-a75a-8ebe9a8bd7f5" width="500" height="250">
 </p>
