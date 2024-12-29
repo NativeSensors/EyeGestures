@@ -231,7 +231,7 @@ If you are building publicly available product, and have no commercial license, 
 
 We will be extremely grateful for your support: it helps to keep server running + fuels my brain with coffee. 
 
-Support project on Polar (if you want to help we provide access to alphas versions and premium content!):
+Support project on Polar (in exchange we provide access to alphas versions!):
 
 <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
 
