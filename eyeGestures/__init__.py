@@ -5,7 +5,7 @@ import eyeGestures.screenTracker.dataPoints as dp
 from eyeGestures.calibration_v1 import Calibrator as Calibrator_v1
 from eyeGestures.calibration_v2 import Calibrator as Calibrator_v2
 from eyeGestures.gevent import Gevent, Cevent
-from eyeGestures.utils import timeit, Buffor
+from eyeGestures.utils import timeit, Buffor, low_pass_filter_fourier
 import numpy as np
 import pickle
 import time
@@ -40,6 +40,7 @@ class EyeGestures_v3:
         self.velocity_max       = dict()
         self.velocity_min       = dict()
         self.fixationTracker    = dict()
+        self.key_points_buffer  = dict()
 
         self.starting_head_position = np.zeros((1,2))
         self.starting_size = np.zeros((1,2))
@@ -130,6 +131,7 @@ class EyeGestures_v3:
             self.velocity_max[context] = 0
             self.velocity_min[context] = 100000000
             self.fixationTracker[context] = Fixation(0,0,100)
+            self.key_points_buffer[context] = []
 
 
     def step(self, frame, calibration, width, height, context="main"):
@@ -138,6 +140,10 @@ class EyeGestures_v3:
         self.calibration[context] = calibration
 
         key_points, blink, sub_frame = self.getLandmarks(frame)
+        self.key_points_buffer[context].append(key_points)
+        if len(self.key_points_buffer[context]) > 10:
+            self.key_points_buffer[context].pop(0)
+        key_points = low_pass_filter_fourier(key_points,200)
 
         y_point = self.clb[context].predict(key_points)
         self.average_points[context][1:,:] = self.average_points[context][:(self.average_points[context].shape[0] - 1),:]

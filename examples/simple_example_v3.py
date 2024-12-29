@@ -14,7 +14,7 @@ screen_height = screen_info.current_h
 
 # Set up the screen
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("EyeGestures v2 example")
+pygame.display.set_caption("EyeGestures v3 example")
 font_size = 48
 bold_font = pygame.font.Font(None, font_size)
 bold_font.set_bold(True)  # Set the font to bold

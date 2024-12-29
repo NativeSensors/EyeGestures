@@ -24,6 +24,17 @@ def timeit(func):
         return ret
     return inner
 
+def low_pass_filter_fourier(data, cutoff_frequency):
+    # Apply Fourier Transform-based filter column-wise
+    filtered_data = np.zeros_like(data, dtype=float)
+    for col in range(data.shape[1]):  # Iterate over each column
+        fft_data = np.fft.fft(data[:, col])
+        frequencies = np.fft.fftfreq(len(data[:, col]))
+        # Apply the low-pass filter
+        fft_data[np.abs(frequencies) > cutoff_frequency] = 0
+        # Perform Inverse Fourier Transform
+        filtered_data[:, col] = np.fft.ifft(fft_data).real
+    return filtered_data
 
 def shape_to_np(shape, dtype="int"):
     """
