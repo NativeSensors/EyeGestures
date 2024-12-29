@@ -73,12 +73,12 @@ while running:
     ret, frame = cap.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+    # frame = np.rot90(frame)
+    frame = np.flip(frame, axis=1)
     calibrate = (iterator <= n_points) # calibrate 25 points
-
     event, calibration = gestures.step(frame, calibrate, screen_width, screen_height, context="my_context")
-    
+
     screen.fill((0, 0, 0))
-    frame = np.rot90(frame)
     frame = pygame.surfarray.make_surface(frame)
     frame = pygame.transform.scale(frame, (400, 400))
 

@@ -18,6 +18,9 @@ class Calibrator:
         self.X = []
         self.Y_y = []
         self.Y_x = []
+        self.__tmp_X = []
+        self.__tmp_Y_y = []
+        self.__tmp_Y_x = []
         self.reg = None
         self.reg_x = scireg.Ridge(alpha=0.5)
         self.reg_y = scireg.Ridge(alpha=0.5)
@@ -49,21 +52,20 @@ class Calibrator:
 
 
     def add(self,x,y):
-        self.X.append(x.flatten())
-        self.Y_y.append(y[1])
-        self.Y_x.append(y[0])
-
+        self.__tmp_X.append(x.flatten())
+        self.__tmp_Y_y.append(y[1])
+        self.__tmp_Y_x.append(y[0])
         self.__launch_fit()
 
     # This coroutine helps to asynchronously recalculate results
     def __async_fit(self):
         try:
             with self.lock:
-                __tmp_X   = np.array(self.X, dtype=object)
-                __tmp_Y_y = np.array(self.Y_y)
-                __tmp_Y_x = np.array(self.Y_x)
-                self.reg_x.fit(__tmp_X,__tmp_Y_x)
-                self.reg_y.fit(__tmp_X,__tmp_Y_y)
+                __fit_tmp_X   = np.array(self.__tmp_X + self.X, dtype=object)
+                __fit_tmp_Y_y = np.array(self.__tmp_Y_y + self.Y_y)
+                __fit_tmp_Y_x = np.array(self.__tmp_Y_x + self.Y_x)
+                self.reg_x.fit(__fit_tmp_X,__fit_tmp_Y_x)
+                self.reg_y.fit(__fit_tmp_X,__fit_tmp_Y_y)
                 self.fitted = True
         except Exception as e:
             print(f"Exception as {e}")
@@ -71,8 +73,8 @@ class Calibrator:
     # This coroutine helps to asynchronously recalculate results
     def __async_post_fit(self):
         try:
-            tmp_fixations_x = scireg.LassoCV(cv=50,max_iter=5000)
-            tmp_fixations_y = scireg.LassoCV(cv=50,max_iter=5000)
+            tmp_fixations_x = scireg.LassoCV(cv=50,max_iter=10000)
+            tmp_fixations_y = scireg.LassoCV(cv=50,max_iter=10000)
 
             __tmp_X   = np.array(self.X)
             __tmp_Y_y = np.array(self.Y_y)
@@ -89,10 +91,11 @@ class Calibrator:
         except Exception as e:
             print(f"Exception as {e}")
             self.cv_not_set = True
+        pass
 
     def post_fit(self):
         if self.cv_not_set:
-            self.calcualtion_coroutine.start()
+            # self.calcualtion_coroutine.start()
             self.cv_not_set = False
 
     def whichAlgorithm(self):
@@ -111,7 +114,16 @@ class Calibrator:
                 return np.array([0.0,0.0])
 
     def movePoint(self):
+        self.X =   self.X + self.__tmp_X
+        self.Y_y = self.Y_y + self.__tmp_Y_y
+        self.Y_x = self.Y_x + self.__tmp_Y_x
         self.matrix.movePoint()
+        self.__tmp_X = []
+        self.__tmp_Y_y = []
+        self.__tmp_Y_x = []
+
+    def isReadyToMove(self):
+        return len(self.__tmp_X) > 30 # magic number - collect 30 points
 
     def getCurrentPoint(self,width,heigth):
         return self.matrix.getCurrentPoint(width,heigth)

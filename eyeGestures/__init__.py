@@ -86,7 +86,6 @@ class EyeGestures_v3:
         if np.array_equal(self.starting_head_position, np.zeros((1,2))):
             self.starting_head_position = np.array([[x_offset,y_offset]])
             self.starting_size = np.array([[x_width,y_width]])
-            print(self.starting_size,x_width,y_width)
         else:
             head_offset = np.array([[x_offset,y_offset]]) - self.starting_head_position
             scale_x = self.starting_size[0,0]/x_width
@@ -99,6 +98,9 @@ class EyeGestures_v3:
 
         key_points[:,0] = key_points[:,0] * scale_x
         key_points[:,1] = key_points[:,1] * scale_y
+
+        key_points[-1,0] = head_offset[:,0]
+        key_points[-1,1] = head_offset[:,1]
         # print(self.starting_size,x_width,y_width)
         subframe = frame[int(y_offset):int(y_offset+y_width),int(x_offset):int(x_offset+x_width)]
         return key_points, blink, subframe
@@ -120,7 +122,6 @@ class EyeGestures_v3:
     def addContext(self, context):
         if context not in self.clb:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
-            self.iterator[context] = 0
             self.average_points[context] = np.zeros((20,2))
             self.filled_points[context] = 0
             self.calibration[context] = False
@@ -161,7 +162,7 @@ class EyeGestures_v3:
         self.velocity_max[context] = max(self.velocity_max[context],velocity)
         self.velocity_min[context] = min(self.velocity_min[context],velocity)
 
-        saccades = velocity > (self.velocity_max[context]+self.velocity_min[context])/4
+        saccades = velocity > (self.velocity_max[context])/4
 
         if self.calibration[context] and (self.clb[context].insideClbRadius(averaged_point,width,height) or self.filled_points[context] < self.average_points[context].shape[0] * 10):
             self.clb[context].add(key_points,self.clb[context].getCurrentPoint(width,height))
@@ -169,9 +170,7 @@ class EyeGestures_v3:
             self.clb[context].post_fit()
 
         if self.calibration[context] and self.clb[context].insideAcptcRadius(averaged_point,width,height):
-            self.iterator[context] += 1
-            if self.iterator[context] > 10:
-                self.iterator[context] = 0
+            if self.clb[context].isReadyToMove():
                 self.clb[context].movePoint()
 
         gevent = Gevent(
@@ -274,7 +273,6 @@ class EyeGestures_v2:
         if context not in self.clb:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
             self.average_points[context] = Buffor(20)
-            self.iterator[context] = 0
             self.average_points[context] = np.zeros((20,2))
             self.filled_points[context] = 0
             self.calibration[context] = False
@@ -321,9 +319,7 @@ class EyeGestures_v2:
             self.clb[context].post_fit()
 
         if self.calibration[context] and self.clb[context].insideAcptcRadius(averaged_point,width,height):
-            self.iterator[context] += 1
-            if self.iterator[context] > 10:
-                self.iterator[context] = 0
+            if self.clb[context].isReadyToMove() > 10:
                 self.clb[context].movePoint()
         
 
