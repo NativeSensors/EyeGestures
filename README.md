@@ -8,6 +8,10 @@
 
 ## EYEGESTURES
 
+<a href="https://github.com/pedromxavier/flag-badges">
+    <img src="https://raw.githubusercontent.com/pedromxavier/flag-badges/main/badges/PL.svg" alt="made in PL">
+</a>
+
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eye-tracking and eye-driven interfaces without requirement of obtaining expensive hardware.
 
 Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)! 
@@ -18,7 +22,7 @@ Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)
 > [!IMPORTANT]  
 > EyeGestures is a fully volunteer-based project and exists thanks to your donations and support.
 >
-> <a href="https://buy.polar.sh/polar_cl_H2FqQHunwgXtU7i9mP7VJ95OZ10XVO3vm6MpSimoPPg"><img src="https://polar.sh/embed/product.svg?organizationId=95cd73d8-20dc-4457-9b70-618d9a6a4799&productId=dcf62f17-a82d-4c27-b58f-2db5ca7531ba&productPriceId=17a8e9ba-6705-41fd-a45e-120257b9775d&darkmode" alt="Donation" /></a>
+> <a href="https://buy.polar.sh/polar_cl_H2FqQHunwgXtU7i9mP7VJ95OZ10XVO3vm6MpSimoPPg">Donation</a>
 
 ### 💜 Sponsors: 
 
@@ -47,8 +51,8 @@ Sponsor us and we can add your link, banner or other promo materials!
 
 ### 🔨 Projects build with EyeGestures: 
 
-- [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18)
-- [EyePather](https://polar.sh/NativeSensors/posts/eyepather-new-tool-in-eyegestures-ecosystem)
+- [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18) 
+- [EyePather](https://polar.sh/NativeSensors/posts/eyepather-new-tool-in-eyegestures-ecosystem) - discontinued
 - [EyeFocus](https://polar.sh/NativeSensors/products/3756d557-134e-4e7e-ac50-d850126aa325?ref=producthunt) <- 4th best product on PH!
 - Add your project! contact@eyegestures.com or PR
 
@@ -254,4 +258,3 @@ Support project on Polar (if you want to help we provide access to alphas versio
     src="https://api.star-history.com/svg?repos=NativeSensors/EyeGestures&type=Date"
   />
 </picture>
-
