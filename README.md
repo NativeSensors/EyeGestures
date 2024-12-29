@@ -144,7 +144,7 @@ while True:
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
 <!-- POLAR-END id=eizdelwu -->
 
-#### Customize:
+#### Customize [only V1/V2]:
 
 You can customize your calibration points/map to fit your solutions. Simple copy snippet below, and place your calibration poitns on x,y planes from 0.0 to 1.0. It will be then automatically scaled to your display.
 
