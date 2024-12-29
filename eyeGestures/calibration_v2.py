@@ -52,10 +52,11 @@ class Calibrator:
 
 
     def add(self,x,y):
-        self.__tmp_X.append(x.flatten())
-        self.__tmp_Y_y.append(y[1])
-        self.__tmp_Y_x.append(y[0])
-        self.__launch_fit()
+        with self.lock:
+            self.__tmp_X.append(x.flatten())
+            self.__tmp_Y_y.append(y[1])
+            self.__tmp_Y_x.append(y[0])
+            self.__launch_fit()
 
     # This coroutine helps to asynchronously recalculate results
     def __async_fit(self):
@@ -114,13 +115,14 @@ class Calibrator:
                 return np.array([0.0,0.0])
 
     def movePoint(self):
-        self.X =   self.X + self.__tmp_X
-        self.Y_y = self.Y_y + self.__tmp_Y_y
-        self.Y_x = self.Y_x + self.__tmp_Y_x
-        self.matrix.movePoint()
-        self.__tmp_X = []
-        self.__tmp_Y_y = []
-        self.__tmp_Y_x = []
+        with self.lock:
+            self.X =   self.X + self.__tmp_X
+            self.Y_y = self.Y_y + self.__tmp_Y_y
+            self.Y_x = self.Y_x + self.__tmp_Y_x
+            self.matrix.movePoint()
+            self.__tmp_X = []
+            self.__tmp_Y_y = []
+            self.__tmp_Y_x = []
 
     def isReadyToMove(self):
         return len(self.__tmp_X) > 30 # magic number - collect 30 points
