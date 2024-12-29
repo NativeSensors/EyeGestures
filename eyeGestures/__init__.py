@@ -319,7 +319,7 @@ class EyeGestures_v2:
             self.clb[context].post_fit()
 
         if self.calibration[context] and self.clb[context].insideAcptcRadius(averaged_point,width,height):
-            if self.clb[context].isReadyToMove() > 10:
+            if self.clb[context].isReadyToMove():
                 self.clb[context].movePoint()
         
 
