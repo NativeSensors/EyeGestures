@@ -83,38 +83,7 @@ python3 examples/simple_example.py [legacy tracker, will become obsolete]
 
 ### 🔧 Build your own:
 
-#### Using EyeGesture Engine V2 - Machine Learning Approach [Recommended]:
-
-```python
-from eyeGestures.utils import VideoCapture
-from eyeGestures import EyeGestures_v2
-
-# Initialize gesture engine and video capture
-gestures = EyeGestures_v2()
-cap = VideoCapture(0)  
-calibrate = True
-screen_width = 500
-screen_height= 500
-
-# Process each frame
-while True:
-  ret, frame = cap.read()
-  event, cevent = gestures.step(frame,
-    calibrate,
-    screen_width,
-    screen_height,
-    context="my_context")
-
-  if event:
-    cursor_x, cursor_y = event.point[0], event.point[1]
-    fixation = event.fixation
-    # calibration_radius: radius for data collection during calibration
-```
-
-<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
-<!-- POLAR-END id=eizdelwu -->
-
-#### Using EyeGesture Engine V3 - Faster smaller better [New and experimental]:
+#### Using EyeGesture Engine V3 - Faster smaller better:
 
 ```python
 from eyeGestures.utils import VideoCapture
@@ -140,6 +109,37 @@ while True:
     cursor_x, cursor_y = event.point[0], event.point[1]
     fixation = event.fixation
     saccades = event.saccadess # saccadess movement detector
+    # calibration_radius: radius for data collection during calibration
+```
+
+<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
+<!-- POLAR-END id=eizdelwu -->
+
+#### Using EyeGesture Engine V2 - [Stable]:
+
+```python
+from eyeGestures.utils import VideoCapture
+from eyeGestures import EyeGestures_v2
+
+# Initialize gesture engine and video capture
+gestures = EyeGestures_v2()
+cap = VideoCapture(0)  
+calibrate = True
+screen_width = 500
+screen_height= 500
+
+# Process each frame
+while True:
+  ret, frame = cap.read()
+  event, cevent = gestures.step(frame,
+    calibrate,
+    screen_width,
+    screen_height,
+    context="my_context")
+
+  if event:
+    cursor_x, cursor_y = event.point[0], event.point[1]
+    fixation = event.fixation
     # calibration_radius: radius for data collection during calibration
 ```
 
