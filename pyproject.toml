@@ -5,6 +5,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.sdist]
 
 dependencies = [
+  "beautifulsoup4>=4.12.3",
+  "keyboard>=0.13.5",
   "matplotlib>=3.8.2",
   "mediapipe>=0.10.8",
   "numpy>=1.26.4",
@@ -13,7 +15,6 @@ dependencies = [
   "pycocotools>=2.0.7",
   "pygame>=2.5.2",
   "pynput>=1.7.6",
-  "PySide2>=5.15.2.1",
   "pytest>=7.4.2",
   "scikit_learn>=1.3.2",
   "scipy>=1.12.0",
@@ -34,7 +35,6 @@ exclude = [
   "*.json",
   "lab/*",
   "app.py",
-  "PupilLab.py",
   "test_app.py",
   "test.py",
   "tools/*"
