@@ -8,7 +8,6 @@ PyAutoGUI==0.9.54
 pycocotools==2.0.7
 pygame==2.5.2
 pynput==1.7.6
-PySide2==5.15.2.1
 pytest==7.4.2
 scikit_learn==1.3.2
 scipy==1.12.0
