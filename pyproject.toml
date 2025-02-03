@@ -34,7 +34,6 @@ exclude = [
   "*.json",
   "lab/*",
   "app.py",
-  "PupilLab.py",
   "test_app.py",
   "test.py",
   "tools/*"
