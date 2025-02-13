@@ -225,6 +225,10 @@ If you are building publicly available product, and have no commercial license, 
 
 1) some users report that `mediapipe`, `scikit-learn` or `opencv` is not installing together with `eyegestures`. To fix it, just install it with `pip`.
 
+### Missing feature or facing a bug?
+
+Create new [issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue) so we can tackle it!
+
 ### 💻 Contributors
 
 <a href="https://github.com/OWNER/REPO/graphs/contributors">
