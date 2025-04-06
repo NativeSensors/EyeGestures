@@ -214,7 +214,6 @@ Feel free to copy and paste the relevant code snippets for your project.
 If you are building publicly available product, and have no commercial license, please mention us somewhere in your interface. 
 
 ### 📇 Find us:
-- [RSS](https://polar.sh/NativeSensors/rss?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRfaWQiOiJkMDYxMDFiOC0xYzYyLTQ1MTYtYjg3YS03NTFhOTM3OTIxZmUiLCJzY29wZXMiOiJhcnRpY2xlczpyZWFkIiwidHlwZSI6ImF1dGgiLCJleHAiOjE3NDMxNjg3ODh9.djoi5ARWHr-xFW_XJ6Fwal3JUT1fAbvx4Npl-daBC5U)
 - [discord](https://discord.gg/FvagCX8T4h)
 - [twitter](https://twitter.com/PW4ltz)
 - [daily.dev](https://dly.to/JEe1Sz6vLey)
