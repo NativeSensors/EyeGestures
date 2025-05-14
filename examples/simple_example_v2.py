@@ -70,6 +70,10 @@ while running:
     calibrate = (iterator <= 25) # calibrate 25 points
 
     event, calibration = gestures.step(frame, calibrate, screen_width, screen_height, context="my_context")
+
+    if event is None:
+        continue
+
     
     screen.fill((0, 0, 0))
     frame = np.rot90(frame)

@@ -5,7 +5,7 @@ import eyeGestures.screenTracker.dataPoints as dp
 from eyeGestures.calibration_v1 import Calibrator as Calibrator_v1
 from eyeGestures.calibration_v2 import Calibrator as Calibrator_v2
 from eyeGestures.gevent import Gevent, Cevent
-from eyeGestures.utils import timeit, Buffor, low_pass_filter_fourier
+from eyeGestures.utils import timeit, Buffor, low_pass_filter_fourier, recoverable
 import numpy as np
 import pickle
 import time
@@ -133,13 +133,14 @@ class EyeGestures_v3:
             self.fixationTracker[context] = Fixation(0,0,100)
             self.key_points_buffer[context] = []
 
-
+    @recoverable(ret_error_params=(None, None))
     def step(self, frame, calibration, width, height, context="main"):
         self.addContext(context)
 
         self.calibration[context] = calibration
 
         key_points, blink, sub_frame = self.getLandmarks(frame)
+
         self.key_points_buffer[context].append(key_points)
         if len(self.key_points_buffer[context]) > 10:
             self.key_points_buffer[context].pop(0)
@@ -283,7 +284,7 @@ class EyeGestures_v2:
             self.filled_points[context] = 0
             self.calibration[context] = False
 
-
+    @recoverable(ret_error_params=(None, None))
     def step(self, frame, calibration, width, height, context="main"):
         self.addContext(context)
 
@@ -294,9 +295,6 @@ class EyeGestures_v2:
         classic_point, key_points, blink, fixation, cevent = self.getLandmarks(frame,
                                                                                self.calibrate_gestures and self.enable_CN,
                                                                                context = context)
-
-        if cevent is None:
-            return (None, None)
 
         margin = 10
         if (classic_point[0] <= margin) and self.calibration[context]:

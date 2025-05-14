@@ -78,6 +78,10 @@ while running:
     calibrate = (iterator <= n_points) # calibrate 25 points
     event, calibration = gestures.step(frame, calibrate, screen_width, screen_height, context="my_context")
 
+    if event is None:
+        continue
+
+
     screen.fill((0, 0, 0))
     frame = pygame.surfarray.make_surface(frame)
     frame = pygame.transform.scale(frame, (400, 400))
