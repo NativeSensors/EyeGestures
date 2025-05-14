@@ -8,10 +8,10 @@ import eyeGestures.eye as eye
 
 class FaceFinder:
 
-    def __init__(self, static_image_mode=True):
+    def __init__(self):
         self.mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
             refine_landmarks=True,
-            static_image_mode=static_image_mode,
+            static_image_mode=False,
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5
         )
@@ -23,6 +23,9 @@ class FaceFinder:
         try:
             face_mesh = self.mp_face_mesh.process(
                 cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+            if face_mesh.multi_face_landmarks is None:
+                return None
 
             return face_mesh
         except Exception as e:

@@ -9,6 +9,22 @@ import numpy as np
 
 # Make predictions for new data points
 
+def recoverable(ret_error_params=()):
+    def decorator(func):
+        """
+        timeit
+        """
+        def inner(*args, **kwargs):
+            """
+            inner
+            """
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                print(f"Caugh error: {e}")
+                return ret_error_params
+        return inner
+    return decorator
 
 def timeit(func):
     """
