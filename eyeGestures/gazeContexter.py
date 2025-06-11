@@ -52,20 +52,21 @@ class Contexter:
 class Gcontext:
     """Helper class for Gcontext"""
 
-    def __init__(self,
-                 display,
-                 face,
-                 roi,
-                 edges,
-                 cluster_boundaries,
-                 gazeBuffor,
-                 l_pupil,
-                 r_pupil,
-                 l_eye_buff,
-                 r_eye_buff,
-                 fixation,
-                 calibration):
-
+    def __init__(
+        self,
+        display,
+        face,
+        roi,
+        edges,
+        cluster_boundaries,
+        gazeBuffor,
+        l_pupil,
+        r_pupil,
+        l_eye_buff,
+        r_eye_buff,
+        fixation,
+        calibration,
+    ):
         self.roi = roi
         self.face = face
         self.edges = edges
@@ -86,43 +87,45 @@ class GazeContext:
     def __init__(self):
         self.contexter = Contexter()
 
-    def get(self,
-            id,
-            display,
-            face=None,
-            roi=dp.ScreenROI(285, 105, 80, 15),
-            edges=dp.ScreenROI(285, 105, 80, 15),
-            cluster_boundaries=dp.ScreenROI(225, 125, 20, 20),
-            buffor=Buffor(200),
-            l_pupil=Buffor(20),
-            r_pupil=Buffor(20),
-            l_eye_buff=Buffor(20),
-            r_eye_buff=Buffor(20),
-            fixation=Fixation(0, 0, 100),
-            calibration=False):
+    def get(
+        self,
+        id,
+        display,
+        face=None,
+        roi=dp.ScreenROI(285, 105, 80, 15),
+        edges=dp.ScreenROI(285, 105, 80, 15),
+        cluster_boundaries=dp.ScreenROI(225, 125, 20, 20),
+        buffor=Buffor(200),
+        l_pupil=Buffor(20),
+        r_pupil=Buffor(20),
+        l_eye_buff=Buffor(20),
+        r_eye_buff=Buffor(20),
+        fixation=Fixation(0, 0, 100),
+        calibration=False,
+    ):
         """Function creating new context or returning if id already exists"""
 
-        context = Gcontext(display=display,
-                           face=face,
-                           roi=roi,
-                           edges=edges,
-                           cluster_boundaries=cluster_boundaries,
-                           gazeBuffor=buffor,
-                           l_pupil=l_pupil,
-                           r_pupil=r_pupil,
-                           l_eye_buff=l_eye_buff,
-                           r_eye_buff=r_eye_buff,
-                           fixation=fixation,
-                           calibration=calibration)
+        context = Gcontext(
+            display=display,
+            face=face,
+            roi=roi,
+            edges=edges,
+            cluster_boundaries=cluster_boundaries,
+            gazeBuffor=buffor,
+            l_pupil=l_pupil,
+            r_pupil=r_pupil,
+            l_eye_buff=l_eye_buff,
+            r_eye_buff=r_eye_buff,
+            fixation=fixation,
+            calibration=calibration,
+        )
 
         if self.contexter.addContext(id, context):
             return context
         else:
             return self.contexter.getContext(id)
 
-    def update(self,
-               id,
-               context):
+    def update(self, id, context):
         """Function updating existing context"""
 
         self.contexter.updateContext(id, context)

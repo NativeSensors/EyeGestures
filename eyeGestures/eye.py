@@ -1,17 +1,15 @@
 """Module providing a extraction of eye from face object."""
 
 import cv2
-import numpy as np
 import mediapipe as mp
+import numpy as np
 
 
 class Eye:
     """Class storing data related and representing a eye"""
 
-    LEFT_EYE_KEYPOINTS = np.array(
-        list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:, 0]
-    RIGHT_EYE_KEYPOINTS = np.array(
-        list(mp.solutions.face_mesh.FACEMESH_RIGHT_EYE))[:, 0]
+    LEFT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:, 0]
+    RIGHT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_RIGHT_EYE))[:, 0]
     LEFT_EYE_IRIS_KEYPOINT = []
     RIGHT_EYE_IRIS_KEYPOINT = []
     LEFT_EYE_PUPIL_KEYPOINT = [473]
@@ -23,7 +21,6 @@ class Eye:
     scale = (150, 100)
 
     def __init__(self, side: int):
-
         # check if eye is left or right
         if side == 1:
             self.side = "right"
@@ -56,14 +53,12 @@ class Eye:
 
         # check if eye is left or right
         if self.side == "right":
-            self.region = np.array(
-                landmarks[self.RIGHT_EYE_KEYPOINTS])
-                # landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
+            self.region = np.array(landmarks[self.RIGHT_EYE_KEYPOINTS])
+            # landmarks[self.RIGHT_EYE_KEYPOINTS], dtype=np.int32)
 
         elif self.side == "left":
-            self.region = np.array(
-                landmarks[self.LEFT_EYE_KEYPOINTS])
-                # landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
+            self.region = np.array(landmarks[self.LEFT_EYE_KEYPOINTS])
+            # landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
 
         self.pupil = landmarks[self.pupil_index][0]
         self._process(self.image, self.region)
@@ -120,15 +115,15 @@ class Eye:
     def getOpenness(self):
         """function returning eye openness"""
 
-        return self.height/2
+        return self.height / 2
 
     def getLandmarks(self):
         """function returning eye landmarks"""
 
         return self.region
-    
+
     def getBoundingBox(self):
-        return (self.x,self.y,self.width,self.height)
+        return (self.x, self.y, self.width, self.height)
 
     def _process(self, image, region):
         h, w, _ = image.shape
@@ -136,11 +131,10 @@ class Eye:
         mask = np.full((h, w), 0, dtype=np.uint8)
         background = np.zeros((h, w), dtype=np.uint8)
 
-        region_int = np.array(region,dtype=np.int32)
+        region_int = np.array(region, dtype=np.int32)
         cv2.fillPoly(mask, [region_int], 0)
 
-        masked_image = cv2.bitwise_not(background, cv2.cvtColor(
-            image.copy(), cv2.COLOR_BGR2GRAY), mask=mask)
+        masked_image = cv2.bitwise_not(background, cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY), mask=mask)
 
         margin = 2
         min_x = np.min(region_int[:, 0]) - margin
@@ -154,8 +148,8 @@ class Eye:
         self.width = np.max(region_int[:, 0]) - np.min(region_int[:, 0])
         self.height = np.max(region_int[:, 1]) - np.min(region_int[:, 1])
 
-        self.center_x = (min_x + max_x)/2
-        self.center_y = (min_y + max_y)/2
+        self.center_x = (min_x + max_x) / 2
+        self.center_y = (min_y + max_y) / 2
 
         # HACKETY_HACK:
         self.pupil[1] = np.min(region[:, 1])
