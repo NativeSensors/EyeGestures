@@ -26,8 +26,10 @@ def test_screen2display_1_1():
     tracker = scrtr.ScreenProcessor()
     p = tracker.screen2display(point, roi, display)
 
-    assert p == (point[0]/ROI_WIDTH * DISPLAY_WIDTH,
-                 point[1]/ROI_HEIGHT * DISPLAY_HEIGHT)
+    assert p == (
+        point[0] / ROI_WIDTH * DISPLAY_WIDTH,
+        point[1] / ROI_HEIGHT * DISPLAY_HEIGHT,
+    )
 
 
 def test_screen2display_55_1():
@@ -40,8 +42,7 @@ def test_screen2display_55_1():
     tracker = scrtr.ScreenProcessor()
     p = tracker.screen2display(point, roi, display)
 
-    assert p == (DISPLAY_WIDTH,
-                 point[1]/ROI_HEIGHT * DISPLAY_HEIGHT)
+    assert p == (DISPLAY_WIDTH, point[1] / ROI_HEIGHT * DISPLAY_HEIGHT)
 
 
 def test_screen2display_55_55():
@@ -54,8 +55,7 @@ def test_screen2display_55_55():
     tracker = scrtr.ScreenProcessor()
     p = tracker.screen2display(point, roi, display)
 
-    assert p == (DISPLAY_WIDTH,
-                 DISPLAY_HEIGHT)
+    assert p == (DISPLAY_WIDTH, DISPLAY_HEIGHT)
 
 
 def test_screen2display_0_0():
@@ -82,8 +82,10 @@ def test_screen2display_1_1_pos_50_50():
     tracker = scrtr.ScreenProcessor()
     p = tracker.screen2display(point, roi, display)
 
-    assert p == ((point[0] - pos[0])/ROI_WIDTH * DISPLAY_WIDTH,
-                 (point[1] - pos[1])/ROI_HEIGHT * DISPLAY_HEIGHT)
+    assert p == (
+        (point[0] - pos[0]) / ROI_WIDTH * DISPLAY_WIDTH,
+        (point[1] - pos[1]) / ROI_HEIGHT * DISPLAY_HEIGHT,
+    )
 
 
 def test_screen2display_55_55_pos_50_50():
@@ -97,8 +99,7 @@ def test_screen2display_55_55_pos_50_50():
     tracker = scrtr.ScreenProcessor()
     p = tracker.screen2display(point, roi, display)
 
-    assert p == (DISPLAY_WIDTH,
-                 DISPLAY_HEIGHT)
+    assert p == (DISPLAY_WIDTH, DISPLAY_HEIGHT)
 
 
 def test_screen2display_0_0_pos_50_50():

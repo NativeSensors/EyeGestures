@@ -1,11 +1,12 @@
 import numpy as np
-from eyeGestures.gevent import Gevent
-from eyeGestures.face import FaceFinder, Face
-from eyeGestures.Fixation import Fixation
-from eyeGestures.processing import EyeProcessor
-from eyeGestures.gazeContexter import GazeContext
-from eyeGestures.screenTracker.screenTracker import ScreenManager
+
 import eyeGestures.screenTracker.dataPoints as dp
+from eyeGestures.face import Face, FaceFinder
+from eyeGestures.Fixation import Fixation
+from eyeGestures.gazeContexter import GazeContext
+from eyeGestures.gevent import Gevent
+from eyeGestures.processing import EyeProcessor
+from eyeGestures.screenTracker.screenTracker import ScreenManager
 from eyeGestures.utils import Buffor
 
 
@@ -148,15 +149,9 @@ class GazeTracker:
             r_eye = self.face.getRightEye()
 
             # TODO: check what happens here before with l_pupil
-            intersection_x, _ = self.__gaze_intersection(
-                l_eye, r_eye, context.l_eye_buff, context.r_eye_buff
-            )
-            l_point, l_buffor = self.__pupil(
-                l_eye, self.eyeProcessorLeft, intersection_x, context.l_pupil
-            )
-            r_point, r_buffor = self.__pupil(
-                r_eye, self.eyeProcessorRight, intersection_x, context.r_pupil
-            )
+            intersection_x, _ = self.__gaze_intersection(l_eye, r_eye, context.l_eye_buff, context.r_eye_buff)
+            l_point, l_buffor = self.__pupil(l_eye, self.eyeProcessorLeft, intersection_x, context.l_pupil)
+            r_point, r_buffor = self.__pupil(r_eye, self.eyeProcessorRight, intersection_x, context.r_pupil)
 
             context.l_pupil = l_buffor
             context.r_pupil = r_buffor
@@ -177,9 +172,7 @@ class GazeTracker:
                 face_h_perc = face_h / image_h
 
                 # # prev current face radius
-                c_face_x, c_face_y, c_face_w, c_face_h, c_image_w, c_image_h = (
-                    context.face
-                )
+                c_face_x, c_face_y, c_face_w, c_face_h, c_image_w, c_image_h = context.face
 
                 c_face_w_perc = c_face_w / c_image_w
                 c_face_h_perc = c_face_h / c_image_h
@@ -194,16 +187,12 @@ class GazeTracker:
                 # context.roi.x -= diff_face_x * 500 # current size of virtual display
                 # context.roi.y -= diff_face_y * 500 # current size of virtual display
                 if abs(face_w_perc / c_face_w_perc - 1.0) > 0.02:
-                    context.roi.width = context.roi.width * abs(
-                        face_w_perc / c_face_w_perc
-                    )
+                    context.roi.width = context.roi.width * abs(face_w_perc / c_face_w_perc)
                     # context.edges.width= context.edges.width * abs(face_w_perc/c_face_w_perc)
                     context.gazeBuffor.flush()
                     # context.calibration = True
                 if abs(face_h_perc / c_face_h_perc - 1.0) > 0.02:
-                    context.roi.height = context.roi.height * abs(
-                        face_h_perc / c_face_h_perc
-                    )
+                    context.roi.height = context.roi.height * abs(face_h_perc / c_face_h_perc)
                     # context.edges.height= context.edges.height * abs(face_w_perc/c_face_w_perc)
                     context.gazeBuffor.flush()
                     # context.calibration = True

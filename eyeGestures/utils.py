@@ -1,19 +1,21 @@
-import time
-import queue
 import pickle
 import platform
+import queue
 import threading
+import time
 
 import cv2
 import numpy as np
 
 # Make predictions for new data points
 
+
 def recoverable(ret_error_params=()):
     def decorator(func):
         """
         timeit
         """
+
         def inner(*args, **kwargs):
             """
             inner
@@ -23,13 +25,17 @@ def recoverable(ret_error_params=()):
             except Exception as e:
                 print(f"Caugh error: {e}")
                 return ret_error_params
+
         return inner
+
     return decorator
+
 
 def timeit(func):
     """
     timeit
     """
+
     def inner(*args, **kwargs):
         """
         inner
@@ -38,7 +44,9 @@ def timeit(func):
         ret = func(*args, **kwargs)
         print(f"Elapsed time: {time.time() - start}")
         return ret
+
     return inner
+
 
 def low_pass_filter_fourier(data, cutoff_frequency):
     # Apply Fourier Transform-based filter column-wise
@@ -51,6 +59,7 @@ def low_pass_filter_fourier(data, cutoff_frequency):
         # Perform Inverse Fourier Transform
         filtered_data[:, col] = np.fft.ifft(fft_data).real
     return filtered_data
+
 
 def shape_to_np(shape, dtype="int"):
     """
@@ -82,8 +91,7 @@ def make_image_grid(images, rows, cols):
 
     if len(images[0].shape) > 2:
         # Create a black canvas to draw the grid on
-        grid_image = np.zeros(
-            (img_h * rows, img_w * cols, images[0].shape[2]), dtype=np.uint8)
+        grid_image = np.zeros((img_h * rows, img_w * cols, images[0].shape[2]), dtype=np.uint8)
     else:
         grid_image = np.zeros((img_h * rows, img_w * cols), dtype=np.uint8)
 
@@ -93,8 +101,7 @@ def make_image_grid(images, rows, cols):
             break  # Stop if we have filled the grid
         row = i // cols
         col = i % cols
-        grid_image[row * img_h:(row + 1) * img_h, col *
-                   img_w:(col + 1) * img_w] = img
+        grid_image[row * img_h : (row + 1) * img_h, col * img_w : (col + 1) * img_w] = img
 
     return grid_image
 
@@ -140,7 +147,7 @@ class Buffor:
 
     def getLen(self):
         return len(self.__buffor)
-    
+
     def isFull(self):
         return len(self.__buffor) >= self.length
 
@@ -151,6 +158,7 @@ class Buffor:
 
     def clear(self):
         self.__buffor = []
+
 
 # Bufforless
 
@@ -180,7 +188,7 @@ class VideoCapture:
             self.t.start()
         else:
             self.frames = []
-            with open(name, 'rb') as file:
+            with open(name, "rb") as file:
                 self.frames = pickle.load(file)
 
     def __openCam(self, name):
