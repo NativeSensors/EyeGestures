@@ -1,7 +1,6 @@
 import pytest
-
-import eyeGestures.screenTracker.dataPoints as dp
 import eyeGestures.screenTracker.screenTracker as scrtr
+import eyeGestures.screenTracker.dataPoints as dp
 
 # region of interest inside the virtual screen
 ROI_WIDTH = 30
@@ -15,7 +14,7 @@ def test_scaleUpTest():
     BIGGER = 10
 
     roi = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH, ROI_HEIGHT)
-    roi2 = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH + BIGGER, ROI_HEIGHT + BIGGER)
+    roi2 = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH+BIGGER, ROI_HEIGHT+BIGGER)
 
     bigger_roi = scrtr.scaleUp(roi, roi2, 0.1)
 
@@ -28,12 +27,12 @@ def test_scaleUpTest_known():
     BIGGER = 10
 
     roi = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH, ROI_HEIGHT)
-    roi2 = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH + BIGGER, ROI_HEIGHT + BIGGER)
+    roi2 = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH+BIGGER, ROI_HEIGHT+BIGGER)
 
     bigger_roi = scrtr.scaleUp(roi, roi2, 0.1)
 
-    assert int(bigger_roi.width) == int(ROI_WIDTH * 1.1)
-    assert int(bigger_roi.height) == int(ROI_HEIGHT * 1.1)
+    assert int(bigger_roi.width) == int(ROI_WIDTH*1.1)
+    assert int(bigger_roi.height) == int(ROI_HEIGHT*1.1)
 
 
 def test_scaleDownTest():
@@ -41,7 +40,7 @@ def test_scaleDownTest():
     SMALLER = 10
 
     roi = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH, ROI_HEIGHT)
-    roi2 = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH - SMALLER, ROI_HEIGHT - SMALLER)
+    roi2 = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH-SMALLER, ROI_HEIGHT-SMALLER)
 
     smaller_roi = scrtr.scaleDown(roi, roi2, -0.1)
 
@@ -54,9 +53,9 @@ def test_scaleUpTest_known():
     SMALLER = 10
 
     roi = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH, ROI_HEIGHT)
-    roi2 = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH - SMALLER, ROI_HEIGHT - SMALLER)
+    roi2 = dp.ScreenROI(pos[0], pos[1], ROI_WIDTH-SMALLER, ROI_HEIGHT-SMALLER)
 
     smaller_roi = scrtr.scaleDown(roi, roi2, -0.1)
 
-    assert int(smaller_roi.width) == int(ROI_WIDTH * 0.9)
-    assert int(smaller_roi.height) == int(ROI_HEIGHT * 0.9)
+    assert int(smaller_roi.width) == int(ROI_WIDTH*0.9)
+    assert int(smaller_roi.height) == int(ROI_HEIGHT*0.9)
