@@ -4,19 +4,21 @@
 class Gevent:
     """Class representing gaze event, with tracked points scaled to screen, blink and fixation."""
 
-    def __init__(self,
-                 point,
-                 blink,
-                 fixation,
-                 l_eye = None,
-                 r_eye = None,
-                 screen_man = None,
-                 roi = None,
-                 edges = None,
-                 cluster = None,
-                 context = None,
-                 saccades = False,
-                 sub_frame = None):
+    def __init__(
+        self,
+        point,
+        blink,
+        fixation,
+        l_eye=None,
+        r_eye=None,
+        screen_man=None,
+        roi=None,
+        edges=None,
+        cluster=None,
+        context=None,
+        saccades=False,
+        sub_frame=None,
+    ):
 
         self.point = point
         self.blink = blink
@@ -37,11 +39,7 @@ class Gevent:
 class Cevent:
     """Class representing gaze event, with tracked points scaled to screen, blink and fixation."""
 
-    def __init__(self,
-                 point,
-                 acceptance_radius,
-                 calibration_radius,
-                 calibration = False):
+    def __init__(self, point, acceptance_radius, calibration_radius, calibration=False):
 
         self.point = point
         self.acceptance_radius = acceptance_radius

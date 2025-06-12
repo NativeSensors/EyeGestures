@@ -14,7 +14,7 @@ class Fixation:
     def process(self, x, y):
         """Function processing x and y estimated points for fixation detection"""
 
-        if (x - self.x)**2 + (y - self.y)**2 < self.radius**2:
+        if (x - self.x) ** 2 + (y - self.y) ** 2 < self.radius**2:
             self.fixation = min(self.fixation + 0.02, 1.0)
         else:
             self.x = x

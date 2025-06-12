@@ -1,8 +1,9 @@
 """Module providing finding and extraction of face from image."""
 
 import cv2
-import numpy as np
 import mediapipe as mp
+import numpy as np
+
 import eyeGestures.eye as eye
 
 
@@ -13,16 +14,15 @@ class FaceFinder:
             refine_landmarks=True,
             static_image_mode=False,
             min_detection_confidence=0.5,
-            min_tracking_confidence=0.5
+            min_tracking_confidence=0.5,
         )
 
     def find(self, image):
 
-        assert (len(image.shape) > 2)
+        assert len(image.shape) > 2
 
         try:
-            face_mesh = self.mp_face_mesh.process(
-                cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            face_mesh = self.mp_face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
             if face_mesh.multi_face_landmarks is None:
                 return None
@@ -71,9 +71,7 @@ class Face:
 
         __face_landmarks = []
         for landmark in __complex_landmarks:
-            __face_landmarks.append((
-                landmark.x * self.image_w,
-                landmark.y * self.image_h))
+            __face_landmarks.append((landmark.x * self.image_w, landmark.y * self.image_h))
 
         return np.array(__face_landmarks)
 
