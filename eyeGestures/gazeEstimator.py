@@ -3,7 +3,7 @@ import numpy as np
 import eyeGestures.screenTracker.dataPoints as dp
 from eyeGestures.face import Face, FaceFinder
 from eyeGestures.Fixation import Fixation
-from eyeGestures.gazeContexter import GazeContext
+from eyeGestures.gaze_contexter import GazeContext
 from eyeGestures.gevent import Gevent
 from eyeGestures.processing import EyeProcessor
 from eyeGestures.screenTracker.screenTracker import ScreenManager
@@ -160,7 +160,7 @@ class GazeTracker:
 
             blink = l_eye.getBlink() or r_eye.getBlink()
             if blink != True:
-                context.gazeBuffor.add(compound_point)
+                context.gaze_buffor.add(compound_point)
 
             if blink != True:
                 # current face radius
@@ -189,16 +189,16 @@ class GazeTracker:
                 if abs(face_w_perc / c_face_w_perc - 1.0) > 0.02:
                     context.roi.width = context.roi.width * abs(face_w_perc / c_face_w_perc)
                     # context.edges.width= context.edges.width * abs(face_w_perc/c_face_w_perc)
-                    context.gazeBuffor.flush()
+                    context.gaze_buffor.flush()
                     # context.calibration = True
                 if abs(face_h_perc / c_face_h_perc - 1.0) > 0.02:
                     context.roi.height = context.roi.height * abs(face_h_perc / c_face_h_perc)
                     # context.edges.height= context.edges.height * abs(face_w_perc/c_face_w_perc)
-                    context.gazeBuffor.flush()
+                    context.gaze_buffor.flush()
                     # context.calibration = True
 
             self.point_screen, roi, cluster = self.screen_man.process(
-                context.gazeBuffor,
+                context.gaze_buffor,
                 context.roi,
                 context.edges,
                 self.screen,

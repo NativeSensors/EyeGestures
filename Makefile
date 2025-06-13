@@ -5,3 +5,6 @@ format:
 format_check:
 	isort eyeGestures --check
 	black eyeGestures --check
+
+check: format_check
+	pylint eyeGestures

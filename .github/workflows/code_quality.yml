@@ -20,4 +20,4 @@ jobs:
         pip install -r requirements_dev.txt
     - name: Analysing code with checkers
       run: |
-        make format_check
+        make check
