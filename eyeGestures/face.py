@@ -4,10 +4,11 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-import eyeGestures.eye as eye
+from eyeGestures.eye import Eye
 
 
-class FaceFinder:
+class FaceFinder:  # pylint: disable=too-few-public-methods
+    """Class helping finding face"""
 
     def __init__(self):
         self.mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
@@ -18,6 +19,7 @@ class FaceFinder:
         )
 
     def find(self, image):
+        """Find face mesh"""
 
         assert len(image.shape) > 2
 
@@ -28,19 +30,24 @@ class FaceFinder:
                 return None
 
             return face_mesh
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Exception in FaceFinder: {e}")
             return None
 
 
 class Face:
+    """Class keeping and processing face landmarks"""
 
     def __init__(self):
-        self.eyeLeft = eye.Eye(0)
-        self.eyeRight = eye.Eye(1)
+        self.eye_left = Eye(0)
+        self.eye_right = Eye(1)
         self.landmarks = None
+        self.image_h = None
+        self.image_w = None
+        self.face = None
 
-    def getBoundingBox(self):
+    def get_bounding_box(self):
+        """Get bounding box of face"""
         if self.landmarks is not None:
             margin = 0
             min_x = np.min(self.landmarks[:, 0]) - margin
@@ -55,13 +62,16 @@ class Face:
             return (x, y, width, height)
         return (0, 0, 0, 0)
 
-    def getLeftEye(self):
-        return self.eyeLeft
+    def get_left_eye(self):
+        """Get left eye"""
+        return self.eye_left
 
-    def getRightEye(self):
-        return self.eyeRight
+    def get_right_eye(self):
+        """Get right eye"""
+        return self.eye_right
 
-    def getLandmarks(self):
+    def get_landmarks(self):
+        """Get landmarks"""
         return self.landmarks
 
     def _landmarks(self, face):
@@ -76,18 +86,19 @@ class Face:
         return np.array(__face_landmarks)
 
     def process(self, image, face):
+        """Process face landmarks on image"""
         # try:
         self.face = face
         self.image_h, self.image_w, _ = image.shape
         self.landmarks = self._landmarks(self.face)
         # self.nose = nose.Nose(image,self.landmarks,self.getBoundingBox())
 
-        x, y, _, _ = self.getBoundingBox()
+        x, y, _, _ = self.get_bounding_box()
         offset = np.array((x, y))
         # offset = offset - self.nose.getHeadTiltOffset()
 
-        self.eyeLeft.update(image, self.landmarks, offset)
-        self.eyeRight.update(image, self.landmarks, offset)
+        self.eye_left.update(image, self.landmarks, offset)
+        self.eye_right.update(image, self.landmarks, offset)
         # except Exception as e:
         #     print(f"Caught exception: {e}")
         #     return None

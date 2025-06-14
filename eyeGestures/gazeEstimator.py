@@ -140,13 +140,13 @@ class GazeTracker:
                 return event
 
             if context.face == None:
-                x, y, w, h = self.face.getBoundingBox()
+                x, y, w, h = self.face.get_bounding_box()
                 i_w = self.face.image_w
                 i_h = self.face.image_h
                 context.face = (x, y, w, h, i_w, i_h)
 
-            l_eye = self.face.getLeftEye()
-            r_eye = self.face.getRightEye()
+            l_eye = self.face.get_left_eye()
+            r_eye = self.face.get_right_eye()
 
             # TODO: check what happens here before with l_pupil
             intersection_x, _ = self.__gaze_intersection(l_eye, r_eye, context.l_eye_buff, context.r_eye_buff)
@@ -164,7 +164,7 @@ class GazeTracker:
 
             if blink != True:
                 # current face radius
-                face_x, face_y, face_w, face_h = self.face.getBoundingBox()
+                face_x, face_y, face_w, face_h = self.face.get_bounding_box()
                 image_w = self.face.image_w
                 image_h = self.face.image_h
 
@@ -177,7 +177,7 @@ class GazeTracker:
                 c_face_w_perc = c_face_w / c_image_w
                 c_face_h_perc = c_face_h / c_image_h
 
-                x, y, w, h = self.face.getBoundingBox()
+                x, y, w, h = self.face.get_bounding_box()
                 i_w = self.face.image_w
                 i_h = self.face.image_h
                 context.face = (x, y, w, h, i_w, i_h)

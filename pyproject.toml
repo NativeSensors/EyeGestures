@@ -73,3 +73,4 @@ profile = "black"
 
 [tool.pylint]
 max-line-length = 120
+generated-members = "cv2.*"
