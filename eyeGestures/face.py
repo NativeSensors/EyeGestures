@@ -7,7 +7,7 @@ import numpy as np
 from eyeGestures.eye import Eye
 
 
-class FaceFinder:  # pylint: disable=too-few-public-methods
+class FaceFinder:
     """Class helping finding face"""
 
     def __init__(self):
@@ -30,7 +30,7 @@ class FaceFinder:  # pylint: disable=too-few-public-methods
                 return None
 
             return face_mesh
-        except Exception as e:  # pylint: disable=broad-exception-caught
+        except Exception as e:
             print(f"Exception in FaceFinder: {e}")
             return None
 

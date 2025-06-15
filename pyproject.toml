@@ -74,3 +74,9 @@ profile = "black"
 [tool.pylint]
 max-line-length = 120
 generated-members = "cv2.*"
+disable = ["too-few-public-methods", "too-many-instance-attributes", "too-many-positional-arguments", "too-many-arguments", "broad-exception-caught"]
+module-naming-style = "any"
+class-naming-style = "any"
+attr-naming-style = "any"
+method-naming-style = "any"
+variable-naming-style = "any"

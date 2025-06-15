@@ -42,10 +42,10 @@ class Contexter:
         return len(self.context)
 
 
-class Gcontext:  # pylint: disable=too-few-public-methods, too-many-instance-attributes
+class Gcontext:
     """Helper class for Gcontext"""
 
-    def __init__(  # pylint: disable=too-many-positional-arguments, too-many-arguments
+    def __init__(
         self,
         display,
         face,
@@ -81,7 +81,7 @@ class GazeContext:
     def __init__(self):
         self.contexter = Contexter()
 
-    def get(  # pylint: disable=too-many-positional-arguments, too-many-arguments
+    def get(
         self,
         context_id,
         display,
