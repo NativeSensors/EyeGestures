@@ -70,3 +70,22 @@ line-length = 120
 [tool.isort]
 line_length = 120
 profile = "black"
+
+[tool.pylint]
+max-line-length = 120
+generated-members = "cv2.*"
+disable = [
+  "too-few-public-methods",
+  "too-many-instance-attributes", 
+  "too-many-positional-arguments", 
+  "too-many-arguments", 
+  "broad-exception-caught",
+  "missing-module-docstring",
+  "missing-function-docstring",
+  "use-dict-literal",
+]
+module-naming-style = "any"
+class-naming-style = "any"
+attr-naming-style = "any"
+method-naming-style = "any"
+variable-naming-style = "any"

@@ -1,10 +1,12 @@
 absl-py==2.3.0
+astroid==3.3.10
 attrs==25.3.0
 black==25.1.0
 cffi==1.17.1
 click==8.2.1
 contourpy==1.3.2
 cycler==0.12.1
+dill==0.4.0
 flatbuffers==25.2.10
 fonttools==4.58.2
 isort==6.0.1
@@ -13,6 +15,7 @@ jaxlib==0.6.1
 joblib==1.5.1
 kiwisolver==1.4.8
 matplotlib==3.10.3
+mccabe==0.7.0
 mediapipe==0.10.21
 ml_dtypes==0.5.1
 mypy_extensions==1.1.0
@@ -27,6 +30,7 @@ platformdirs==4.3.8
 protobuf==4.25.8
 pycparser==2.22
 pygame==2.6.1
+pylint==3.3.7
 pyparsing==3.2.3
 python-dateutil==2.9.0.post0
 scikit-learn==1.7.0
@@ -35,3 +39,4 @@ sentencepiece==0.2.0
 six==1.17.0
 sounddevice==0.5.2
 threadpoolctl==3.6.0
+tomlkit==0.13.3

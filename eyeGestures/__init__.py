@@ -67,9 +67,9 @@ class EyeGestures_v3:
         # try:
         self.face.process(frame, self.finder.find(frame))
 
-        face_landmarks = self.face.getLandmarks()
-        l_eye = self.face.getLeftEye()
-        r_eye = self.face.getRightEye()
+        face_landmarks = self.face.get_landmarks()
+        l_eye = self.face.get_left_eye()
+        r_eye = self.face.get_right_eye()
         l_eye_landmarks = l_eye.getLandmarks()
         r_eye_landmarks = r_eye.getLandmarks()
         blink = l_eye.getBlink() and r_eye.getBlink()

@@ -9,44 +9,37 @@ class Contexter:
     """Class storing contextes"""
 
     def __init__(self):
-        self.context = dict()
+        self.context = {}
 
-    def addContext(self, context_id, object):
+    def add_context(self, context_id, context):
         """Function allowing to add new context to contexter"""
 
-        if context_id not in self.context.keys():
-            self.context[context_id] = object
+        if context_id not in self.context:
+            self.context[context_id] = context
             return True
         return False
 
-    def rmContext(self, context_id):
-        """Function allowing to removes context from contexter"""
+    def remove_context(self, context_id):
+        """Function removing context"""
+        return self.context.pop(context_id, None) is not None
 
-        if context_id in self.context.keys():
-            del self.context[context_id]
-            return True
-        return False
-
-    def getContext(self, context_id):
+    def get_context(self, context_id):
         """Function returning context based on id"""
+        return self.context.get(context_id, None)
 
-        if context_id in self.context.keys():
-            return self.context[context_id]
-        return None
-
-    def updateContext(self, context_id, data):
+    def update_context(self, context_id, data):
         """Function updating context with new data"""
 
-        if context_id in self.context.keys():
+        if context_id in self.context:
             self.context[context_id] = data
-            return True
-        self.addContext(context_id, data)
+        else:
+            self.add_context(context_id, data)
         return True
 
-    def getNumberContextes(self):
-        """Function returning number of contextes"""
+    def get_number_contexts(self):
+        """Function returning number of contexts"""
 
-        return len(self.context.keys())
+        return len(self.context)
 
 
 class Gcontext:
@@ -59,7 +52,7 @@ class Gcontext:
         roi,
         edges,
         cluster_boundaries,
-        gazeBuffor,
+        gaze_buffor,
         l_pupil,
         r_pupil,
         l_eye_buff,
@@ -72,7 +65,7 @@ class Gcontext:
         self.face = face
         self.edges = edges
         self.cluster_boundaries = cluster_boundaries
-        self.gazeBuffor = gazeBuffor
+        self.gaze_buffor = gaze_buffor
         self.l_pupil = l_pupil
         self.r_pupil = r_pupil
         self.l_eye_buff = l_eye_buff
@@ -90,7 +83,7 @@ class GazeContext:
 
     def get(
         self,
-        id,
+        context_id,
         display,
         face=None,
         roi=dp.ScreenROI(285, 105, 80, 15),
@@ -112,7 +105,7 @@ class GazeContext:
             roi=roi,
             edges=edges,
             cluster_boundaries=cluster_boundaries,
-            gazeBuffor=buffor,
+            gaze_buffor=buffor,
             l_pupil=l_pupil,
             r_pupil=r_pupil,
             l_eye_buff=l_eye_buff,
@@ -121,12 +114,11 @@ class GazeContext:
             calibration=calibration,
         )
 
-        if self.contexter.addContext(id, context):
+        if self.contexter.add_context(context_id, context):
             return context
-        else:
-            return self.contexter.getContext(id)
+        return self.contexter.get_context(context_id)
 
-    def update(self, id, context):
+    def update(self, context_id, context):
         """Function updating existing context"""
 
-        self.contexter.updateContext(id, context)
+        self.contexter.update_context(context_id, context)
