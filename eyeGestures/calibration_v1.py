@@ -32,7 +32,6 @@ class Calibrator:
         self.drawn = False
         self.prev_point = None
         self.last_calib = time.time()
-        pass
 
     def __add_left(self):
         self.calibration_steps.append(CalibrationPositions.LEFT)
@@ -70,14 +69,13 @@ class Calibrator:
         if len(self.calibration_steps) > 0:
             if CalibrationPositions.LEFT == self.calibration_steps[0]:
                 return (self.calibration_margin, int(self.height / 2))
-            elif CalibrationPositions.RIGHT == self.calibration_steps[0]:
+            if CalibrationPositions.RIGHT == self.calibration_steps[0]:
                 return (self.width - self.calibration_margin, int(self.height / 2))
-            elif CalibrationPositions.TOP == self.calibration_steps[0]:
+            if CalibrationPositions.TOP == self.calibration_steps[0]:
                 return (int(self.width / 2), self.calibration_margin)
-            elif CalibrationPositions.BOTTOM == self.calibration_steps[0]:
+            if CalibrationPositions.BOTTOM == self.calibration_steps[0]:
                 return (int(self.width / 2), self.height - self.calibration_margin)
-        else:
-            return (0, 0)
+        return (0, 0)
 
     def calibrate(self, x, y, fix):
 
@@ -114,53 +112,51 @@ class Calibrator:
                 self.drawn = False
                 self.last_calib = time.time()
                 return True
-            elif CalibrationPositions.RIGHT == self.calibration_steps[0] and x > self.width - self.calibration_margin:
+            if CalibrationPositions.RIGHT == self.calibration_steps[0] and x > self.width - self.calibration_margin:
                 if CalibrationPositions.RIGHT in self.calibration_steps:
                     self.calibration_steps.remove(CalibrationPositions.RIGHT)
                 self.prev_point = CalibrationPositions.RIGHT
                 self.drawn = False
                 self.last_calib = time.time()
                 return True
-            elif CalibrationPositions.TOP == self.calibration_steps[0] and y < self.calibration_margin:
+            if CalibrationPositions.TOP == self.calibration_steps[0] and y < self.calibration_margin:
                 if CalibrationPositions.TOP in self.calibration_steps:
                     self.calibration_steps.remove(CalibrationPositions.TOP)
                 self.prev_point = CalibrationPositions.TOP
                 self.drawn = False
                 self.last_calib = time.time()
                 return True
-            elif CalibrationPositions.BOTTOM == self.calibration_steps[0] and y > self.height - self.calibration_margin:
+            if CalibrationPositions.BOTTOM == self.calibration_steps[0] and y > self.height - self.calibration_margin:
                 if CalibrationPositions.BOTTOM in self.calibration_steps:
                     self.calibration_steps.remove(CalibrationPositions.BOTTOM)
                 self.prev_point = CalibrationPositions.BOTTOM
                 self.drawn = False
                 self.last_calib = time.time()
                 return True
-            else:
-                # TODO: somewhere here is bug breaking entire program
-                self.last_calib = time.time()
-                self.drawn = False
-                self.prev_point = None
+            # TODO: somewhere here is bug breaking entire program
+            self.last_calib = time.time()
+            self.drawn = False
+            self.prev_point = None
 
-                if self.calibration_steps[0] in [
-                    CalibrationPositions.RIGHT,
-                    CalibrationPositions.LEFT,
-                ]:
-                    if x < self.width / 2:
-                        if CalibrationPositions.RIGHT in self.calibration_steps:
-                            self.calibration_steps.remove(CalibrationPositions.RIGHT)
-                        self.calibration_steps.insert(0, CalibrationPositions.RIGHT)
-                    else:
-                        if CalibrationPositions.LEFT in self.calibration_steps:
-                            self.calibration_steps.remove(CalibrationPositions.LEFT)
-                        self.calibration_steps.insert(0, CalibrationPositions.LEFT)
-                    return True
-
-                if self.calibration_steps[0] is CalibrationPositions.TOP:
-                    self.calibration_steps.insert(0, CalibrationPositions.BOTTOM)
-                    return True
+            if self.calibration_steps[0] in [
+                CalibrationPositions.RIGHT,
+                CalibrationPositions.LEFT,
+            ]:
+                if x < self.width / 2:
+                    if CalibrationPositions.RIGHT in self.calibration_steps:
+                        self.calibration_steps.remove(CalibrationPositions.RIGHT)
+                    self.calibration_steps.insert(0, CalibrationPositions.RIGHT)
                 else:
-                    self.calibration_steps.insert(0, CalibrationPositions.TOP)
-                    return True
+                    if CalibrationPositions.LEFT in self.calibration_steps:
+                        self.calibration_steps.remove(CalibrationPositions.LEFT)
+                    self.calibration_steps.insert(0, CalibrationPositions.LEFT)
+                return True
+
+            if self.calibration_steps[0] is CalibrationPositions.TOP:
+                self.calibration_steps.insert(0, CalibrationPositions.BOTTOM)
+                return True
+            self.calibration_steps.insert(0, CalibrationPositions.TOP)
+            return True
 
         self.prev_point = None
         return False

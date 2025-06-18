@@ -78,12 +78,17 @@ disable = [
   "too-few-public-methods",
   "too-many-instance-attributes", 
   "too-many-positional-arguments", 
-  "too-many-arguments", 
+  "too-many-arguments",
+  "too-many-statements",
+  "too-many-branches",
+  "too-many-return-statements",
   "broad-exception-caught",
   "missing-module-docstring",
   "missing-function-docstring",
   "missing-class-docstring",
   "use-dict-literal",
+  "protected-access",
+  "fixme"
 ]
 module-naming-style = "any"
 class-naming-style = "any"
