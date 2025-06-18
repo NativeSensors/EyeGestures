@@ -82,6 +82,7 @@ disable = [
   "broad-exception-caught",
   "missing-module-docstring",
   "missing-function-docstring",
+  "missing-class-docstring",
   "use-dict-literal",
 ]
 module-naming-style = "any"
