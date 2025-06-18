@@ -89,7 +89,8 @@ disable = [
   "missing-class-docstring",
   "use-dict-literal",
   "protected-access",
-  "fixme"
+  "fixme",
+  "singleton-comparison"
 ]
 module-naming-style = "any"
 class-naming-style = "any"

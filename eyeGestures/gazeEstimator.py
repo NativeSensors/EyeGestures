@@ -155,10 +155,8 @@ class GazeTracker:
             compound_point = np.array(((l_point + r_point) / 2), dtype=np.uint32)
 
             blink = l_eye.getBlink() or r_eye.getBlink()
-            if blink is not True:
+            if blink != True:
                 context.gaze_buffor.add(compound_point)
-
-            if blink is not True:
                 # current face radius
                 _, _, face_w, face_h = self.face.get_bounding_box()
                 image_w = self.face.image_w
