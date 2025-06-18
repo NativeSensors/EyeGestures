@@ -1,10 +1,7 @@
-import asyncio
 import threading
 
 import numpy as np
 import sklearn.linear_model as scireg
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler
 
 
 def euclidean_distance(point1, point2):
@@ -16,8 +13,9 @@ class Calibrator:
     PRECISION_LIMIT = 50
     PRECISION_STEP = 10
     ACCEPTANCE_RADIUS = 500
+    CALIBRATION_RADIUS = 1000
 
-    def __init__(self, CALIBRATION_RADIUS=1000):
+    def __init__(self, calibration_radius=1000):
         self.X = []
         self.Y_y = []
         self.Y_x = []
@@ -30,13 +28,15 @@ class Calibrator:
         self.current_algorithm = "Ridge"
         self.fitted = False
         self.cv_not_set = True
+        self.fixations_x = None
+        self.fixations_y = None
 
         self.matrix = CalibrationMatrix()
 
         self.precision_limit = self.PRECISION_LIMIT
         self.precision_step = self.PRECISION_STEP
-        self.acceptance_radius = int(CALIBRATION_RADIUS / 2)
-        self.calibration_radius = int(CALIBRATION_RADIUS)
+        self.acceptance_radius = int(calibration_radius / 2)
+        self.calibration_radius = int(calibration_radius)
 
         self.lock = threading.Lock()
         self.calcualtion_coroutine = threading.Thread(target=self.__async_post_fit)
@@ -94,7 +94,6 @@ class Calibrator:
         except Exception as e:
             print(f"Exception as {e}")
             self.cv_not_set = True
-        pass
 
     def post_fit(self):
         if self.cv_not_set:
@@ -113,8 +112,7 @@ class Calibrator:
                 y_x = self.reg_x.predict(x)[0]
                 y_y = self.reg_y.predict(x)[0]
                 return np.array([y_x, y_y])
-            else:
-                return np.array([0.0, 0.0])
+            return np.array([0.0, 0.0])
 
     def movePoint(self):
         with self.lock:
@@ -187,7 +185,6 @@ class CalibrationMatrix:
                 [0.0, 0.25],
             ]
         )
-        pass
 
     def updMatrix(self, points):
         self.points = points

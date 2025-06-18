@@ -51,6 +51,7 @@ class EyeGestures_v3:
     def saveModel(self, context="main"):
         if context in self.clb:
             return pickle.dumps(self.clb[context])
+        return None
 
     def loadModel(self, model, context="main"):
         self.clb[context] = pickle.loads(model)
@@ -119,8 +120,7 @@ class EyeGestures_v3:
     def whichAlgorithm(self, context="main"):
         if context in self.clb:
             return self.clb[context].whichAlgorithm()
-        else:
-            return "None"
+        return "None"
 
     def reset(self, context="main"):
         self.filled_points[context] = 0
@@ -239,6 +239,7 @@ class EyeGestures_v2:
     def saveModel(self, context="main"):
         if context in self.clb:
             return pickle.dumps(self.clb[context])
+        return None
 
     def loadModel(self, model, context="main"):
         self.clb[context] = pickle.loads(model)
@@ -285,8 +286,7 @@ class EyeGestures_v2:
     def whichAlgorithm(self, context="main"):
         if context in self.clb:
             return self.clb[context].whichAlgorithm()
-        else:
-            return "None"
+        return "None"
 
     def setClassicImpact(self, impact):
         self.CN = impact

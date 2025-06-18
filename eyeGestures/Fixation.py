@@ -9,7 +9,6 @@ class Fixation:
         self.fixation = 0.0
         self.x = x
         self.y = y
-        pass
 
     def process(self, x, y):
         """Function processing x and y estimated points for fixation detection"""

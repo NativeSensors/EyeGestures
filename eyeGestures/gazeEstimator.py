@@ -18,8 +18,7 @@ def isInside(circle_x, circle_y, r, x, y):
     # from given point
     if (x - circle_x) * (x - circle_x) + (y - circle_y) * (y - circle_y) <= r * r:
         return True
-    else:
-        return False
+    return False
 
 
 class GazeTracker:
@@ -37,8 +36,6 @@ class GazeTracker:
         roi_y,
         roi_width,
         roi_height,
-        monitor_offset_x=0,
-        monitor_offset_y=0,
     ):
         self.screen = dp.Screen(screen_width, screen_heigth)
 
@@ -62,7 +59,6 @@ class GazeTracker:
         self.face = Face()
 
         # those are used for analysis
-        self.__headDir = [0.5, 0.5]
 
         self.point_screen = [0.0, 0.0]
         self.freezed_point = [0.0, 0.0]
@@ -139,7 +135,7 @@ class GazeTracker:
             if self.face.landmarks is None:
                 return event
 
-            if context.face == None:
+            if context.face is None:
                 x, y, w, h = self.face.get_bounding_box()
                 i_w = self.face.image_w
                 i_h = self.face.image_h
@@ -161,10 +157,8 @@ class GazeTracker:
             blink = l_eye.getBlink() or r_eye.getBlink()
             if blink != True:
                 context.gaze_buffor.add(compound_point)
-
-            if blink != True:
                 # current face radius
-                face_x, face_y, face_w, face_h = self.face.get_bounding_box()
+                _, _, face_w, face_h = self.face.get_bounding_box()
                 image_w = self.face.image_w
                 image_h = self.face.image_h
 
@@ -172,7 +166,7 @@ class GazeTracker:
                 face_h_perc = face_h / image_h
 
                 # # prev current face radius
-                c_face_x, c_face_y, c_face_w, c_face_h, c_image_w, c_image_h = context.face
+                _, _, c_face_w, c_face_h, c_image_w, c_image_h = context.face
 
                 c_face_w_perc = c_face_w / c_image_w
                 c_face_h_perc = c_face_h / c_image_h

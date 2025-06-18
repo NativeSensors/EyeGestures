@@ -108,11 +108,11 @@ def make_image_grid(images, rows, cols):
 
 class var:
 
-    def __init__(self, var):
-        self.__var = var
+    def __init__(self, _var):
+        self.__var = _var
 
-    def set(self, var):
-        self.__var = var
+    def set(self, _var):
+        self.__var = _var
 
     def get(self):
         return self.__var
@@ -124,11 +124,11 @@ class Buffor:
         self.length = length
         self.__buffor = []
 
-    def add(self, var):
+    def add(self, _var):
         if len(self.__buffor) >= self.length:
             self.__buffor.pop(0)
 
-        self.__buffor.append(var)
+        self.__buffor.append(_var)
 
     def getAvg(self, lenght=0):
         return np.sum(self.__buffor[-lenght:], axis=0) / len(self.__buffor[-lenght:])
@@ -228,10 +228,9 @@ class VideoCapture:
         """Function returning latest frame"""
         if self.stream:
             return self.q.get()
-        else:
-            frame = self.frames.pop(0)
-            self.frames.pop(0)
-            return ((len(self.frames) >= 1), frame)
+        frame = self.frames.pop(0)
+        self.frames.pop(0)
+        return ((len(self.frames) >= 1), frame)
 
     def close(self):
         """Function closing stream"""
