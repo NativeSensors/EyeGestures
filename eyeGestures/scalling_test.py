@@ -1,5 +1,3 @@
-import pytest
-
 import eyeGestures.screenTracker.dataPoints as dp
 import eyeGestures.screenTracker.screenTracker as scrtr
 
@@ -49,7 +47,7 @@ def test_scaleDownTest():
     assert smaller_roi.height < roi.height
 
 
-def test_scaleUpTest_known():
+def test_scaleDownTest_known():
     pos = (50, 50)
     SMALLER = 10
 
