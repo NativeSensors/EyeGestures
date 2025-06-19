@@ -1,9 +1,3 @@
-import math
-
-import numpy as np
-from scipy import signal
-
-
 class Center:
     """Helper representing Center of object with x,y,width,height"""
 
@@ -62,4 +56,6 @@ class Display:
 
     def getCenter(self):
         """Function returnig center of the Display"""
-        return self.__center
+        center_x = (self.offset_x + self.width) / 2
+        center_y = (self.offset_y + self.height) / 2
+        return (center_x, center_y)
