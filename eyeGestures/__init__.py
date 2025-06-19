@@ -11,7 +11,7 @@ from eyeGestures.face import Face, FaceFinder
 from eyeGestures.Fixation import Fixation
 from eyeGestures.gazeEstimator import GazeTracker
 from eyeGestures.gevent import Cevent, Gevent
-from eyeGestures.utils import Buffor, low_pass_filter_fourier, recoverable, timeit
+from eyeGestures.utils import Buffor, low_pass_filter_fourier, recoverable
 
 VERSION = "3.0.0"
 

@@ -8,3 +8,4 @@ format_check:
 
 check: format_check
 	pylint eyeGestures
+	flake8 eyeGestures

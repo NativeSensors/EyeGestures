@@ -55,7 +55,7 @@ class EyeProcessor:
     def getAvgPupil(self, width, height, pupilBuffor):
         """Function returning average point based on tracked."""
 
-        if not width is None and not height is None:
+        if width is not None and height is not None:
             _retPupil = self.__convertPoint(
                 pupilBuffor.getAvg(),
                 width=width,
