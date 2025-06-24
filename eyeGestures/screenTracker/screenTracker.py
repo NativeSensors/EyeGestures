@@ -1,9 +1,3 @@
-import math
-
-import numpy as np
-from scipy import signal
-from sklearn.cluster import DBSCAN
-
 import eyeGestures.screenTracker.dataPoints as dp
 from eyeGestures.screenTracker.clusters import Clusters
 from eyeGestures.screenTracker.heatmap import Heatmap
@@ -16,8 +10,8 @@ def detect_if_inside(point, rect):
     py = point[1]
     x, y, width, height = rect.getBoundaries()
 
-    x_in = x < px and px < x + width
-    y_in = y < py and py < y + height
+    x_in = x < px < x + width
+    y_in = y < py < y + height
 
     return x_in and y_in
 
@@ -94,7 +88,8 @@ def scaleDown(roi, edge, scale):
 
 
 def scaleUp(roi, roi2, scale):
-    """Function scalling up one roi into another roi, second roi is for limiting scaling operation and scale is telling how much you can scale"""
+    """Function scalling up one roi into another roi,
+    second roi is for limiting scaling operation and scale is telling how much you can scale"""
 
     (_, _, roi2_w, roi2_h) = roi2.getBoundaries()
 
@@ -211,7 +206,7 @@ class ScreenManager:
             if calibration:
                 roi = self.screen_processor.update(roi, edges, cluster, heatmap)
 
-            p, percentage = self.screen_processor.process(
+            p, _ = self.screen_processor.process(
                 buffor.getAvg(20),
                 (offset[0], offset[1]),
                 len(buffor.getBuffor()),

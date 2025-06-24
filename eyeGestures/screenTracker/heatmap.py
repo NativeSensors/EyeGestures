@@ -63,5 +63,6 @@ class Heatmap:
         return (x, y)
 
     def getHist(self):
-        """Function returning histogram of the heatmap. This heatmap is simply 2d histogram, so this function returns values for each axis."""
+        """Function returning histogram of the heatmap.
+        This heatmap is simply 2d histogram, so this function returns values for each axis."""
         return (self.axis_x / self.inc_step, self.axis_y / self.inc_step)
