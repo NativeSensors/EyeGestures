@@ -99,3 +99,7 @@ method-naming-style = "any"
 variable-naming-style = "any"
 function-naming-style = "any"
 argument-naming-style = "any"
+
+[tool.flake8]
+max-line-length = 120
+ignore = "DAR101, DAR201, E203, E266, E712, W503"

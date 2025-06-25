@@ -131,7 +131,7 @@ class GazeTracker:
         )
         context.calibration = calibration
 
-        if not self.face is None:
+        if self.face is not None:
             if self.face.landmarks is None:
                 return event
 
