@@ -1,5 +1,7 @@
 """Module providing a processing pupil position to gaze direction."""
 
+from typing import Tuple
+
 import numpy as np
 
 
@@ -16,7 +18,7 @@ class EyeProcessor:
         self.pupil = None
         self.landmarks = None
 
-    def append(self, pupil: (int, int), landmarks: np.ndarray, pupilBuffor):
+    def append(self, pupil: Tuple[int, int], landmarks: np.ndarray, pupilBuffor):
         """Function appending new pupil point to tracker."""
 
         self.pupil = pupil

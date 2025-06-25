@@ -10,3 +10,5 @@ venv
 dist/*
 *.csv
 data/*
+.mypy_cache
+.venvs

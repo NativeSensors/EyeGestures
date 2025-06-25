@@ -103,3 +103,10 @@ argument-naming-style = "any"
 [tool.flake8]
 max-line-length = 120
 ignore = "DAR101, DAR201, E203, E266, E712, W503"
+
+[tool.mypy]
+strict = 0
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "mediapipe.*"]
+ignore_missing_imports = true
