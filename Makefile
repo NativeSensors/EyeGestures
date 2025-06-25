@@ -9,4 +9,4 @@ format_check:
 check: format_check
 	pylint eyeGestures
 	flake8 eyeGestures
-	mypy eyeGestures/screenTracker
+	mypy eyeGestures

@@ -1,5 +1,6 @@
 import pickle
 import time
+from typing import Any, Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -19,17 +20,14 @@ VERSION = "3.0.0"
 class EyeGestures_v3:
     """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
 
-    def __init__(self, calibration_radius=1000):
+    def __init__(self, calibration_radius: int = 1000) -> None:
         self.calibration_radius = calibration_radius
 
-        self.clb = dict()  # Calibrator_v2()
+        self.clb: Dict[str, Calibrator_v2] = dict()  # Calibrator_v2()
         self.cap = None
-
-        self.calibration = dict()
-
-        self.average_points = dict()
-        self.iterator = dict()
-        self.filled_points = dict()
+        self.calibration: Dict[str, bool] = dict()
+        self.average_points: Dict[str, np.ndarray] = dict()
+        self.filled_points: Dict[str, int] = dict()
         self.enable_CN = False
         self.calibrate_gestures = False
 
@@ -37,30 +35,30 @@ class EyeGestures_v3:
         self.face = Face()
 
         # this has to be contexted
-        self.prev_timestamp = dict()
-        self.prev_point = dict()
-        self.fix = dict()
-        self.velocity_max = dict()
-        self.velocity_min = dict()
-        self.fixationTracker = dict()
-        self.key_points_buffer = dict()
+        self.prev_timestamp: Dict[str, float] = dict()
+        self.prev_point: Dict[str, np.ndarray] = dict()
+        self.fix: Optional[float] = None
+        self.velocity_max: Dict[str, int] = dict()
+        self.velocity_min: Dict[str, int] = dict()
+        self.fixationTracker: Dict[str, Fixation] = dict()
+        self.key_points_buffer: Dict[str, List[np.ndarray]] = dict()
 
         self.starting_head_position = np.zeros((1, 2))
         self.starting_size = np.zeros((1, 2))
 
-    def saveModel(self, context="main"):
+    def saveModel(self, context: str = "main") -> Optional[bytes]:
         if context in self.clb:
             return pickle.dumps(self.clb[context])
         return None
 
-    def loadModel(self, model, context="main"):
+    def loadModel(self, model: Any, context: str = "main") -> None:
         self.clb[context] = pickle.loads(model)
 
-    def uploadCalibrationMap(self, points, context="main"):
+    def uploadCalibrationMap(self, points: List[Tuple[int, int]], context: str = "main") -> None:
         self.addContext(context)
         self.clb[context].updMatrix(np.array(points))
 
-    def getLandmarks(self, frame):
+    def getLandmarks(self, frame: cv2.typing.MatLike) -> Tuple[np.ndarray, bool, cv2.typing.MatLike]:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
@@ -117,20 +115,20 @@ class EyeGestures_v3:
         ]
         return key_points, blink, subframe
 
-    def whichAlgorithm(self, context="main"):
+    def whichAlgorithm(self, context: str = "main") -> str:
         if context in self.clb:
             return self.clb[context].whichAlgorithm()
         return "None"
 
-    def reset(self, context="main"):
+    def reset(self, context: str = "main") -> None:
         self.filled_points[context] = 0
         if context in self.clb:
             self.addContext(context)
 
-    def setFixation(self, fix):
+    def setFixation(self, fix: float) -> None:
         self.fix = fix
 
-    def addContext(self, context):
+    def addContext(self, context: str) -> None:
         if context not in self.clb:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
             self.average_points[context] = np.zeros((20, 2))
@@ -144,7 +142,9 @@ class EyeGestures_v3:
             self.key_points_buffer[context] = []
 
     @recoverable(ret_error_params=(None, None))
-    def step(self, frame, calibration, width, height, context="main"):
+    def step(
+        self, frame: cv2.typing.MatLike, calibration: bool, width: int, height: int, context: str = "main"
+    ) -> Tuple[Gevent, Cevent]:
         self.addContext(context)
 
         self.calibration[context] = calibration

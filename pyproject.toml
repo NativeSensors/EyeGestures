@@ -105,7 +105,7 @@ max-line-length = 120
 ignore = "DAR101, DAR201, E203, E266, E712, W503"
 
 [tool.mypy]
-strict = 0
+strict = false
 
 [[tool.mypy.overrides]]
 module = ["sklearn.*", "mediapipe.*"]
