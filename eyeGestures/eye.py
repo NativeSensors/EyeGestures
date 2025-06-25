@@ -5,6 +5,7 @@ from typing import Optional
 import cv2
 import mediapipe as mp
 import numpy as np
+import numpy.typing as npt
 
 
 class Eye:
@@ -36,16 +37,18 @@ class Eye:
         self.height = 0
         self.center_x = 0
         self.center_y = 0
-        self.image: Optional[np.ndarray] = None
+        self.image: Optional[npt.NDArray[np.float64]] = None
         self.pupil = None
-        self.offset: Optional[np.ndarray] = None
-        self.region: Optional[np.ndarray] = None
+        self.offset: Optional[npt.NDArray[np.float64]] = None
+        self.region: Optional[npt.NDArray[np.float64]] = None
         self.cut_image = None
-        self.landmarks: Optional[np.ndarray] = None
+        self.landmarks: Optional[npt.NDArray[np.float64]] = None
 
         # self._process(self.image,self.region)
 
-    def update(self, image: np.ndarray, landmarks: np.ndarray, offset: np.ndarray):
+    def update(
+        self, image: npt.NDArray[np.float64], landmarks: npt.NDArray[np.float64], offset: npt.NDArray[np.float64]
+    ):
         """function updating data stored inside eye object"""
 
         self.image = image
