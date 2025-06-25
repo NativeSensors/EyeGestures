@@ -1,6 +1,6 @@
 import pickle
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import cv2
 import numpy as np
@@ -12,7 +12,7 @@ from eyeGestures.face import Face, FaceFinder
 from eyeGestures.Fixation import Fixation
 from eyeGestures.gazeEstimator import GazeTracker
 from eyeGestures.gevent import Cevent, Gevent
-from eyeGestures.utils import Buffor, low_pass_filter_fourier, recoverable
+from eyeGestures.utils import low_pass_filter_fourier, recoverable
 
 VERSION = "3.0.0"
 
@@ -54,7 +54,7 @@ class EyeGestures_v3:
     def loadModel(self, model: Any, context: str = "main") -> None:
         self.clb[context] = pickle.loads(model)
 
-    def uploadCalibrationMap(self, points: List[Tuple[int, int]], context: str = "main") -> None:
+    def uploadCalibrationMap(self, points: Union[List[Tuple[int, int]], np.ndarray], context: str = "main") -> None:
         self.addContext(context)
         self.clb[context].updMatrix(np.array(points))
 
@@ -144,7 +144,7 @@ class EyeGestures_v3:
     @recoverable(ret_error_params=(None, None))
     def step(
         self, frame: cv2.typing.MatLike, calibration: bool, width: int, height: int, context: str = "main"
-    ) -> Tuple[Gevent, Cevent]:
+    ) -> Tuple[Optional[Gevent], Optional[Cevent]]:
         self.addContext(context)
 
         self.calibration[context] = calibration
@@ -215,40 +215,41 @@ class EyeGestures_v3:
 class EyeGestures_v2:
     """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
 
-    def __init__(self, calibration_radius=1000):
+    def __init__(self, calibration_radius: int = 1000) -> None:
         self.monitor_width = 1
         self.monitor_height = 1
         self.calibration_radius = calibration_radius
 
-        self.clb = dict()  # Calibrator_v2()
+        self.clb: Dict[str, Calibrator_v2] = dict()  # Calibrator_v2()
         self.cap = None
         self.gestures = EyeGestures_v1(285, 115, 200, 100)
 
-        self.calibration = dict()
+        self.calibration: Dict[str, bool] = dict()
 
-        self.CN = 5
+        self.CN: int = 5
 
-        self.average_points = dict()
-        self.iterator = dict()
-        self.filled_points = dict()
+        self.average_points: Dict[str, np.ndarray] = dict()
+        self.filled_points: Dict[str, int] = dict()
         self.enable_CN = False
         self.calibrate_gestures = False
 
         self.fix = 0.8
 
-    def saveModel(self, context="main"):
+    def saveModel(self, context: str = "main") -> Optional[bytes]:
         if context in self.clb:
             return pickle.dumps(self.clb[context])
         return None
 
-    def loadModel(self, model, context="main"):
+    def loadModel(self, model: Any, context: str = "main") -> None:
         self.clb[context] = pickle.loads(model)
 
-    def uploadCalibrationMap(self, points, context="main"):
+    def uploadCalibrationMap(self, points: Union[List[Tuple[int, int]], np.ndarray], context="main") -> None:
         self.addContext(context)
         self.clb[context].updMatrix(np.array(points))
 
-    def getLandmarks(self, frame, calibrate=False, context="main"):
+    def getLandmarks(
+        self, frame: cv2.typing.MatLike, calibrate: bool = False, context: str = "main"
+    ) -> Tuple[np.ndarray, np.ndarray, bool, bool, Optional[Cevent]]:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
@@ -281,43 +282,44 @@ class EyeGestures_v2:
                 event.fixation,
                 cevent,
             )
-        return np.array((0.0, 0.0)), np.array([]), 0, 0, None
+        return np.array((0.0, 0.0)), np.array([]), False, False, None
 
-    def whichAlgorithm(self, context="main"):
+    def whichAlgorithm(self, context: str = "main") -> str:
         if context in self.clb:
             return self.clb[context].whichAlgorithm()
         return "None"
 
-    def setClassicImpact(self, impact):
+    def setClassicImpact(self, impact: int) -> None:
         self.CN = impact
 
-    def reset(self, context="main"):
+    def reset(self, context: str = "main") -> None:
         self.filled_points[context] = 0
         if context in self.clb:
             self.addContext(context)
 
-    def setFixation(self, fix):
+    def setFixation(self, fix: float) -> None:
         self.fix = fix
 
-    def setClassicalImpact(self, CN):
+    def setClassicalImpact(self, CN: int) -> None:
         self.CN = CN
 
-    def enableCNCalib(self):
+    def enableCNCalib(self) -> None:
         self.enable_CN = True
 
-    def disableCNCalib(self):
+    def disableCNCalib(self) -> None:
         self.enable_CN = False
 
-    def addContext(self, context):
+    def addContext(self, context: str) -> None:
         if context not in self.clb:
             self.clb[context] = Calibrator_v2(self.calibration_radius)
-            self.average_points[context] = Buffor(20)
             self.average_points[context] = np.zeros((20, 2))
             self.filled_points[context] = 0
             self.calibration[context] = False
 
     @recoverable(ret_error_params=(None, None))
-    def step(self, frame, calibration, width, height, context="main"):
+    def step(
+        self, frame: cv2.typing.MatLike, calibration: bool, width: int, height: int, context: str = "main"
+    ) -> Tuple[Optional[Gevent], Optional[Cevent]]:
         self.addContext(context)
 
         self.calibration[context] = calibration
@@ -329,6 +331,8 @@ class EyeGestures_v2:
         )
 
         margin = 10
+        if cevent is None:
+            raise ValueError("cevent must not be None")
         if (classic_point[0] <= margin) and self.calibration[context]:
             self.calibrate_gestures = cevent.calibration
         elif (classic_point[0] >= width - margin) and self.calibration[context]:
