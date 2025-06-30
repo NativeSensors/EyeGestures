@@ -19,7 +19,7 @@ class EyeProcessor:
         self.pupil = None
         self.landmarks = None
 
-    def append(self, pupil: Tuple[int, int], landmarks: npt.NDArray[np.float64], pupilBuffor):
+    def append(self, pupil: Tuple[int, int], landmarks: npt.NDArray, pupilBuffor):
         """Function appending new pupil point to tracker."""
 
         self.pupil = pupil

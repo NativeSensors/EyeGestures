@@ -1,6 +1,6 @@
 import pickle
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -27,7 +27,7 @@ class EyeGestures_v3:
         self.clb: Dict[str, Calibrator_v2] = dict()  # Calibrator_v2()
         self.cap = None
         self.calibration: Dict[str, bool] = dict()
-        self.average_points: Dict[str, npt.NDArray[np.float64]] = dict()
+        self.average_points: Dict[str, npt.NDArray] = dict()
         self.filled_points: Dict[str, int] = dict()
         self.enable_CN = False
         self.calibrate_gestures = False
@@ -37,12 +37,12 @@ class EyeGestures_v3:
 
         # this has to be contexted
         self.prev_timestamp: Dict[str, float] = dict()
-        self.prev_point: Dict[str, npt.NDArray[np.float64]] = dict()
+        self.prev_point: Dict[str, npt.NDArray] = dict()
         self.fix: Optional[float] = None
         self.velocity_max: Dict[str, int] = dict()
         self.velocity_min: Dict[str, int] = dict()
         self.fixationTracker: Dict[str, Fixation] = dict()
-        self.key_points_buffer: Dict[str, List[npt.NDArray[np.float64]]] = dict()
+        self.key_points_buffer: Dict[str, List[npt.NDArray]] = dict()
 
         self.starting_head_position = np.zeros((1, 2))
         self.starting_size = np.zeros((1, 2))
@@ -55,11 +55,11 @@ class EyeGestures_v3:
     def loadModel(self, model: Any, context: str = "main") -> None:
         self.clb[context] = pickle.loads(model)
 
-    def uploadCalibrationMap(self, points: npt.NDArray[np.float64], context: str = "main") -> None:
+    def uploadCalibrationMap(self, points: npt.NDArray, context: str = "main") -> None:
         self.addContext(context)
         self.clb[context].updMatrix(np.array(points))
 
-    def getLandmarks(self, frame: cv2.typing.MatLike) -> Tuple[npt.NDArray[np.float64], bool, cv2.typing.MatLike]:
+    def getLandmarks(self, frame: cv2.typing.MatLike) -> Tuple[npt.NDArray, bool, cv2.typing.MatLike]:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
@@ -229,7 +229,7 @@ class EyeGestures_v2:
 
         self.CN: int = 5
 
-        self.average_points: Dict[str, npt.NDArray[np.float64]] = dict()
+        self.average_points: Dict[str, npt.NDArray] = dict()
         self.filled_points: Dict[str, int] = dict()
         self.enable_CN = False
         self.calibrate_gestures = False
@@ -244,15 +244,13 @@ class EyeGestures_v2:
     def loadModel(self, model: Any, context: str = "main") -> None:
         self.clb[context] = pickle.loads(model)
 
-    def uploadCalibrationMap(
-        self, points: Union[List[Tuple[int, int]], npt.NDArray[np.float64]], context="main"
-    ) -> None:
+    def uploadCalibrationMap(self, points: npt.NDArray, context="main") -> None:
         self.addContext(context)
         self.clb[context].updMatrix(np.array(points))
 
     def getLandmarks(
         self, frame: cv2.typing.MatLike, calibrate: bool = False, context: str = "main"
-    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], bool, bool, Optional[Cevent]]:
+    ) -> Tuple[npt.NDArray, npt.NDArray, bool, bool, Optional[Cevent]]:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
