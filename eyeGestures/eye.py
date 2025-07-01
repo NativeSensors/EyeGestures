@@ -1,8 +1,11 @@
 """Module providing a extraction of eye from face object."""
 
+from typing import Optional
+
 import cv2
 import mediapipe as mp
 import numpy as np
+import numpy.typing as npt
 
 
 class Eye:
@@ -10,8 +13,6 @@ class Eye:
 
     LEFT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:, 0]
     RIGHT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_RIGHT_EYE))[:, 0]
-    LEFT_EYE_IRIS_KEYPOINT = []
-    RIGHT_EYE_IRIS_KEYPOINT = []
     LEFT_EYE_PUPIL_KEYPOINT = [473]
     RIGHT_EYE_PUPIL_KEYPOINT = [468]
 
@@ -36,16 +37,16 @@ class Eye:
         self.height = 0
         self.center_x = 0
         self.center_y = 0
-        self.image = None
+        self.image: Optional[npt.NDArray] = None
         self.pupil = None
-        self.offset = None
-        self.region = None
+        self.offset: Optional[npt.NDArray] = None
+        self.region: Optional[npt.NDArray] = None
         self.cut_image = None
-        self.landmarks = None
+        self.landmarks: Optional[npt.NDArray] = None
 
         # self._process(self.image,self.region)
 
-    def update(self, image: np.ndarray, landmarks: list, offset: np.ndarray):
+    def update(self, image: npt.NDArray, landmarks: npt.NDArray, offset: npt.NDArray):
         """function updating data stored inside eye object"""
 
         self.image = image
