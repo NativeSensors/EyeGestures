@@ -37,16 +37,18 @@ class Eye:
         self.height = 0
         self.center_x = 0
         self.center_y = 0
-        self.image: Optional[npt.NDArray] = None
+        self.image: Optional[npt.NDArray[np.float64]] = None
         self.pupil = None
-        self.offset: Optional[npt.NDArray] = None
-        self.region: Optional[npt.NDArray] = None
+        self.offset: Optional[npt.NDArray[np.float64]] = None
+        self.region: Optional[npt.NDArray[np.float64]] = None
         self.cut_image = None
-        self.landmarks: Optional[npt.NDArray] = None
+        self.landmarks: Optional[npt.NDArray[np.float64]] = None
 
         # self._process(self.image,self.region)
 
-    def update(self, image: npt.NDArray, landmarks: npt.NDArray, offset: npt.NDArray):
+    def update(
+        self, image: npt.NDArray[np.float64], landmarks: npt.NDArray[np.float64], offset: npt.NDArray[np.float64]
+    ):
         """function updating data stored inside eye object"""
 
         self.image = image
