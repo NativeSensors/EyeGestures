@@ -1,11 +1,13 @@
 """Module providing a extraction of eye from face object."""
 
-from typing import Optional
+from typing import Optional, Tuple
 
 import cv2
 import mediapipe as mp
 import numpy as np
 import numpy.typing as npt
+
+from eyeGestures.utils import Buffor
 
 
 class Eye:
@@ -21,7 +23,7 @@ class Eye:
 
     scale = (150, 100)
 
-    def __init__(self, side: int):
+    def __init__(self, side: int) -> None:
 
         # check if eye is left or right
         if side == 1:
@@ -38,21 +40,22 @@ class Eye:
         self.center_x = 0
         self.center_y = 0
         self.image: Optional[cv2.typing.MatLike] = None
-        self.pupil = None
+        self.pupil: Optional[npt.NDArray[np.float64]] = None
         self.offset: Optional[npt.NDArray[np.float64]] = None
         self.region: Optional[npt.NDArray[np.float64]] = None
-        self.cut_image = None
+        self.cut_image: Optional[cv2.typing.MatLike] = None
         self.landmarks: Optional[npt.NDArray[np.float64]] = None
 
         # self._process(self.image,self.region)
 
-    def update(self, image: cv2.typing.MatLike, landmarks: npt.NDArray[np.float64], offset: npt.NDArray[np.float64]):
+    def update(
+        self, image: cv2.typing.MatLike, landmarks: npt.NDArray[np.float64], offset: npt.NDArray[np.float64]
+    ) -> None:
         """function updating data stored inside eye object"""
 
         self.image = image
         self.offset = offset
         self.landmarks = landmarks
-
         # check if eye is left or right
         if self.side == "right":
             self.region = np.array(landmarks[self.RIGHT_EYE_KEYPOINTS])
@@ -63,39 +66,43 @@ class Eye:
             # landmarks[self.LEFT_EYE_KEYPOINTS], dtype=np.int32)
 
         self.pupil = landmarks[self.pupil_index][0]
+        assert self.region is not None
         self._process(self.image, self.region)
 
-    def getCenter(self):
+    def getCenter(self) -> Tuple[float, float]:
         """function returning center of eye"""
 
-        return (self.center_x, self.center_y)
+        return (float(self.center_x), float(self.center_y))
 
-    def getPos(self):
+    def getPos(self) -> Tuple[int, int]:
         """function returning position of eye in the image"""
 
-        return (self.x, self.y)
+        return (int(self.x), int(self.y))
 
-    def getPupil(self):
+    def getPupil(self) -> Optional[npt.NDArray[np.float64]]:
         """function returning pupil object"""
 
         # return self.pupil.getCoords()
         return self.pupil
 
-    def getBlink(self):
+    def getBlink(self) -> bool:
         """function returning blink event"""
         # return self.pupil.getCoords()
         return (self.height) <= 3  # 2x margin
 
-    def getImage(self):
+    def getImage(self) -> Optional[cv2.typing.MatLike]:
         """function returning image of the eye cut from the entire face image"""
 
         # TODO: draw additional parameters
         return self.cut_image
 
-    def getGaze(self, gaze_buffor, y_correction=0, x_correction=0):
+    def getGaze(self, gaze_buffor: Buffor, y_correction: int = 0, x_correction: int = 0) -> npt.NDArray[np.float64]:
         """function returning gaze position"""
 
         # pupilCoords = self.pupil.getCoords()
+        assert self.offset is not None
+        assert self.region is not None
+        assert self.pupil is not None
         center = np.array((self.center_x, self.center_y)) - self.offset
 
         region_corrected = self.region - self.offset
@@ -114,27 +121,27 @@ class Eye:
         gaze_buffor.add(gaze_vector)
         return gaze_buffor.getAvg()
 
-    def getOpenness(self):
+    def getOpenness(self) -> float:
         """function returning eye openness"""
 
         return self.height / 2
 
-    def getLandmarks(self):
+    def getLandmarks(self) -> Optional[npt.NDArray[np.float64]]:
         """function returning eye landmarks"""
 
         return self.region
 
-    def getBoundingBox(self):
-        return (self.x, self.y, self.width, self.height)
+    def getBoundingBox(self) -> Tuple[int, int, int, int]:
+        return (int(self.x), int(self.y), int(self.width), int(self.height))
 
-    def _process(self, image, region):
+    def _process(self, image: cv2.typing.MatLike, region: npt.NDArray[np.float64]) -> None:
         h, w, _ = image.shape
 
         mask = np.full((h, w), 0, dtype=np.uint8)
         background = np.zeros((h, w), dtype=np.uint8)
 
         region_int = np.array(region, dtype=np.int32)
-        cv2.fillPoly(mask, [region_int], 0)
+        cv2.fillPoly(mask, [region_int], (0,))
 
         masked_image = cv2.bitwise_not(background, cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY), mask=mask)
 
@@ -154,6 +161,7 @@ class Eye:
         self.center_y = (min_y + max_y) / 2
 
         # HACKETY_HACK:
+        assert self.pupil is not None
         self.pupil[1] = np.min(region[:, 1])
 
         self.cut_image = masked_image[min_y:max_y, min_x:max_x]

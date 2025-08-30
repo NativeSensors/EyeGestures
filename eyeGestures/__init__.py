@@ -94,7 +94,9 @@ class EyeGestures_v3:
             scale_y = self.starting_size[0, 1] / y_width
 
         # eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
-        key_points = np.concatenate(
+        assert l_eye_landmarks is not None
+        assert r_eye_landmarks is not None
+        key_points: npt.NDArray[np.float64] = np.concatenate(
             (
                 l_eye_landmarks,
                 r_eye_landmarks,
