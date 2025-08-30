@@ -37,7 +37,7 @@ class Eye:
         self.height = 0
         self.center_x = 0
         self.center_y = 0
-        self.image: Optional[npt.NDArray[np.float64]] = None
+        self.image: Optional[cv2.typing.MatLike] = None
         self.pupil = None
         self.offset: Optional[npt.NDArray[np.float64]] = None
         self.region: Optional[npt.NDArray[np.float64]] = None
@@ -46,9 +46,7 @@ class Eye:
 
         # self._process(self.image,self.region)
 
-    def update(
-        self, image: npt.NDArray[np.float64], landmarks: npt.NDArray[np.float64], offset: npt.NDArray[np.float64]
-    ):
+    def update(self, image: cv2.typing.MatLike, landmarks: npt.NDArray[np.float64], offset: npt.NDArray[np.float64]):
         """function updating data stored inside eye object"""
 
         self.image = image

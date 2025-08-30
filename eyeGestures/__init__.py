@@ -68,6 +68,7 @@ class EyeGestures_v3:
         self.face.process(frame, self.finder.find(frame))
 
         face_landmarks = self.face.get_landmarks()
+        assert face_landmarks is not None
         l_eye = self.face.get_left_eye()
         r_eye = self.face.get_right_eye()
         l_eye_landmarks = l_eye.getLandmarks()
