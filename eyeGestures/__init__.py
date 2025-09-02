@@ -175,7 +175,6 @@ class EyeGestures_v3:
             self.filled_points[context] = 1
 
         averaged_point = np.sum(self.average_points[context][:, :], axis=0) / (self.filled_points[context])
-
         fixation = self.fixationTracker[context].process(averaged_point[0], averaged_point[1])
 
         duration = time.time() - self.prev_timestamp[context]

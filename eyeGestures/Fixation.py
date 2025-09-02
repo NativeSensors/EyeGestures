@@ -4,13 +4,13 @@
 class Fixation:
     """Class performing Fixation"""
 
-    def __init__(self, x: int, y: int, radius: int = 100) -> None:
+    def __init__(self, x: float, y: float, radius: int = 100) -> None:
         self.radius = radius
         self.fixation = 0.0
         self.x = x
         self.y = y
 
-    def process(self, x: int, y: int) -> float:
+    def process(self, x: float, y: float) -> float:
         """Function processing x and y estimated points for fixation detection"""
 
         if (x - self.x) ** 2 + (y - self.y) ** 2 < self.radius**2:
