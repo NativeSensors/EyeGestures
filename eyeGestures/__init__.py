@@ -27,7 +27,7 @@ class EyeGestures_v3:
         self.clb: Dict[str, Calibrator_v2] = dict()  # Calibrator_v2()
         self.cap = None
         self.calibration: Dict[str, bool] = dict()
-        self.average_points: Dict[str, npt.NDArray] = dict()
+        self.average_points: Dict[str, npt.NDArray[np.float64]] = dict()
         self.filled_points: Dict[str, int] = dict()
         self.enable_CN = False
         self.calibrate_gestures = False
@@ -37,12 +37,12 @@ class EyeGestures_v3:
 
         # this has to be contexted
         self.prev_timestamp: Dict[str, float] = dict()
-        self.prev_point: Dict[str, npt.NDArray] = dict()
+        self.prev_point: Dict[str, npt.NDArray[np.float64]] = dict()
         self.fix: Optional[float] = None
         self.velocity_max: Dict[str, int] = dict()
         self.velocity_min: Dict[str, int] = dict()
         self.fixationTracker: Dict[str, Fixation] = dict()
-        self.key_points_buffer: Dict[str, List[npt.NDArray]] = dict()
+        self.key_points_buffer: Dict[str, List[npt.NDArray[np.float64]]] = dict()
 
         self.starting_head_position = np.zeros((1, 2))
         self.starting_size = np.zeros((1, 2))
@@ -55,11 +55,11 @@ class EyeGestures_v3:
     def loadModel(self, model: Any, context: str = "main") -> None:
         self.clb[context] = pickle.loads(model)
 
-    def uploadCalibrationMap(self, points: npt.NDArray, context: str = "main") -> None:
+    def uploadCalibrationMap(self, points: npt.NDArray[np.float64], context: str = "main") -> None:
         self.addContext(context)
         self.clb[context].updMatrix(np.array(points))
 
-    def getLandmarks(self, frame: cv2.typing.MatLike) -> Tuple[npt.NDArray, bool, cv2.typing.MatLike]:
+    def getLandmarks(self, frame: cv2.typing.MatLike) -> Tuple[npt.NDArray[np.float64], bool, cv2.typing.MatLike]:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
@@ -68,6 +68,7 @@ class EyeGestures_v3:
         self.face.process(frame, self.finder.find(frame))
 
         face_landmarks = self.face.get_landmarks()
+        assert face_landmarks is not None
         l_eye = self.face.get_left_eye()
         r_eye = self.face.get_right_eye()
         l_eye_landmarks = l_eye.getLandmarks()
@@ -93,7 +94,9 @@ class EyeGestures_v3:
             scale_y = self.starting_size[0, 1] / y_width
 
         # eye_events = np.array([event.blink,event.fixation]).reshape(1, 2)
-        key_points = np.concatenate(
+        assert l_eye_landmarks is not None
+        assert r_eye_landmarks is not None
+        key_points: npt.NDArray[np.float64] = np.concatenate(
             (
                 l_eye_landmarks,
                 r_eye_landmarks,
@@ -172,7 +175,6 @@ class EyeGestures_v3:
             self.filled_points[context] = 1
 
         averaged_point = np.sum(self.average_points[context][:, :], axis=0) / (self.filled_points[context])
-
         fixation = self.fixationTracker[context].process(averaged_point[0], averaged_point[1])
 
         duration = time.time() - self.prev_timestamp[context]
@@ -229,7 +231,7 @@ class EyeGestures_v2:
 
         self.CN: int = 5
 
-        self.average_points: Dict[str, npt.NDArray] = dict()
+        self.average_points: Dict[str, npt.NDArray[np.float64]] = dict()
         self.filled_points: Dict[str, int] = dict()
         self.enable_CN = False
         self.calibrate_gestures = False
@@ -244,13 +246,13 @@ class EyeGestures_v2:
     def loadModel(self, model: Any, context: str = "main") -> None:
         self.clb[context] = pickle.loads(model)
 
-    def uploadCalibrationMap(self, points: npt.NDArray, context="main") -> None:
+    def uploadCalibrationMap(self, points: npt.NDArray[np.float64], context="main") -> None:
         self.addContext(context)
         self.clb[context].updMatrix(np.array(points))
 
     def getLandmarks(
         self, frame: cv2.typing.MatLike, calibrate: bool = False, context: str = "main"
-    ) -> Tuple[npt.NDArray, npt.NDArray, bool, bool, Optional[Cevent]]:
+    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], bool, bool, Optional[Cevent]]:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
