@@ -6,6 +6,7 @@ import time
 
 import cv2
 import numpy as np
+import numpy.typing as npt
 
 # Make predictions for new data points
 
@@ -48,7 +49,7 @@ def timeit(func):
     return inner
 
 
-def low_pass_filter_fourier(data, cutoff_frequency):
+def low_pass_filter_fourier(data: npt.NDArray[np.float64], cutoff_frequency: int) -> npt.NDArray[np.float64]:
     # Apply Fourier Transform-based filter column-wise
     filtered_data = np.zeros_like(data, dtype=float)
     for col in range(data.shape[1]):  # Iterate over each column
