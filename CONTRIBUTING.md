@@ -24,7 +24,7 @@ Join our Discord server to connect with other contributors, ask questions, and c
    ```sh
    cd EyeGestures
    ```
-**4. Use Devel/Develop branch for your contributions (or use different branch than main)**
+**4. Use `Develop` branch for your contributions (or use different branch than main)**
 
 ### Create a Branch
 
