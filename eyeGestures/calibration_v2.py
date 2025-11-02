@@ -39,6 +39,24 @@ class Calibrator:
         self.calcualtion_coroutine = threading.Thread(target=self.__async_post_fit)
         self.fit_coroutines = [] 
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # Remove unpickleable entries
+        if 'lock' in state:
+            del state['lock']
+        if 'calcualtion_coroutine' in state:
+            del state['calcualtion_coroutine']
+        if 'fit_coroutines' in state:
+            del state['fit_coroutines']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # Recreate the lock and other non-picklable objects
+        self.lock = threading.Lock()
+        self.calcualtion_coroutine = threading.Thread(target=self.__async_post_fit)
+        self.fit_coroutines = []
+
     def __launch_fit(self):
         coroutine = threading.Thread(target=self.__async_fit)
         self.fit_coroutines.append(coroutine)
