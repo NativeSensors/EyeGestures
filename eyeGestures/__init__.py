@@ -110,6 +110,10 @@ class EyeGestures_v3:
         key_points[:, 0] = key_points[:, 0] * scale_x
         key_points[:, 1] = key_points[:, 1] * scale_y
 
+        # TODO:
+        # Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+        # key_points[-1, 1] = head_offset[:, 1]
+
         key_points[-1, 0] = head_offset[:, 0]
         key_points[-1, 1] = head_offset[:, 1]
         # print(self.starting_size,x_width,y_width)
