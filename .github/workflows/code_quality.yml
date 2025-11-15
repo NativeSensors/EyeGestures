@@ -21,3 +21,6 @@ jobs:
     - name: Analysing code with checkers
       run: |
         make check
+    - name: Tests
+      run: |
+        make test
