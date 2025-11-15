@@ -63,3 +63,51 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/NativeSensors/EyeGestures"
 Issues = "https://github.com/NativeSensors/EyeGestures/Issues"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+line_length = 120
+profile = "black"
+
+[tool.pylint]
+max-line-length = 120
+generated-members = "cv2.*"
+disable = [
+  "too-few-public-methods",
+  "too-many-instance-attributes", 
+  "too-many-positional-arguments", 
+  "too-many-arguments",
+  "too-many-statements",
+  "too-many-branches",
+  "too-many-return-statements",
+  "too-many-locals",
+  "broad-exception-caught",
+  "missing-module-docstring",
+  "missing-function-docstring",
+  "missing-class-docstring",
+  "use-dict-literal",
+  "protected-access",
+  "fixme",
+  "singleton-comparison"
+]
+module-naming-style = "any"
+class-naming-style = "any"
+attr-naming-style = "any"
+method-naming-style = "any"
+variable-naming-style = "any"
+function-naming-style = "any"
+argument-naming-style = "any"
+
+[tool.flake8]
+max-line-length = 120
+ignore = "DAR101, DAR201, E203, E266, E712, W503"
+
+[tool.mypy]
+strict = false
+plugins = ["numpy.typing.mypy_plugin"]
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "mediapipe.*"]
+ignore_missing_imports = true

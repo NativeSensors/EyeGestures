@@ -1,22 +1,32 @@
 """Module providing a Gaze Events."""
 
+from typing import Any, Optional
+
+import cv2
+import numpy as np
+import numpy.typing as npt
+
+from eyeGestures.eye import Eye
+
 
 class Gevent:
     """Class representing gaze event, with tracked points scaled to screen, blink and fixation."""
 
-    def __init__(self,
-                 point,
-                 blink,
-                 fixation,
-                 l_eye = None,
-                 r_eye = None,
-                 screen_man = None,
-                 roi = None,
-                 edges = None,
-                 cluster = None,
-                 context = None,
-                 saccades = False,
-                 sub_frame = None):
+    def __init__(
+        self,
+        point: npt.NDArray[np.float64],
+        blink: bool,
+        fixation: float,
+        l_eye: Optional[Eye] = None,
+        r_eye: Optional[Eye] = None,
+        screen_man: Optional[Any] = None,
+        roi: Optional[Any] = None,
+        edges: Optional[Any] = None,
+        cluster: Optional[Any] = None,
+        context: Optional[Any] = None,
+        saccades: bool = False,
+        sub_frame: Optional[cv2.typing.MatLike] = None,
+    ):
 
         self.point = point
         self.blink = blink
@@ -37,11 +47,9 @@ class Gevent:
 class Cevent:
     """Class representing gaze event, with tracked points scaled to screen, blink and fixation."""
 
-    def __init__(self,
-                 point,
-                 acceptance_radius,
-                 calibration_radius,
-                 calibration = False):
+    def __init__(
+        self, point: npt.NDArray[np.float64], acceptance_radius: int, calibration_radius: int, calibration: bool = False
+    ) -> None:
 
         self.point = point
         self.acceptance_radius = acceptance_radius

@@ -123,7 +123,7 @@ while True:
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
 <!-- POLAR-END id=eizdelwu -->
 
-#### Using EyeGesture Engine V2 - [Stable]:
+#### Using EyeGesture Engine V2 - [Legacy]:
 
 ```python
 from eyeGestures.utils import VideoCapture

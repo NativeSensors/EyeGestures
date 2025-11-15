@@ -1,19 +1,22 @@
-import time
-import queue
 import pickle
 import platform
+import queue
 import threading
+import time
 
 import cv2
 import numpy as np
+import numpy.typing as npt
 
 # Make predictions for new data points
+
 
 def recoverable(ret_error_params=()):
     def decorator(func):
         """
         timeit
         """
+
         def inner(*args, **kwargs):
             """
             inner
@@ -23,13 +26,17 @@ def recoverable(ret_error_params=()):
             except Exception as e:
                 print(f"Caugh error: {e}")
                 return ret_error_params
+
         return inner
+
     return decorator
+
 
 def timeit(func):
     """
     timeit
     """
+
     def inner(*args, **kwargs):
         """
         inner
@@ -38,9 +45,11 @@ def timeit(func):
         ret = func(*args, **kwargs)
         print(f"Elapsed time: {time.time() - start}")
         return ret
+
     return inner
 
-def low_pass_filter_fourier(data, cutoff_frequency):
+
+def low_pass_filter_fourier(data: npt.NDArray[np.float64], cutoff_frequency: int) -> npt.NDArray[np.float64]:
     # Apply Fourier Transform-based filter column-wise
     filtered_data = np.zeros_like(data, dtype=float)
     for col in range(data.shape[1]):  # Iterate over each column
@@ -51,6 +60,7 @@ def low_pass_filter_fourier(data, cutoff_frequency):
         # Perform Inverse Fourier Transform
         filtered_data[:, col] = np.fft.ifft(fft_data).real
     return filtered_data
+
 
 def shape_to_np(shape, dtype="int"):
     """
@@ -82,8 +92,7 @@ def make_image_grid(images, rows, cols):
 
     if len(images[0].shape) > 2:
         # Create a black canvas to draw the grid on
-        grid_image = np.zeros(
-            (img_h * rows, img_w * cols, images[0].shape[2]), dtype=np.uint8)
+        grid_image = np.zeros((img_h * rows, img_w * cols, images[0].shape[2]), dtype=np.uint8)
     else:
         grid_image = np.zeros((img_h * rows, img_w * cols), dtype=np.uint8)
 
@@ -93,19 +102,18 @@ def make_image_grid(images, rows, cols):
             break  # Stop if we have filled the grid
         row = i // cols
         col = i % cols
-        grid_image[row * img_h:(row + 1) * img_h, col *
-                   img_w:(col + 1) * img_w] = img
+        grid_image[row * img_h : (row + 1) * img_h, col * img_w : (col + 1) * img_w] = img
 
     return grid_image
 
 
 class var:
 
-    def __init__(self, var):
-        self.__var = var
+    def __init__(self, _var):
+        self.__var = _var
 
-    def set(self, var):
-        self.__var = var
+    def set(self, _var):
+        self.__var = _var
 
     def get(self):
         return self.__var
@@ -117,11 +125,11 @@ class Buffor:
         self.length = length
         self.__buffor = []
 
-    def add(self, var):
+    def add(self, _var):
         if len(self.__buffor) >= self.length:
             self.__buffor.pop(0)
 
-        self.__buffor.append(var)
+        self.__buffor.append(_var)
 
     def getAvg(self, lenght=0):
         return np.sum(self.__buffor[-lenght:], axis=0) / len(self.__buffor[-lenght:])
@@ -140,7 +148,7 @@ class Buffor:
 
     def getLen(self):
         return len(self.__buffor)
-    
+
     def isFull(self):
         return len(self.__buffor) >= self.length
 
@@ -151,6 +159,7 @@ class Buffor:
 
     def clear(self):
         self.__buffor = []
+
 
 # Bufforless
 
@@ -180,7 +189,7 @@ class VideoCapture:
             self.t.start()
         else:
             self.frames = []
-            with open(name, 'rb') as file:
+            with open(name, "rb") as file:
                 self.frames = pickle.load(file)
 
     def __openCam(self, name):
@@ -220,10 +229,9 @@ class VideoCapture:
         """Function returning latest frame"""
         if self.stream:
             return self.q.get()
-        else:
-            frame = self.frames.pop(0)
-            self.frames.pop(0)
-            return ((len(self.frames) >= 1), frame)
+        frame = self.frames.pop(0)
+        self.frames.pop(0)
+        return ((len(self.frames) >= 1), frame)
 
     def close(self):
         """Function closing stream"""
