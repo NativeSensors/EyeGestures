@@ -60,18 +60,9 @@ try:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                pygame.quit()
-                cap.close()
-                cv2.destroyAllWindows()
-                sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL:
                     running = False
-                    pygame.quit()
-                    cap.close()
-                    cv2.destroyAllWindows()
-                    sys.exit()
-
 
         # Generate new random position for the cursor
         ret, frame = cap.read()
@@ -122,10 +113,6 @@ try:
         clock.tick(60)
 except KeyboardInterrupt:
     print("Quitting the Game!")
-    pygame.quit()
-    cap.close()
-    cv2.destroyAllWindows()
-    sys.exit()
 finally:
     pygame.quit()
     cap.close()
