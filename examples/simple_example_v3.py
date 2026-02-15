@@ -3,6 +3,7 @@ import sys
 import cv2
 import pygame
 import numpy as np
+import traceback
 
 pygame.init()
 pygame.font.init()
@@ -59,85 +60,92 @@ running = True
 iterator = 0
 prev_x = 0
 prev_y = 0
-while running:
-    # Event handling
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL:
+try:
+    while running:
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    running = False
 
 
-    # Generate new random position for the cursor
-    ret, frame = cap.read()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Generate new random position for the cursor
+        ret, frame = cap.read()
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    # frame = np.rot90(frame)
-    frame = np.flip(frame, axis=1)
-    calibrate = (iterator <= n_points) # calibrate 25 points
-    event, calibration = gestures.step(frame, calibrate, screen_width, screen_height, context="my_context")
+        # frame = np.rot90(frame)
+        frame = np.flip(frame, axis=1)
+        calibrate = (iterator <= n_points) # calibrate 25 points
+        event, calibration = gestures.step(frame, calibrate, screen_width, screen_height, context="my_context")
 
-    if event is None:
-        continue
-
-
-    screen.fill((0, 0, 0))
-    frame = pygame.surfarray.make_surface(frame)
-    frame = pygame.transform.scale(frame, (400, 400))
-
-    if event is not None or calibration is not None:
-        # Display frame on Pygame screen
-        screen.blit(
-            pygame.surfarray.make_surface(
-                np.rot90(event.sub_frame)
-            ),
-            (0, 0)
-        )
-        my_font = pygame.font.SysFont('Comic Sans MS', 30)
-        text_surface = my_font.render(f'{event.fixation}', False, (0, 0, 0))
-        screen.blit(text_surface, (0,0))
-        if calibrate:
-            if calibration.point[0] != prev_x or calibration.point[1] != prev_y:
-                iterator += 1
-                prev_x = calibration.point[0]
-                prev_y = calibration.point[1]
-            # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
-            pygame.draw.circle(screen, BLUE, calibration.point, calibration.acceptance_radius)
-            text_surface = bold_font.render(f"{iterator}/{n_points}", True, WHITE)
-            text_square = text_surface.get_rect(center=calibration.point)
-            screen.blit(text_surface, text_square)
-        else:
-            pass
-        if gestures.whichAlgorithm(context="my_context") == "Ridge":
-            pygame.draw.circle(screen, RED, event.point, 50)
-        if gestures.whichAlgorithm(context="my_context") == "LassoCV":
-            pygame.draw.circle(screen, BLUE, event.point, 50)
-        if event.saccades:
-            pygame.draw.circle(screen, GREEN, event.point, 50)
-
-        for target in targets:
-            pygame.draw.rect(
-                screen,
-                RED,
-                pygame.Rect(
-                int(target[0] * screen_width),
-                int(target[1] * screen_height),
-                int(target[2] * screen_width),
-                int(target[3] * screen_height),
-            ))
-            text_surface = my_font.render(f'{target[4]}', False, (0, 0, 0))
-            screen.blit(text_surface, (int(target[0] * screen_width),int(target[1] * screen_height)))
+        if event is None:
+            continue
 
 
-        my_font = pygame.font.SysFont('Comic Sans MS', 30)
-        text_surface = my_font.render(f'{gestures.whichAlgorithm(context="my_context")}', False, (0, 0, 0))
-        screen.blit(text_surface, event.point)
+        screen.fill((0, 0, 0))
+        frame = pygame.surfarray.make_surface(frame)
+        frame = pygame.transform.scale(frame, (400, 400))
 
-    pygame.display.flip()
+        if event is not None or calibration is not None:
+            # Display frame on Pygame screen
+            screen.blit(
+                pygame.surfarray.make_surface(
+                    np.rot90(event.sub_frame)
+                ),
+                (0, 0)
+            )
+            my_font = pygame.font.SysFont('Comic Sans MS', 30)
+            text_surface = my_font.render(f'{event.fixation}', False, (0, 0, 0))
+            screen.blit(text_surface, (0,0))
+            if calibrate:
+                if calibration.point[0] != prev_x or calibration.point[1] != prev_y:
+                    iterator += 1
+                    prev_x = calibration.point[0]
+                    prev_y = calibration.point[1]
+                # pygame.draw.circle(screen, GREEN, fit_point, calibration_radius)
+                pygame.draw.circle(screen, BLUE, calibration.point, calibration.acceptance_radius)
+                text_surface = bold_font.render(f"{iterator}/{n_points}", True, WHITE)
+                text_square = text_surface.get_rect(center=calibration.point)
+                screen.blit(text_surface, text_square)
+            else:
+                pass
+            if gestures.whichAlgorithm(context="my_context") == "Ridge":
+                pygame.draw.circle(screen, RED, event.point, 50)
+            if gestures.whichAlgorithm(context="my_context") == "LassoCV":
+                pygame.draw.circle(screen, BLUE, event.point, 50)
+            if event.saccades:
+                pygame.draw.circle(screen, GREEN, event.point, 50)
 
-    # Cap the frame rate
-    clock.tick(60)
+            for target in targets:
+                pygame.draw.rect(
+                    screen,
+                    RED,
+                    pygame.Rect(
+                    int(target[0] * screen_width),
+                    int(target[1] * screen_height),
+                    int(target[2] * screen_width),
+                    int(target[3] * screen_height),
+                ))
+                text_surface = my_font.render(f'{target[4]}', False, (0, 0, 0))
+                screen.blit(text_surface, (int(target[0] * screen_width),int(target[1] * screen_height)))
 
-# Quit Pygame
-pygame.quit()
+
+            my_font = pygame.font.SysFont('Comic Sans MS', 30)
+            text_surface = my_font.render(f'{gestures.whichAlgorithm(context="my_context")}', False, (0, 0, 0))
+            screen.blit(text_surface, event.point)
+
+        pygame.display.flip()
+
+        # Cap the frame rate
+        clock.tick(60)
+except Exception as e:
+    print(f"Exception occured: {e}")
+    traceback.print_exc()
+finally:
+    # Quit Pygame
+    pygame.quit()
+    cap.close()
+    cv2.destroyAllWindows()
+    sys.exit()
