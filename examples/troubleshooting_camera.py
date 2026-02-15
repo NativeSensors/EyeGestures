@@ -3,6 +3,7 @@ import sys
 import cv2
 import pygame
 import numpy as np
+import traceback
 
 pygame.init()
 pygame.font.init()
@@ -46,36 +47,47 @@ running = True
 iterator = 0
 prev_x = 0
 prev_y = 0
-while running:
-    # Event handling
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL:
+
+try:
+    while running:
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    running = False
 
 
-    # Generate new random position for the cursor
-    ret, frame = cap.read()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Generate new random position for the cursor
+        ret, frame = cap.read()
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    # frame = np.rot90(frame)
-    frame = np.flip(frame, axis=1)
+        # frame = np.rot90(frame)
+        frame = np.flip(frame, axis=1)
 
-    if event is None:
-        continue
+        if event is None:
+            continue
 
 
-    screen.fill((0, 0, 0))
-    frame = pygame.surfarray.make_surface(frame)
-    frame = pygame.transform.scale(frame, (400, 400))
-    screen.blit(frame, (0, 0))  # Draw the frame at top-left corner
+        screen.fill((0, 0, 0))
+        frame = pygame.surfarray.make_surface(frame)
+        frame = pygame.transform.scale(frame, (400, 400))
+        screen.blit(frame, (0, 0))  # Draw the frame at top-left corner
 
-    pygame.display.flip()
+        pygame.display.flip()
 
-    # Cap the frame rate
-    clock.tick(60)
+        # Cap the frame rate
+        clock.tick(60)
+except Exception as e:
+    print(f"Exception occured: {e}")
+    traceback.print_exc()
+finally:
+    pygame.quit()
+    cap.close()
+    cv2.destroyAllWindows()
+    sys.exit()
+
 
 # Quit Pygame
 pygame.quit()
