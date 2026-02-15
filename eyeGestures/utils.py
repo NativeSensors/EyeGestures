@@ -185,7 +185,7 @@ class VideoCapture:
             self.__openCam(name)
 
             self.q = queue.Queue()
-            self.t = threading.Thread(target=self.__reader)
+            self.t = threading.Thread(target=self.__reader, daemon = True)
             self.t.start()
         else:
             self.frames = []
@@ -204,6 +204,8 @@ class VideoCapture:
                 print(f"Trying to open camera: {name}.")
                 if name + 1 < 10:
                     self.__openCam(name + 1)
+                if name + 1 > 10:
+
         else:
             self.cap = cv2.VideoCapture(name)
 
@@ -211,6 +213,8 @@ class VideoCapture:
         while self.run:
             ret, frame = self.cap.read()
             if not ret:
+                print("Camera read failed. Possibly in use or disconnected")
+                self.run = False
                 break
             if not self.q.empty() and self.bufforless:
                 try:
@@ -225,16 +229,21 @@ class VideoCapture:
         while not self.q.empty():
             self.q.get()
 
-    def read(self):
-        """Function returning latest frame"""
+    def read(self, timeout = 2):
         if self.stream:
-            return self.q.get()
+            try:
+                return self.q.get(timeout = timeout)
+            except queue.Empty:
+                return (False, None)
+        if len(self.frames) < 1:
+            return (False, None)
         frame = self.frames.pop(0)
         self.frames.pop(0)
         return ((len(self.frames) >= 1), frame)
 
     def close(self):
-        """Function closing stream"""
         self.run = False
-        self.t.join()
-        self.cap.release()
+        if self.stream:
+            self.t.join()
+            if self.cap.isOpened():
+                self.cap.release()
