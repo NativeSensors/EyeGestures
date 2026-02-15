@@ -26,7 +26,13 @@ from eyeGestures.utils import VideoCapture
 from eyeGestures import EyeGestures_v3
 
 gestures = EyeGestures_v3()
-cap = VideoCapture(0)
+try:
+    cap = VideoCapture(0)
+except RuntimeError as e:
+    print(f"Camera Initialization failed : {e}")
+    pygame.quit()
+    cv2.destroyAllWindows()
+    sys.exit()
 
 x = np.arange(0, 1.1, 0.2)
 y = np.arange(0, 1.1, 0.2)

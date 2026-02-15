@@ -213,7 +213,12 @@ class VideoCapture:
                 if not ret or frame is None:
                     cap.release()
                     continue
-                black_pixel_ratio = np.count_nonzero(frame == 0) / frame.size
+                num_black_pixels = np.count_nonzero(frame == 0)
+                frame_size = frame.size
+                black_pixel_ratio = num_black_pixels / frame_size
+                print(frame)
+                print(f"black_pixels = {num_black_pixels}, frame_size = {frame_size}")
+                print(f"black_pixel_ratio = {black_pixel_ratio}")
                 if black_pixel_ratio > 0.9:
                     raise RuntimeError("Camera Frame not captured:")
                 print(f"Opened camera: {name}")
@@ -228,7 +233,12 @@ class VideoCapture:
             if not ret:
                 cap.release()
                 raise RuntimeError("Camera opened but cannot read ( busy camera )")
-            black_pixel_ratio = np.count_nonzero(frame == 0) / frame.size
+            num_black_pixels = np.count_nonzero(frame == 0)
+            frame_size = frame.size
+            black_pixel_ratio = num_black_pixels / frame_size
+            print(frame)
+            print(f"black_pixels = {num_black_pixels}, frame_size = {frame_size}")
+            print(f"black_pixel_ratio = {black_pixel_ratio}")
             if black_pixel_ratio > 0.9:
                 raise RuntimeError("Camera Frame not captured:")
             self.cap = cap
