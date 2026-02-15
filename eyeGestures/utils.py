@@ -2,7 +2,10 @@ import pickle
 import platform
 import queue
 import threading
+import sys
 import time
+import traceback
+from string import capwords
 
 import cv2
 import numpy as np
@@ -181,9 +184,7 @@ class VideoCapture:
 
         if self.stream:
             self.prev_frame = None
-
             self.__openCam(name)
-
             self.q = queue.Queue()
             self.t = threading.Thread(target=self.__reader, daemon = True)
             self.t.start()
@@ -193,21 +194,44 @@ class VideoCapture:
                 self.frames = pickle.load(file)
 
     def __openCam(self, name):
+        max_index = 10
+
         if isinstance(name, int):
-            if "Windows" in platform.system():
-                self.cap = cv2.VideoCapture(name, cv2.CAP_DSHOW)
-            else:
-                self.cap = cv2.VideoCapture(name)
+            for cam_index in range(name, max_index):
+                if "Windows" in platform.system():
+                    cap = cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
+                else:
+                    cap = cv2.VideoCapture(cam_index)
 
-            if self.cap is None or not self.cap.isOpened():
-                print(f"Was unable to open camera: {name}.")
-                print(f"Trying to open camera: {name}.")
-                if name + 1 < 10:
-                    self.__openCam(name + 1)
-                if name + 1 > 10:
+                if cap is None or not cap.isOpened():
+                    print(f"Was unable to open camera: {name}.")
+                    print(f"Trying to open camera: {name}.")
+                    continue
 
+                # testing an actual read
+                ret, frame = cap.read()
+                if not ret or frame is None:
+                    cap.release()
+                    continue
+                black_pixel_ratio = np.count_nonzero(frame == 0) / frame.size
+                if black_pixel_ratio > 0.9:
+                    raise RuntimeError("Camera Frame not captured:")
+                print(f"Opened camera: {name}")
+                self.cap = cap
+                return
+            raise RuntimeError("No available camera found or camera busy")
         else:
-            self.cap = cv2.VideoCapture(name)
+            cap = cv2.VideoCapture(name)
+            if not cap.isOpened():
+                raise RuntimeError(f"Unable to open video source:{name}")
+            ret, frame = cap.read()
+            if not ret:
+                cap.release()
+                raise RuntimeError("Camera opened but cannot read ( busy camera )")
+            black_pixel_ratio = np.count_nonzero(frame == 0) / frame.size
+            if black_pixel_ratio > 0.9:
+                raise RuntimeError("Camera Frame not captured:")
+            self.cap = cap
 
     def __reader(self):
         while self.run:
