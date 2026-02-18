@@ -112,7 +112,7 @@ class GazeTracker:
         if not face_mesh:
             return None
 
-        if face_mesh.multi_face_landmarks:
+        if face_mesh.face_landmarks:
             self.face.process(image, face_mesh)
 
         context = self.GContext.get(

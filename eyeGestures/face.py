@@ -25,7 +25,7 @@ class FaceFinder:
         VisionRunningMode = vision.RunningMode
         options = FaceLandmarkerOptions(
             base_options = BaseOptions(
-                model_asset_path = r".\task_model\face_landmarker.task"
+                model_asset_path = r"C:\Users\vvams\PycharmProjects\EyeGestures\eyeGestures\task_model\face_landmarker.task"
             ),
             running_mode = VisionRunningMode.IMAGE,
             num_faces = 1,
