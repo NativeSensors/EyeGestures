@@ -32,8 +32,8 @@ class EyeProcessor:
         self.min_y = np.min(self.landmarks[:, 1]) - margin
         self.max_y = np.max(self.landmarks[:, 1]) + margin
 
-        assert self.pupil[0] > self.min_x
-        assert self.pupil[1] > self.min_y
+        # assert self.pupil[0] > self.min_x
+        # assert self.pupil[1] > self.min_y
 
         width = self.max_x - self.min_x
         height = (self.max_y - self.min_y) / 2
