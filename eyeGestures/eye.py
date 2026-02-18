@@ -13,8 +13,12 @@ from eyeGestures.utils import Buffor
 class Eye:
     """Class storing data related and representing a eye"""
 
-    LEFT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:, 0]
-    RIGHT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_RIGHT_EYE))[:, 0]
+    LEFT_EYE_KEYPOINTS = np.array([
+        33, 7, 163, 144, 145, 153, 154, 155, 133, 246, 161, 160, 159, 158, 157, 173
+    ])
+    RIGHT_EYE_KEYPOINTS = np.array([
+        263, 249, 390, 373, 374, 380, 381, 382, 362, 398, 384, 385, 386, 387, 388, 466
+    ])
     LEFT_EYE_PUPIL_KEYPOINT = [473]
     RIGHT_EYE_PUPIL_KEYPOINT = [468]
 
