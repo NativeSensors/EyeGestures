@@ -4,6 +4,11 @@ from typing import Any, NamedTuple, Optional, Tuple
 
 import cv2
 import mediapipe as mp
+
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+from mediapipe import Image, ImageFormat
+
 import numpy as np
 import numpy.typing as npt
 
@@ -14,12 +19,20 @@ class FaceFinder:
     """Class helping finding face"""
 
     def __init__(self) -> None:
-        self.mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
-            refine_landmarks=True,
-            static_image_mode=False,
-            min_detection_confidence=0.5,
-            min_tracking_confidence=0.5,
+        BaseOptions = python.BaseOptions
+        FaceLandmarker = vision.FaceLandmarker
+        FaceLandmarkerOptions = vision.FaceLandmarkerOptions
+        VisionRunningMode = vision.RunningMode
+        options = FaceLandmarkerOptions(
+            base_options = BaseOptions(
+                model_asset_path = r".\task_model\face_landmarker.task"
+            ),
+            running_mode = VisionRunningMode.IMAGE,
+            num_faces = 1,
+            min_face_detection_confidence=0.5,
+            min_tracking_confidence=0.5
         )
+        self.mp_face_mesh = FaceLandmarker.create_from_options(options)
 
     def find(self, image: cv2.typing.MatLike) -> Optional[Any]:
         """Find face mesh"""
@@ -27,8 +40,10 @@ class FaceFinder:
         assert len(image.shape) > 2
 
         try:
-            face_mesh = self.mp_face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            if face_mesh.multi_face_landmarks is None:
+            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            mp_image = Image(image_format = ImageFormat.SRGB, data = image_rgb)
+            face_mesh = self.mp_face_mesh.detect(mp_image)
+            if face_mesh.face_landmarks is None:
                 return None
 
             return face_mesh
