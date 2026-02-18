@@ -93,11 +93,10 @@ class Face:
 
     def _landmarks(self, face: Any) -> npt.NDArray[np.float64]:
 
-        __complex_landmark_points = face.multi_face_landmarks
-        __complex_landmarks = __complex_landmark_points[0].landmark
+        __complex_landmark_points = face.face_landmarks[0]
 
         __face_landmarks = []
-        for landmark in __complex_landmarks:
+        for landmark in __complex_landmark_points:
             __face_landmarks.append((landmark.x * self.image_w, landmark.y * self.image_h))
 
         return np.array(__face_landmarks)
