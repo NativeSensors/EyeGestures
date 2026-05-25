@@ -3,7 +3,7 @@
 from typing import Optional, Tuple
 
 import cv2
-from mediapipe.tasks.python.vision.face_landmarker import FaceLandmarksConnections
+import mediapipe as mp
 import numpy as np
 import numpy.typing as npt
 
@@ -13,24 +13,8 @@ from eyeGestures.utils import Buffor
 class Eye:
     """Class storing data related and representing a eye"""
 
-    LEFT_EYE_KEYPOINTS = np.array(
-        sorted(
-            {
-                index
-                for connection in FaceLandmarksConnections.FACE_LANDMARKS_LEFT_EYE
-                for index in (connection.start, connection.end)
-            }
-        )
-    )
-    RIGHT_EYE_KEYPOINTS = np.array(
-        sorted(
-            {
-                index
-                for connection in FaceLandmarksConnections.FACE_LANDMARKS_RIGHT_EYE
-                for index in (connection.start, connection.end)
-            }
-        )
-    )
+    LEFT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:, 0]
+    RIGHT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_RIGHT_EYE))[:, 0]
     LEFT_EYE_PUPIL_KEYPOINT = [473]
     RIGHT_EYE_PUPIL_KEYPOINT = [468]
 

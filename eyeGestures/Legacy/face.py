@@ -1,70 +1,37 @@
 """Module providing finding and extraction of face from image."""
 
-import os
-from pathlib import Path
 from typing import Any, NamedTuple, Optional, Tuple
-import urllib.request
 
 import cv2
 import mediapipe as mp
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 import numpy as np
 import numpy.typing as npt
 
 from eyeGestures.eye import Eye
 
-FACE_LANDMARKER_MODEL_URL = (
-    "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
-)
-
-
-def _resolve_model_asset_path(model_asset_path: Optional[str]) -> str:
-    """Resolve the FaceLandmarker model path."""
-
-    if model_asset_path:
-        return model_asset_path
-
-    env_model_path = os.getenv("EYEGESTURES_FACE_LANDMARKER_MODEL")
-    if env_model_path:
-        return env_model_path
-
-    default_model_path = Path(__file__).with_name("face_landmarker_v2_with_blendshapes.task")
-    if default_model_path.exists():
-        return str(default_model_path)
-
-    default_model_path.parent.mkdir(parents=True, exist_ok=True)
-    urllib.request.urlretrieve(FACE_LANDMARKER_MODEL_URL, default_model_path)
-    return str(default_model_path)
-
 
 class FaceFinder:
     """Class helping finding face"""
 
-    def __init__(self, model_asset_path: Optional[str] = None) -> None:
-        resolved_model_path = _resolve_model_asset_path(model_asset_path)
-        base_options = python.BaseOptions(model_asset_path=resolved_model_path)
-        options = vision.FaceLandmarkerOptions(
-            base_options=base_options,
-            output_face_blendshapes=True,
-            output_facial_transformation_matrixes=True,
-            num_faces=1,
+    def __init__(self) -> None:
+        self.mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
+            refine_landmarks=True,
+            static_image_mode=False,
+            min_detection_confidence=0.5,
+            min_tracking_confidence=0.5,
         )
-        self.face_landmarker = vision.FaceLandmarker.create_from_options(options)
 
     def find(self, image: cv2.typing.MatLike) -> Optional[Any]:
-        """Find face landmarks."""
+        """Find face mesh"""
 
         assert len(image.shape) > 2
 
         try:
-            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
-            detection_result = self.face_landmarker.detect(mp_image)
-            if not detection_result.face_landmarks:
+            face_mesh = self.mp_face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            if face_mesh.multi_face_landmarks is None:
                 return None
 
-            return detection_result
+            return face_mesh
         except Exception as e:
             print(f"Exception in FaceFinder: {e}")
             return None
@@ -110,13 +77,15 @@ class Face:
         return self.landmarks
 
     def _landmarks(self, face: Any) -> npt.NDArray[np.float64]:
-        face_landmarks = face.face_landmarks[0]
 
-        scaled_landmarks = []
-        for landmark in face_landmarks:
-            scaled_landmarks.append((landmark.x * self.image_w, landmark.y * self.image_h))
+        __complex_landmark_points = face.multi_face_landmarks
+        __complex_landmarks = __complex_landmark_points[0].landmark
 
-        return np.array(scaled_landmarks)
+        __face_landmarks = []
+        for landmark in __complex_landmarks:
+            __face_landmarks.append((landmark.x * self.image_w, landmark.y * self.image_h))
+
+        return np.array(__face_landmarks)
 
     def process(self, image: cv2.typing.MatLike, face: Optional[Any]) -> None:
         """Process face landmarks on image"""

@@ -1,0 +1,20 @@
+[package]
+name = "EyegesturesEngine"
+version = "4.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Wasm dependencies
+wasm-bindgen = { version = "0.2", optional = true }
+web-sys = { version = "0.3.99", features = ["console"], optional = true }
+
+# Python dependencies
+pyo3 = { version = "0.23", optional = true, features = ["extension-module"] }
+
+[features]
+default = ["wasm"]
+wasm = ["wasm-bindgen", "web-sys"]
+python = ["pyo3"]

@@ -52,12 +52,18 @@ maintainers = [
 description = "Package for eye tracking algorithm allowing for development of gaze controlled computer interface"
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.8"
+requires-python = ">=3.13"
 keywords = ["eyetracking", "eye", "gaze", "tracking", "gazetracking"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
+]
+dependencies = [
+    "maturin>=1.13.3",
+    "mediapipe>=0.10.35",
+    "opencv-python>=4.13.0.92",
+    "pygame>=2.6.1",
 ]
 
 [project.urls]

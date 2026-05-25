@@ -12,3 +12,4 @@ dist/*
 data/*
 .mypy_cache
 .venvs
+*.task

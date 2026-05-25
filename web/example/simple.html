@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EyeGesturesLite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0 auto;
+            text-align: center;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        #status {
+            color: #666;
+            margin: 10px 0;
+        }
+        #error {
+            color: red;
+            display: none;
+            margin: 10px 0;
+        }
+        canvas, video {
+            border: 1px solid #ccc;
+            max-width: 100%;
+        }
+
+    </style>
+    <link rel="stylesheet" href="eyegestures.css">
+    <script src="https://www.lactame.com/lib/ml/6.0.0/ml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+</head>
+<body >
+    <div id="heatmap-container" style="pointer-events: none; width: 100vw; height: 100vh;">
+        <div class="container" >
+            <h1>EyeGesturesLite</h1>
+            <div id="status">Initializing...</div>
+            <div id="error"></div>
+            <video id="video" width="640" height="480" autoplay style="display: none;"></video>
+        </div>
+    </div>
+
+    <!-- Load MediaPipe library with version check -->
+    <script src="https://cdn.jsdelivr.net/npm/heatmap.js@2.0.5/build/heatmap.min.js"></script>
+    <script src="../engine/pkg/eyegestures.min.js"></script>
+    <script>
+
+        // Initialize heatmap
+        const data = {
+            max: 100,
+            data: [],
+        };
+        let databuf = [];
+
+        const heatmap = h337.create({
+            container: document.getElementById('heatmap-container'),
+            radius: 50,
+            maxOpacity: 0.45,
+            blur: 0.85,
+        });
+
+        function onPoint(point,calibration){
+            if (data.data.length === 20) {
+                data.data.pop();
+            }
+            data.data.splice(0,0,{
+                x: parseInt(point[0]),
+                y: parseInt(point[1]),
+                value: 30
+            })
+
+            heatmap.setData(data);
+        };
+
+        const gestures = new EyeGestures(
+            "video",
+            onPoint
+        );
+
+        gestures.invisible();
+        gestures.start();
+    </script>
+</body>
+</html>
