@@ -20,6 +20,7 @@ except ImportError:
 
 VERSION = "4.0.0"
 
+
 class EyeGestures_v4:
     """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
 
@@ -40,7 +41,7 @@ class EyeGestures_v4:
 
         self.starting_head_position = np.zeros((1, 2))
         self.starting_size = np.zeros((1, 2))
-        
+
     def uploadCalibrationMap(self, points: npt.NDArray[np.float64], context: str = "main") -> None:
         self.clb.updMatrix(np.array(points))
 
@@ -112,10 +113,13 @@ class EyeGestures_v4:
     def setFixation(self, fix: float) -> None:
         self.fix = fix
 
-
     @recoverable(ret_error_params=(None, None, None))
     def step(
-        self, frame: cv2.typing.MatLike, width: int, height: int,):
+        self,
+        frame: cv2.typing.MatLike,
+        width: int,
+        height: int,
+    ):
 
         if self.engine is None:
             self.engine = RustEyeGesturesEngine(width, height)
@@ -127,9 +131,9 @@ class EyeGestures_v4:
         scaled_landmarks = np.array(scaled_landmarks)
         result = self.engine.process(scaled_landmarks.flatten().tolist())
 
-        x, y          = result[0], result[1]
+        x, y = result[0], result[1]
         is_calibrating = result[2] == 1.0
         calib_x, calib_y = result[3], result[4]
-        calib_x = min(max(calib_x, 0), width) 
+        calib_x = min(max(calib_x, 0), width)
         calib_y = min(max(calib_y, 0), height)
         return [x, y], is_calibrating, [calib_x, calib_y]

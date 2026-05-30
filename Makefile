@@ -1,17 +1,20 @@
+# Python build
+FORMAT_TOOLS = uv run --with isort --with black
+CHECK_TOOLS = uv run --with pylint --with flake8 --with mypy --with isort --with black
 .PHONY: format format_check test min wasm python python-help
 
 format:
-	isort eyeGestures
-	black eyeGestures
+	$(FORMAT_TOOLS) python -m isort eyeGestures
+	$(FORMAT_TOOLS) python -m black eyeGestures
 
 format_check:
-	isort eyeGestures --check
-	black eyeGestures --check
+	$(CHECK_TOOLS) python -m isort eyeGestures --check
+	$(CHECK_TOOLS) python -m black eyeGestures --check
 
 check: format_check
-	pylint eyeGestures
-	flake8 eyeGestures
-	mypy eyeGestures
+	$(CHECK_TOOLS) python -m pylint eyeGestures
+	$(CHECK_TOOLS) python -m flake8 eyeGestures
+	$(CHECK_TOOLS) python -m mypy eyeGestures
 
 # Web build
 

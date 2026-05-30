@@ -3,9 +3,9 @@
 from typing import Optional, Tuple
 
 import cv2
-from mediapipe.tasks.python.vision.face_landmarker import FaceLandmarksConnections
 import numpy as np
 import numpy.typing as npt
+from mediapipe.tasks.python.vision.face_landmarker import FaceLandmarksConnections
 
 from eyeGestures.utils import Buffor
 

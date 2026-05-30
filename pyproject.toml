@@ -22,9 +22,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+    "black>=26.5.1",
+    "isort>=8.0.1",
     "mediapipe>=0.10.35",
     "opencv-python>=4.13.0.92",
-    "pygame>=2.6.1",
 ]
 
 [tool.maturin]

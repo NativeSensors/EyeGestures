@@ -18,8 +18,8 @@ def detect_if_inside(point, rect):
 
 def detect_edges(roi, display, point_on_screen, point_on_display):
     """Function performing edge detection based on point, screen and display sizes"""
-    (s_x, s_y) = point_on_screen
-    (d_x, d_y) = point_on_display
+    s_x, s_y = point_on_screen
+    d_x, d_y = point_on_display
 
     x, y, width, height = roi.getBoundaries()
     new_roi = dp.ScreenROI(x, y, width, height)
@@ -71,7 +71,7 @@ def rescale_w(roi, scale_w, change=0.5):
 def scaleDown(roi, edge, scale):
     """Function scalling down one roi till edges are met"""
 
-    (_, _, cluster_w, cluster_h) = edge.getBoundaries()
+    _, _, cluster_w, cluster_h = edge.getBoundaries()
 
     new_roi = dp.ScreenROI(roi.x, roi.y, roi.width, roi.height)
     if cluster_w < roi.width:
@@ -91,7 +91,7 @@ def scaleUp(roi, roi2, scale):
     """Function scalling up one roi into another roi,
     second roi is for limiting scaling operation and scale is telling how much you can scale"""
 
-    (_, _, roi2_w, roi2_h) = roi2.getBoundaries()
+    _, _, roi2_w, roi2_h = roi2.getBoundaries()
 
     new_roi = dp.ScreenROI(roi.x, roi.y, roi.width, roi.height)
 
@@ -135,7 +135,7 @@ class ScreenProcessor:
         )
 
         # return how close that is hist region
-        (_, _, roi_w, roi_h) = heatmap.getBoundaries()
+        _, _, roi_w, roi_h = heatmap.getBoundaries()
         closeness_percentage = (roi_w * roi_h) / (screen.width * screen.height)
         return (p_on_display, closeness_percentage)
 
@@ -144,7 +144,7 @@ class ScreenProcessor:
     def update(self, roi, edges, cluster, heatmap):
         """Function to update screen processor with new clusters and heatmaps"""
 
-        (x, y) = heatmap.getCenter()
+        x, y = heatmap.getCenter()
         # =====================================
         # ---------histogram obtained----------
         # =====================================

@@ -50,7 +50,7 @@ class EyeProcessor:
         )
 
     def __convertPoint(self, point, width=1.0, height=1.0, scale_w=1.0, scale_h=1.0, offset=(0.0, 0.0)):
-        (min_x, min_y) = offset
+        min_x, min_y = offset
         x = int(((point[0] - min_x) / scale_w) * width)
         y = int(((point[1] - min_y) / scale_h) * height)
         return (x, y)
