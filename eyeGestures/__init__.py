@@ -42,9 +42,6 @@ class EyeGestures_v4:
         self.starting_head_position = np.zeros((1, 2))
         self.starting_size = np.zeros((1, 2))
 
-    def uploadCalibrationMap(self, points: npt.NDArray[np.float64], context: str = "main") -> None:
-        self.clb.updMatrix(np.array(points))
-
     def getLandmarks(self, frame: cv2.typing.MatLike) -> Tuple[npt.NDArray[np.float64], bool, cv2.typing.MatLike]:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -104,10 +101,10 @@ class EyeGestures_v4:
         ]
         return key_points, blink, subframe
 
-    def whichAlgorithm(self, context: str = "main") -> str:
+    def whichAlgorithm(self) -> str:
         return "rust engine"
 
-    def reset(self, context: str = "main") -> None:
+    def reset(self) -> None:
         self.filled_points = 0
 
     def setFixation(self, fix: float) -> None:
