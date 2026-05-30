@@ -1,48 +1,10 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.sdist]
-
-dependencies = [
-  "beautifulsoup4>=4.12.3",
-  "keyboard>=0.13.5",
-  "matplotlib>=3.8.2",
-  "mediapipe>=0.10.8",
-  "numpy>=1.26.4",
-  "Pillow>=10.3.0",
-  "PyAutoGUI>=0.9.54",
-  "pycocotools>=2.0.7",
-  "pygame>=2.5.2",
-  "pynput>=1.7.6",
-  "pytest>=7.4.2",
-  "scikit_learn>=1.3.2",
-  "scipy>=1.12.0",
-  "screeninfo>=0.8.1",
-  "setuptools>=70.0.0",
-  "scipy>=1.12.0",
-  "opencv-contrib-python>=4.9.0.80",
-  "xlwt>=1.3.0"
-]
-
-include = [
-  "eyeGestures/*.py",
-  "eyeGestures/screenTracker/*.py",
-  "eyeGestures/eyegestures.py"
-]
-
-exclude = [
-  "*.json",
-  "lab/*",
-  "app.py",
-  "test_app.py",
-  "test.py",
-  "tools/*"
-]
+requires = ["maturin>=1.13,<2.0"]
+build-backend = "maturin"
 
 [project]
 name = "eyeGestures"
-version = "3.2.4"
+version = "4.0.0"
 authors = [
   { name="Piotr Walas", email="piotr.walas@eyegestures.com" },
 ]
@@ -60,11 +22,17 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "maturin>=1.13.3",
     "mediapipe>=0.10.35",
     "opencv-python>=4.13.0.92",
     "pygame>=2.6.1",
 ]
+
+[tool.maturin]
+manifest-path = "engine/Cargo.toml"
+features = ["python"]
+no-default-features = true
+python-source = "."
+module-name = "eyeGestures.EyegesturesEngine"
 
 [project.urls]
 Homepage = "https://github.com/NativeSensors/EyeGestures"

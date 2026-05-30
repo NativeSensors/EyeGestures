@@ -2,4 +2,5 @@
 @REM pyinstaller ./apps/app_win.spec
 @REM deactivate;
 
-python -m build
+uv run --no-sync --python 3.13 --with build python -m build --wheel
+uv run --no-sync --python 3.14 --with build python -m build --wheel

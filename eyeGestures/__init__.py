@@ -11,9 +11,12 @@ from eyeGestures.Fixation import Fixation
 from eyeGestures.utils import recoverable
 
 try:
-    from EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine
+    from .EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine
 except ImportError:
-    RustEyeGesturesEngine = None
+    try:
+        from EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine
+    except ImportError:
+        RustEyeGesturesEngine = None
 
 VERSION = "4.0.0"
 
