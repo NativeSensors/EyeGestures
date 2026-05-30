@@ -13,6 +13,7 @@ web-sys = { version = "0.3.99", features = ["console"], optional = true }
 
 # Python dependencies
 pyo3 = { version = "0.23", optional = true, features = ["extension-module"] }
+maturin = "1.13.3"
 
 [features]
 default = ["wasm"]
