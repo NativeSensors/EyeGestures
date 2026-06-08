@@ -57,4 +57,8 @@ clean:
 	rm -f src/eyegestures.min.js
 
 test:
-	${PYTHON} -m unittest tests/test_*
+	@if [ -d tests ] && find tests -maxdepth 1 -type f -name 'test_*.py' | grep -q .; then \
+		${PYTHON} -m unittest discover -s tests -p 'test_*.py'; \
+	else \
+		echo "No tests found; skipping."; \
+	fi
