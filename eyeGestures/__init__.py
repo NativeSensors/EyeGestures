@@ -1,5 +1,3 @@
-import pickle
-import time
 from typing import Any, Dict, List, Optional, Tuple
 
 import cv2
@@ -11,10 +9,10 @@ from eyeGestures.Fixation import Fixation
 from eyeGestures.utils import recoverable
 
 try:
-    from .EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine
+    from .EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine  # type: ignore[import-untyped]
 except ImportError:
     try:
-        from EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine
+        from EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine  # type: ignore[import-untyped]
     except ImportError:
         RustEyeGesturesEngine = None
 
@@ -33,7 +31,7 @@ class EyeGestures_v4:
 
         self.finder = FaceFinder()
         self.face = Face()
-        self.engine = None
+        self.engine: Optional[Any] = None
 
         self.fix: Optional[float] = None
         self.fixationTracker: Dict[str, Fixation] = dict()
@@ -121,11 +119,13 @@ class EyeGestures_v4:
         if self.engine is None:
             self.engine = RustEyeGesturesEngine(width, height)
 
-        landmarks = self.finder.find(frame).face_landmarks[0]
-        scaled_landmarks = []
-        for landmark in landmarks:
-            scaled_landmarks.append((landmark.x, landmark.y))
-        scaled_landmarks = np.array(scaled_landmarks)
+        find_result = self.finder.find(frame)
+        if find_result is None or not find_result.face_landmarks:
+            raise ValueError("No face landmarks detected")
+
+        landmarks = find_result.face_landmarks[0]
+        scaled_landmarks = np.array([(landmark.x, landmark.y) for landmark in landmarks], dtype=np.float64)
+        assert self.engine is not None
         result = self.engine.process(scaled_landmarks.flatten().tolist())
 
         x, y = result[0], result[1]

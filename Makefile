@@ -1,3 +1,5 @@
+.PHONY: format format_check test min wasm python python-help
+
 # Python build
 FORMAT_TOOLS = uv run --with isort --with black
 CHECK_TOOLS = uv run --with pylint --with flake8 --with mypy --with isort --with black
@@ -6,8 +8,6 @@ MINIFY = npx terser
 MINIFY_FLAGS = --compress --mangle
 JS_SRC = web/src/eyegestures.js
 MIN = $(JS_SRC:.js=.min.js)
-
-.PHONY: format format_check test min wasm python python-help
 
 format:
 	$(FORMAT_TOOLS) python -m isort eyeGestures
