@@ -12,8 +12,8 @@ try:
     from .EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine  # type: ignore[import-untyped]
 except ImportError:
     try:
-        from EyegesturesEngine import (  # type: ignore[import-not-found, import-untyped]
-            EyeGesturesEnginePython as RustEyeGesturesEngine,
+        from EyegesturesEngine import (
+            EyeGesturesEnginePython as RustEyeGesturesEngine,  # type: ignore[import-not-found, import-untyped]
         )
     except ImportError:
         RustEyeGesturesEngine = None
