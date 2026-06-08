@@ -33,6 +33,7 @@ wasm:
 # Python build
 PYTHON = uv run
 MATURIN_PYTHON_FLAGS = --release --no-default-features --features python
+
 # Set to 1 to allow builds for newer CPython versions than PyO3 officially supports.
 PYO3_USE_ABI3_FORWARD_COMPATIBILITY ?= 1
 PYTHON_INTERPRETERS=python3.12 python3.13
@@ -43,8 +44,14 @@ else
 PYO3_FORWARD_ENV = PYO3_USE_ABI3_FORWARD_COMPATIBILITY=$(PYO3_USE_ABI3_FORWARD_COMPATIBILITY)
 endif
 
+ifeq ($(OS),Windows_NT)
+python:
+	$(PYO3_FORWARD_ENV) maturin build $(MATURIN_PYTHON_FLAGS) --target i686-pc-windows-msvc --interpreter $(PYTHON_INTERPRETERS)
+	$(PYO3_FORWARD_ENV) maturin build $(MATURIN_PYTHON_FLAGS) --target x86_64-pc-windows-msvc --interpreter $(PYTHON_INTERPRETERS)
+else
 python:
 	$(PYO3_FORWARD_ENV) maturin build $(MATURIN_PYTHON_FLAGS) --interpreter $(PYTHON_INTERPRETERS)
+endif
 
 clean:
 	rm -f src/eyegestures.min.js
