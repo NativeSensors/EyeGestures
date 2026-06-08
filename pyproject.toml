@@ -85,3 +85,7 @@ strict = false
 [[tool.mypy.overrides]]
 module = ["sklearn.*", "mediapipe.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["EyegesturesEngine", "eyeGestures.EyegesturesEngine"]
+ignore_missing_imports = true
