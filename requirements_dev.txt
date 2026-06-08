@@ -10,7 +10,7 @@ dill==0.4.0
 flake8==7.3.0
 Flake8-pyproject==1.2.3
 flatbuffers==25.2.10
-fonttools==4.58.2
+fonttools==4.60.2
 isort==6.0.1
 jax==0.6.1
 jaxlib==0.6.1

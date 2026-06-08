@@ -17,8 +17,11 @@
 EyeGestures is open source eyetracking software/library using native webcams and phone camers for achieving its goal. The aim of library is to bring accessibility of eye-tracking and eye-driven interfaces without requirement of obtaining expensive hardware.
 
 Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)! 
-### 💜 Sponsors: 
 
+> [!Warning]
+> **Before contributing read the `contributing.md` guide!**
+
+### 💜 Sponsors:
 > [!IMPORTANT]  
 > EyeGestures is a fully volunteer-based project and exists thanks to your donations and support.
 >
