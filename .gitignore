@@ -12,3 +12,5 @@ dist/*
 data/*
 .mypy_cache
 .venvs
+*.task
+/engine/target

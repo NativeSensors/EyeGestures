@@ -1,0 +1,26 @@
+#cursor {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 255, 0.342);
+    border-radius: 50%;
+    border: medium solid rgba(0, 0, 255, 0.171);
+    z-index: 1000;
+}
+#calib_cursor {
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    background: #ff575777;
+    border-radius: 50%;
+    border: medium solid #ff5757;
+    z-index: 10000;
+}
+#logoDivEyeGestures{
+}
+#logoDivEyeGestures:hover{
+    transform: scale(1.01);
+}
+#logoDivEyeGestures:active{
+    transform: scale(1.0);
+}

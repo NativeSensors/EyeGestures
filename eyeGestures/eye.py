@@ -3,9 +3,9 @@
 from typing import Optional, Tuple
 
 import cv2
-import mediapipe as mp
 import numpy as np
 import numpy.typing as npt
+from mediapipe.tasks.python.vision.face_landmarker import FaceLandmarksConnections
 
 from eyeGestures.utils import Buffor
 
@@ -13,8 +13,24 @@ from eyeGestures.utils import Buffor
 class Eye:
     """Class storing data related and representing a eye"""
 
-    LEFT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_LEFT_EYE))[:, 0]
-    RIGHT_EYE_KEYPOINTS = np.array(list(mp.solutions.face_mesh.FACEMESH_RIGHT_EYE))[:, 0]
+    LEFT_EYE_KEYPOINTS = np.array(
+        sorted(
+            {
+                index
+                for connection in FaceLandmarksConnections.FACE_LANDMARKS_LEFT_EYE
+                for index in (connection.start, connection.end)
+            }
+        )
+    )
+    RIGHT_EYE_KEYPOINTS = np.array(
+        sorted(
+            {
+                index
+                for connection in FaceLandmarksConnections.FACE_LANDMARKS_RIGHT_EYE
+                for index in (connection.start, connection.end)
+            }
+        )
+    )
     LEFT_EYE_PUPIL_KEYPOINT = [473]
     RIGHT_EYE_PUPIL_KEYPOINT = [468]
 
@@ -37,8 +53,8 @@ class Eye:
         self.y = 0
         self.width = 0
         self.height = 0
-        self.center_x = 0
-        self.center_y = 0
+        self.center_x: float = 0.0
+        self.center_y: float = 0.0
         self.image: Optional[cv2.typing.MatLike] = None
         self.pupil: Optional[npt.NDArray[np.float64]] = None
         self.offset: Optional[npt.NDArray[np.float64]] = None
@@ -146,19 +162,19 @@ class Eye:
         masked_image = cv2.bitwise_not(background, cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY), mask=mask)
 
         margin = 2
-        min_x = np.min(region_int[:, 0]) - margin
-        max_x = np.max(region_int[:, 0]) + margin
-        min_y = np.min(region_int[:, 1]) - margin
-        max_y = np.max(region_int[:, 1]) + margin
+        min_x = int(np.min(region_int[:, 0]) - margin)
+        max_x = int(np.max(region_int[:, 0]) + margin)
+        min_y = int(np.min(region_int[:, 1]) - margin)
+        max_y = int(np.max(region_int[:, 1]) + margin)
 
         self.x = min_x
         self.y = min_y
 
-        self.width = np.max(region_int[:, 0]) - np.min(region_int[:, 0])
-        self.height = np.max(region_int[:, 1]) - np.min(region_int[:, 1])
+        self.width = int(np.max(region_int[:, 0]) - np.min(region_int[:, 0]))
+        self.height = int(np.max(region_int[:, 1]) - np.min(region_int[:, 1]))
 
-        self.center_x = (min_x + max_x) / 2
-        self.center_y = (min_y + max_y) / 2
+        self.center_x = float((min_x + max_x) / 2)
+        self.center_y = float((min_y + max_y) / 2)
 
         # HACKETY_HACK:
         assert self.pupil is not None

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eye QWERTY Keyboard · EyeGestures</title>
+  <script src="https://www.lactame.com/lib/ml/6.0.0/ml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  <link rel="stylesheet" href="https://eyegestures.com/eyegestures.css"/>
+  <!-- <script src="https://eyegestures.com/eyegestures.js"></script> -->
+  <script src="../src/calibration.js"></script>
+  <script src="../src/eyegestures.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f5f5f0;
+      --surface:#ffffff;
+      --border:#e0ddd6;
+      --key-bg:#ffffff;
+      --key-gaze:#faf5ff;
+      --key-act:#c026d3;
+      --accent:#c026d3;
+      --accent2:#e11d48;
+      --text:#1a1a1a;
+      --muted:#6b7280;
+      --success:#16a34a;
+      --danger:#e11d48;
+      --radius:14px;
+      --hdr:64px;
+      --out-h:100px;
+      --dwell:1.5s;
+    }
+    html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif}
+    #app{display:grid;grid-template-rows:var(--hdr) var(--out-h) 1fr auto;height:100vh;width:100vw}
+
+    header{background:var(--surface);border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:12px;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .logo{font-size:20px;font-weight:800;letter-spacing:.03em;color:var(--accent)}
+    .logo span{color:var(--text)}
+
+    #pill{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);background:var(--bg);border:1.5px solid var(--border);border-radius:100px;padding:5px 14px}
+    #pill .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+    #pill.calibrating .dot{background:var(--accent2);animation:blink 1s infinite}
+    #pill.active .dot{background:var(--success)}
+    #pill.error .dot{background:var(--danger)}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+    #out-wrap{background:var(--surface);border-bottom:1.5px solid var(--border);padding:10px 20px 8px;display:flex;flex-direction:column;justify-content:center;position:relative}
+    #out-label{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--muted);margin-bottom:5px;text-transform:uppercase}
+    #out-text{font-size:clamp(22px,3.2vw,34px);font-weight:300;color:var(--text);min-height:1.3em;word-break:break-word;line-height:1.2}
+    #pending{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--accent);background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);border-radius:10px;padding:5px 12px;display:none;font-weight:700;letter-spacing:.08em}
+
+    #kb-area{padding:10px;display:flex;flex-direction:column;gap:7px;overflow:hidden;background:var(--bg);height:100%}
+    .kb-row{display:flex;flex:1;gap:7px;align-items:stretch}
+
+    .key{position:relative;flex:1;background:var(--key-bg);border:1.5px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:background .12s,border-color .12s,transform .1s;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+    .key .label{font-size:clamp(18px,2.6vw,32px);font-weight:600;color:var(--text);text-transform:uppercase;user-select:none;pointer-events:none;z-index:1;letter-spacing:.01em}
+
+    .key.gazed{border-color:var(--accent);background:var(--key-gaze)}
+    .key.activated{border-color:var(--accent);background:rgba(249,115,22,.25);transform:scale(.94)}
+
+    #kb-area.locked .key{opacity:.38;pointer-events:none;filter:grayscale(.4)}
+    #lock-overlay{
+      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:10px;z-index:20;pointer-events:none;
+      background:rgba(245,245,240,.78);backdrop-filter:blur(3px);
+    }
+    #lock-overlay .lock-icon{font-size:48px;opacity:.45}
+    #lock-overlay p{font-size:15px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+    #kb-wrapper{position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+
+    .dwell-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0}
+    .dwell-svg circle{fill:none;stroke:var(--accent);stroke-width:3.5;stroke-linecap:round;transform-origin:center;transform:rotate(-90deg);stroke-dasharray:999;stroke-dashoffset:999}
+
+    #settings{background:var(--surface);border-top:1.5px solid var(--border);display:flex;align-items:center;gap:20px;padding:8px 20px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+    #settings label{display:flex;align-items:center;gap:7px}
+    #dwell-range{accent-color:var(--accent);width:110px;cursor:pointer}
+    #dwell-val{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
+    #gaze-coords{margin-left:auto;font-variant-numeric:tabular-nums}
+    #gaze-coords b{color:var(--text)}
+
+    #video,#status,#error{display:none}
+  </style>
+</head>
+<body>
+<video id="video" width="640" height="480" autoplay></video>
+<div id="status"></div>
+<div id="error"></div>
+
+<div id="app">
+  <header>
+    <div class="logo">Eye<span>Board</span></div>
+
+    <div id="pill">
+      <div class="dot"></div>
+      <span id="pill-txt">Starting…</span>
+    </div>
+  </header>
+
+  <div id="out-wrap">
+    <div id="out-label">Output</div>
+    <div id="out-text"><span id="cursor"></span></div>
+    <div id="pending"></div>
+  </div>
+
+  <div id="kb-wrapper">
+    <div id="kb-area" class="locked"></div>
+    <div id="lock-overlay">
+      <p>Complete calibration to unlock keyboard</p>
+    </div>
+  </div>
+
+  <div id="settings">
+    <label>
+      Dwell time:
+      <input id="dwell-range" type="range" min="500" max="3000" step="100" value="1500"/>
+      <span id="dwell-val">1.5 s</span>
+    </label>
+    <span>Look at a key and hold gaze to select</span>
+    <span id="gaze-coords">x: <b id="gx">—</b> &nbsp; y: <b id="gy">—</b></span>
+  </div>
+</div>
+
+<script>
+const ROWS = [
+  ['q','w','e','r','t','y','u','i','o','p'],
+  ['a','s','d','f','g','h','j','k','l'],
+  ['SHIFT','z','x','c','v','b','n','m','⌫'],
+  ['123','SPACE','.,!?','↵','CLR'],
+];
+const WIDE = {'SHIFT':1.8,'⌫':1.8,'SPACE':4,'123':1.4,'.,!?':1.6,'↵':1.6,'CLR':1.4};
+
+let text='', shiftOn=false, numMode=false, isCalib=false, readyForGaze=false;
+
+const kbArea = document.getElementById('kb-area');
+const lockOverlay = document.getElementById('lock-overlay');
+
+function makeKey(ch){
+  const key=document.createElement('div');
+  key.className='key';
+  key.dataset.key=ch;
+  key.style.flex=WIDE[ch]||1;
+  const label=document.createElement('div');
+  label.className='label';
+  label.textContent=ch==='SPACE'?'␣ SPACE':ch;
+  key.appendChild(label);
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.classList.add('dwell-svg');
+  const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circle.setAttribute('cx','50%');
+  circle.setAttribute('cy','50%');
+  circle.setAttribute('r','46%');
+  svg.appendChild(circle);
+  key.appendChild(svg);
+  return key;
+}
+
+ROWS.forEach(row=>{
+  const rowEl=document.createElement('div');
+  rowEl.className='kb-row';
+  row.forEach(ch=>rowEl.appendChild(makeKey(ch)));
+  kbArea.appendChild(rowEl);
+});
+
+const outText=document.getElementById('out-text');
+const cursorEl=document.getElementById('cursor');
+
+function renderText(){outText.textContent=text;outText.appendChild(cursorEl)}
+renderText();
+
+function speak(str){
+  if(!str.trim())return;
+  const utt=new SpeechSynthesisUtterance(str.trim());
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utt);
+}
+
+function pressKey(ch){
+  switch(ch){
+    case '⌫': text=text.slice(0,-1); break;
+    case 'CLR': text=''; break;
+    case 'SPACE': {
+      text+=' ';
+      const words=text.trimEnd().split(/\s+/);
+      const lastWord=words[words.length-1];
+      if(lastWord)speak(lastWord);
+      break;
+    }
+    case '↵': {
+      speak(text);
+      text+='\n';
+      break;
+    }
+    case 'SHIFT': shiftOn=!shiftOn; updateLabels(); break;
+    case '123': numMode=!numMode; updateLabels(); break;
+    case '.,!?': text+='.'; break;
+    default:
+      if(numMode){
+        const N={q:'1',w:'2',e:'3',r:'4',t:'5',y:'6',u:'7',i:'8',o:'9',p:'0',
+                 a:'@',s:'#',d:'$',f:'%',g:'&',h:'*',j:'(',k:')',l:'-',
+                 z:'+',x:'=',c:'[',v:']',b:'{',n:'}',m:'/'};
+        text+=(N[ch]||ch);
+      } else {
+        text+=shiftOn?ch.toUpperCase():ch;
+        if(shiftOn){shiftOn=false;updateLabels();}
+      }
+  }
+  renderText();
+}
+
+function updateLabels(){
+  document.querySelectorAll('.key').forEach(k=>{
+    const ch=k.dataset.key;
+    const lEl=k.querySelector('.label');
+    if(!['SHIFT','⌫','SPACE','.,!?','↵','123'].includes(ch)){
+      if(numMode){
+        const N={q:'1',w:'2',e:'3',r:'4',t:'5',y:'6',u:'7',i:'8',o:'9',p:'0',
+                 a:'@',s:'#',d:'$',f:'%',g:'&',h:'*',j:'(',k:')',l:'-',
+                 z:'+',x:'=',c:'[',v:']',b:'{',n:'}',m:'/'};
+        lEl.textContent=N[ch]||ch;
+      } else {
+        lEl.textContent=shiftOn?ch.toUpperCase():ch;
+      }
+    }
+    if(ch==='SHIFT')k.style.borderColor=shiftOn?'var(--accent2)':'';
+    if(ch==='123')k.style.borderColor=numMode?'var(--accent2)':'';
+  });
+}
+
+let dwellMs=1500, gazeTarget=null, gazeStart=null, rafId=null;
+const dwellRange=document.getElementById('dwell-range');
+const dwellVal=document.getElementById('dwell-val');
+
+dwellRange.addEventListener('input',()=>{
+  dwellMs=+dwellRange.value;
+  dwellVal.textContent=(dwellMs/1000).toFixed(1)+' s';
+  resetDwell(false);
+});
+
+function resetDwell(save=true){
+  cancelAnimationFrame(rafId);
+  if(gazeTarget){
+    if(save && gazeStart !== null){
+      const elapsed=performance.now()-gazeStart;
+    }
+    gazeTarget.classList.remove('gazed');
+    const c=gazeTarget.querySelector('.dwell-svg circle');
+    const svg=gazeTarget.querySelector('.dwell-svg');
+    if(c){
+      c.style.strokeDashoffset='999';
+      c.style.strokeDasharray='999';
+    }
+    if(svg)svg.style.opacity='0';
+    gazeTarget=null;
+  }
+  gazeStart=null;
+}
+
+function startDwell(el){
+    const saved=0;
+    gazeTarget=el;
+    gazeStart=performance.now()-saved;
+    el.classList.add('gazed');
+    const svg=el.querySelector('.dwell-svg');
+    if(svg)svg.style.opacity='1';
+    animateDwell();
+}
+
+function animateDwell(){
+  if(!gazeTarget)return;
+  const elapsed=performance.now()-gazeStart;
+  const frac=Math.min(elapsed/dwellMs,1);
+  const svg=gazeTarget.querySelector('.dwell-svg');
+  const circle=gazeTarget.querySelector('.dwell-svg circle');
+  if(svg&&circle){
+    const r=svg.getBoundingClientRect().width*0.46;
+    const circ=2*Math.PI*r;
+    circle.style.strokeDasharray=circ;
+    circle.style.strokeDashoffset=circ*(1-frac);
+  }
+  if(frac<1){rafId=requestAnimationFrame(animateDwell);}
+  else{activate(gazeTarget);resetDwell(false);}
+}
+
+let gestures = null;
+
+function activate(el){
+    el.classList.add('activated');
+    setTimeout(()=>el.classList.remove('activated'),220);
+    const rect = el.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    gestures.addPointToCalibration(centerX, centerY);
+    // use centerX / centerY as needed
+    pressKey(el.dataset.key);
+}
+
+function keyAtPoint(x,y){
+    if (x===NaN||y===NaN)return null;
+    console.log("Finding key at point:", x, y);
+    const el=document.elementsFromPoint(x,y);
+    if(!el)return null;
+    let node=el;
+
+    for (let i=0;i<el.length;i++){
+        const e=el[i];
+        if(e.classList&&e.classList.contains('key'))return e;
+    }
+    return null;
+}
+
+function unlockKeyboard(){
+  kbArea.classList.remove('locked');
+  lockOverlay.style.display='none';
+}
+
+function onPoint(point,calibration){
+  const x=point[0],y=point[1];
+  document.getElementById('gx').textContent=Math.round(x);
+  document.getElementById('gy').textContent=Math.round(y);
+  if(calibration){
+    setStatus('calibrating','Calibrating — follow the dots');
+    resetDwell();
+    return;
+  }else{ 
+    unlockKeyboard();
+    setStatus('active','Tracking active — gaze & hold to type');
+  }
+  const hovered = keyAtPoint(x,y);
+  if(!hovered){resetDwell();return;}
+  if(hovered!==gazeTarget){resetDwell();startDwell(hovered);}
+}
+
+const pill=document.getElementById('pill');
+const pillTxt=document.getElementById('pill-txt');
+function setStatus(state,msg){pill.className=state;pillTxt.textContent=msg}
+
+window.addEventListener('load',()=>{
+  setStatus('calibrating','Requesting camera…');
+  try{
+    gestures = new EyeGestures('video',onPoint);
+    gestures.start();
+    setStatus('calibrating','Follow the red circles to calibrate');
+  }catch(err){
+    setStatus('error','Tracker error: '+err.message);
+  }
+});
+
+document.addEventListener('mousemove',e=>{
+//   if(!isCalib)return;
+  document.getElementById('gx').textContent=Math.round(e.clientX);
+  document.getElementById('gy').textContent=Math.round(e.clientY);
+});
+</script>
+</body>
+</html>

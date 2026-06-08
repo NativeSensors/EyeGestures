@@ -1,0 +1,23 @@
+[package]
+name = "EyegesturesEngine"
+version = "4.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Wasm dependencies
+wasm-bindgen = { version = "0.2", optional = true }
+web-sys = { version = "0.3.99", features = ["console"], optional = true }
+
+# Python dependencies
+# `generate-import-lib` allows Windows builds when maturin uses bundled sysconfig
+# for discovered interpreters.
+pyo3 = { version = "0.28.2", optional = true, features = ["extension-module", "generate-import-lib"] }
+maturin = "1.13.3"
+
+[features]
+default = ["wasm"]
+wasm = ["wasm-bindgen", "web-sys"]
+python = ["pyo3"]

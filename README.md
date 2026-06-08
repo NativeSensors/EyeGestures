@@ -21,12 +21,7 @@ Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)
 > [!Warning]
 > **Before contributing read the `contributing.md` guide!**
 
-> [!NOTE]
-> Check JS port: [EyeGesturesLite](https://github.com/NativeSensors/EyeGesturesLite)!
-
-### 💜 Sponsors: 
-
-
+### 💜 Sponsors:
 > [!IMPORTANT]  
 > EyeGestures is a fully volunteer-based project and exists thanks to your donations and support.
 >
@@ -34,11 +29,7 @@ Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)
 >
 > 📢📢 **If you are bussiness and would like to collaborate, reach us: contact@eyegestures.com** 📢📢
 >
-> We can provide custom comercial license and invoices if needed.
->
-> <!-- POLAR type=ads id=203bbe subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
-> 
-> <!-- POLAR-END id=eizdelw -->
+> We are happy to be involved in your project!
 >
 ---------
 ### 🔨 Projects build with EyeGestures: 
@@ -52,22 +43,10 @@ Our [Mission](https://github.com/NativeSensors/EyeGestures/blob/main/MISSION.md)
   <img src="https://github.com/user-attachments/assets/33e7782b-7977-4f88-ad54-c43d44c6dced" width="300" height="150">
 </p>
 
-- [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18) 
+- [EyePilot](https://polar.sh/NativeSensors/products/5fce104c-46ec-4203-892b-a26e0e0ead18) - waiting to be restored
 - [EyePather](https://polar.sh/NativeSensors/posts/eyepather-new-tool-in-eyegestures-ecosystem) - discontinued
-- [EyeFocus](https://polar.sh/NativeSensors/products/3756d557-134e-4e7e-ac50-d850126aa325?ref=producthunt) <- 4th best product on PH!
+- [EyeFocus](https://polar.sh/NativeSensors/products/3756d557-134e-4e7e-ac50-d850126aa325?ref=producthunt)
 - Add your project! contact@eyegestures.com or PR
-
-Subscribe and get access to our software:
-<p align="left">
-  <a href="https://polar.sh/NativeSensors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=NativeSensors&label=Subscribe"></picture></a>
-
---------
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/0a5c5363-f389-4b99-a75a-8ebe9a8bd7f5" width="500" height="250">
-</p>
-
-### ⚓ Ports:
-- JavaScript version: [EyeGesturesLite](https://github.com/NativeSensors/EyeGesturesLite)!
 
 ### 💻 Install
 ```
@@ -82,20 +61,16 @@ python3 -m pip install eyeGestures
 Tracker works best when your camera or laptop is at arm's length, similar to how you would typically use it. If you are further away, it may be less responsive for now - currently working on solving this issue.
 
 ```
-python3 examples/simple_example_v2.py
-```
-
-```
-python3 examples/simple_example.py [legacy tracker, will become obsolete]
+python3 examples/simple_example_v4.py
 ```
 
 ### 🔧 Build your own:
 
-#### Using EyeGesture Engine V3 - Faster smaller better:
+#### Engine V4 - Rust based enginee:
 
 ```python
 from eyeGestures.utils import VideoCapture
-from eyeGestures import EyeGestures_v3
+from eyeGestures import EyeGestures_v4
 
 # Initialize gesture engine and video capture
 gestures = EyeGestures_v3()
@@ -123,90 +98,9 @@ while True:
 <!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
 <!-- POLAR-END id=eizdelwu -->
 
-#### Using EyeGesture Engine V2 - [Legacy]:
+#### Legacy Enginees:
 
-```python
-from eyeGestures.utils import VideoCapture
-from eyeGestures import EyeGestures_v2
-
-# Initialize gesture engine and video capture
-gestures = EyeGestures_v2()
-cap = VideoCapture(0)  
-calibrate = True
-screen_width = 500
-screen_height= 500
-
-# Process each frame
-while True:
-  ret, frame = cap.read()
-  event, cevent = gestures.step(frame,
-    calibrate,
-    screen_width,
-    screen_height,
-    context="my_context")
-
-  if event:
-    cursor_x, cursor_y = event.point[0], event.point[1]
-    fixation = event.fixation
-    # calibration_radius: radius for data collection during calibration
-```
-
-<!-- POLAR type=ads id=eizdelwu subscription_benefit_id=bb272b6d-f698-44e3-a417-36a6fa203bbe width=240 height=100 -->
-<!-- POLAR-END id=eizdelwu -->
-
-#### Customize [only V1/V2]:
-
-You can customize your calibration points/map to fit your solutions. Simple copy snippet below, and place your calibration poitns on x,y planes from 0.0 to 1.0. It will be then automatically scaled to your display.
-
-```python
-gestures = EyeGestures_v2()
-gestures.uploadCalibrationMap([[0,0],[0,1],[1,0],[1,1]])
-```
-
-V2 is two stage tracker. It runs V1 under the hood but then uses it as feature extractor for V2 machine learning component, and combines both outputs to generate new gaze point. It is possible to control how much V1 affects V2 by:
-
-```python
-gestures.setClassicImpact(N) # setting N = 2 is working best for my testing 
-```
-This makes that sample obtained from V2 is averaged with N times sample from V1 (same sample copied that many times). In outcome having V2 impacting output in `1/N+1` and V1 `N/N+1`.
-
-It is also worth to know that you can enable hidden calibration for V1 (same calibration when using only V1, but now it is invisible to user):
-```python
-gestures.enableCNCalib()
-```
- 
-#### Using EyeGesture Engine V1 - Model-Based Approach [not recommended]:
-
-```python
-from eyeGestures.utils import VideoCapture
-from eyeGestures import EyeGestures_v1
-
-# Initialize gesture engine with RoI parameters
-gestures = EyeGestures_v1()
-
-cap = VideoCapture(0)  
-ret, frame = cap.read()
-calibrate = True
-screen_width = 500
-screen_height= 500
-
-# Obtain estimations from camera frames
-event, cevent = gestures.estimate(
-    frame,
-    "main",
-    calibrate,  # set calibration - switch to False to stop calibration
-    screen_width,
-    screen_height,
-    0, 0, 0.8, 10
-)
-
-if event:
-  cursor_x, cursor_y = event.point[0], event.point[1]
-  fixation = event.fixation
-  # calibration_radius: radius for data collection during calibration
-```
-
-Feel free to copy and paste the relevant code snippets for your project.
+With release of V4 rust based engine shared betweeen all eyegestures versions (web and desktop), fully pythonic enginees become deprecated. This decision was driven by trying to achieve single algorithm powering eyegestures application. Keeping multiple different enginees was beyond ability to maintain it. Source code can still be found in `src/Legacy`.
 
 ### 🔥 Web Demos:
 
