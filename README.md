@@ -58,6 +58,7 @@ python3 -m pip install eyeGestures
 
 ### ⚙️ Try
 
+
 Tracker works best when your camera or laptop is at arm's length, similar to how you would typically use it. If you are further away, it may be less responsive for now - currently working on solving this issue.
 
 ```
@@ -65,9 +66,43 @@ python3 examples/simple_example_v4.py
 ```
 
 ### 🔧 Build your own:
-
 #### Engine V4 - Rust based enginee:
 
+##### JS - webbrowser
+
+1. External dependencies CDNs:
+```
+<script src="https://www.lactame.com/lib/ml/6.0.0/ml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+```
+2. You need two CDN links:
+```
+<link rel="stylesheet" href="https://eyegestures.com/eyegestures.css">
+<script src="https://eyegestures.com/eyegestures.js"></script>
+```
+3. Place video element (which can be hidden) somewhere in the page together with status and error divs (can stay invisible):
+```
+<video id="video" width="640" height="480" autoplay style="display: none;"></video>
+<div id="status" style="display : none;">Initializing...</div>
+<div id="error" style="display : none;"></div>
+```
+4. Then javascript interface code:
+```
+<script>
+
+function onPoint(point,calibration){
+    point[0]; // x
+    point[1]; // y
+    calibration; // true - for calibrated data, false if calibration is ongoing
+};
+
+const gestures = new EyeGestures('video',onPoint);
+// gestures.invisible(); // to disable blue tracker
+gestures.start();
+</script>
+```
+
+##### Python
 ```python
 from eyeGestures.utils import VideoCapture
 from eyeGestures import EyeGestures_v4
