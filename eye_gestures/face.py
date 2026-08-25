@@ -12,7 +12,7 @@ import numpy.typing as npt
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-from eyeGestures.eye import Eye
+from eye_gestures.eye import Eye
 
 FACE_LANDMARKER_MODEL_URL = (
     "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"

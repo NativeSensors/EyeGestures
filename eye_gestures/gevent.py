@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import numpy.typing as npt
 
-from eyeGestures.eye import Eye
+from eye_gestures.eye import Eye
 
 
 class Gevent:

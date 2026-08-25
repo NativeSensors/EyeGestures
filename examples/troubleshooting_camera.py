@@ -16,7 +16,7 @@ screen_height = screen_info.current_h
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("EyeGestures v3 example")
 
-from eyeGestures.utils import VideoCapture
+from eye_gestures.utils import VideoCapture
 
 cap = VideoCapture(0)
 

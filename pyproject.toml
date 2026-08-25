@@ -33,7 +33,7 @@ manifest-path = "engine/Cargo.toml"
 features = ["python"]
 no-default-features = true
 python-source = "."
-module-name = "eyeGestures.EyegesturesEngine"
+module-name = "eye_gestures.EyegesturesEngine"
 
 [project.urls]
 Homepage = "https://github.com/NativeSensors/EyeGestures"
@@ -87,5 +87,5 @@ module = ["sklearn.*", "mediapipe.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["EyegesturesEngine", "eyeGestures.EyegesturesEngine"]
+module = ["EyegesturesEngine", "eye_gestures.EyegesturesEngine"]
 ignore_missing_imports = true

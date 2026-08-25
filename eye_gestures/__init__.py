@@ -4,9 +4,9 @@ import cv2
 import numpy as np
 import numpy.typing as npt
 
-from eyeGestures.face import Face, FaceFinder
-from eyeGestures.Fixation import Fixation
-from eyeGestures.utils import recoverable
+from eye_gestures.face import Face, FaceFinder
+from eye_gestures.Fixation import Fixation
+from eye_gestures.utils import recoverable
 
 try:
     from .EyegesturesEngine import EyeGesturesEnginePython as RustEyeGesturesEngine  # type: ignore[import-untyped]
@@ -136,3 +136,4 @@ class EyeGestures_v4:
         calib_x = min(max(calib_x, 0), width)
         calib_y = min(max(calib_y, 0), height)
         return [x, y], is_calibrating, [calib_x, calib_y]
+

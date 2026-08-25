@@ -104,8 +104,8 @@ gestures.start();
 
 ##### Python
 ```python
-from eyeGestures.utils import VideoCapture
-from eyeGestures import EyeGestures_v4
+from eye_gestures.utils import VideoCapture
+from eye_gestures import EyeGestures_v4
 
 # Initialize gesture engine and video capture
 gestures = EyeGestures_v3()
