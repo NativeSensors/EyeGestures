@@ -22,8 +22,8 @@ bold_font.set_bold(True)  # Set the font to bold
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}/..')
 
-from eyeGestures.utils import VideoCapture
-from eyeGestures import EyeGestures_v3
+from eye_gestures.utils import VideoCapture
+from eye_gestures import EyeGestures_v3
 
 gestures = EyeGestures_v3()
 cap = VideoCapture(0)

@@ -1,5 +1,5 @@
-from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures
+from eye_gestures.utils import VideoCapture
+from eye_gestures.eyegestures import EyeGestures
 from screeninfo import get_monitors
 
 if __name__ == '__main__':

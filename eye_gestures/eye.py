@@ -7,7 +7,7 @@ import numpy as np
 import numpy.typing as npt
 from mediapipe.tasks.python.vision.face_landmarker import FaceLandmarksConnections
 
-from eyeGestures.utils import Buffor
+from eye_gestures.utils import Buffor
 
 
 class Eye:

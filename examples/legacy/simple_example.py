@@ -7,8 +7,8 @@ import numpy as np
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(f'{dir_path}/..')
 
-from eyeGestures.utils import VideoCapture
-from eyeGestures.eyegestures import EyeGestures_v1
+from eye_gestures.utils import VideoCapture
+from eye_gestures.eyegestures import EyeGestures_v1
 
 gestures = EyeGestures_v1(285,115,80,15)
 
