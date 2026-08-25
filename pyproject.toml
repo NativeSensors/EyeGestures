@@ -34,6 +34,8 @@ features = ["python"]
 no-default-features = true
 python-source = "."
 module-name = "eye_gestures.EyegesturesEngine"
+# Also include deprecated `eyeGestures` alias package alongside `eye_gestures`
+include = ["eyeGestures/**/*.py"]
 
 [project.urls]
 Homepage = "https://github.com/NativeSensors/EyeGestures"

@@ -10,17 +10,17 @@ JS_SRC = web/src/eyegestures.js
 MIN = $(JS_SRC:.js=.min.js)
 
 format:
-	$(FORMAT_TOOLS) python -m isort eyeGestures
-	$(FORMAT_TOOLS) python -m black eyeGestures
+	$(FORMAT_TOOLS) python -m isort eye_gestures eyeGestures
+	$(FORMAT_TOOLS) python -m black eye_gestures eyeGestures
 
 format_check:
-	$(CHECK_TOOLS) python -m isort eyeGestures --check
-	$(CHECK_TOOLS) python -m black eyeGestures --check
+	$(CHECK_TOOLS) python -m isort eye_gestures eyeGestures --check
+	$(CHECK_TOOLS) python -m black eye_gestures eyeGestures --check
 
 check: format_check
-	$(CHECK_TOOLS) python -m pylint eyeGestures
-	$(CHECK_TOOLS) python -m flake8 eyeGestures
-	$(CHECK_TOOLS) python -m mypy eyeGestures
+	$(CHECK_TOOLS) python -m pylint eye_gestures eyeGestures
+	$(CHECK_TOOLS) python -m flake8 eye_gestures eyeGestures
+	$(CHECK_TOOLS) python -m mypy eye_gestures eyeGestures
 
 # Web build
 min:
