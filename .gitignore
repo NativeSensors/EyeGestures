@@ -14,3 +14,5 @@ data/*
 .venvs
 *.task
 /engine/target
+.envrc
+.direnv
