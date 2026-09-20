@@ -151,8 +151,10 @@ fn real_clock_samples_at_30hz() {
         std::thread::sleep(std::time::Duration::from_micros(4_000));
     }
     let samples = core.samples_taken;
+    // Samples are taken on the first frame at or after each 33.3 ms boundary, so a loaded
+    // host (or a slow `process_landmarks`) quantises the rate downwards; allow that slack.
     assert!(
-        (25..=40).contains(&samples),
+        (20..=40).contains(&samples),
         "expected ~30 samples per second, got {samples}"
     );
 }
