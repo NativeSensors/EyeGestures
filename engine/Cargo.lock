@@ -6,6 +6,7 @@ version = 4
 name = "EyegesturesEngine"
 version = "4.0.0"
 dependencies = [
+ "js-sys",
  "maturin",
  "pyo3",
  "wasm-bindgen",

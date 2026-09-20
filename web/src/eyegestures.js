@@ -18,7 +18,7 @@ function __loadEngineModule() {
 
 VERSION = "4.0.0";
 class EyeGestures{ // strip export default before making cdn/web embeddable version 
-    constructor(videoElement_ID, onGaze)
+    constructor(videoElement_ID, onGaze, dynamic_recalib = true, sampling_fps = 30)
     {
         const cursor = document.createElement('div');
         cursor.id = "cursor";
@@ -65,6 +65,9 @@ class EyeGestures{ // strip export default before making cdn/web embeddable vers
         this.__invisible = false;
         this.screen_width = 0;
         this.screen_height = 0;
+        this.dynamic_recalib = dynamic_recalib;
+        // Calibration data acquisition rate; gaze tracking itself keeps running at full frame rate.
+        this.sampling_fps = sampling_fps;
 
         this.updateViewportSize();
 
@@ -210,7 +213,8 @@ class EyeGestures{ // strip export default before making cdn/web embeddable vers
             this.updateStatus('Loading EyeGestures engine...');
             const engineModule = await __loadEngineModule();
             await engineModule.default();
-            this.engine = new engineModule.EyeGesturesEngineWasm(this.screen_width, this.screen_height);
+            this.engine = new engineModule.EyeGesturesEngineWasm(this.screen_width, this.screen_height, this.dynamic_recalib);
+            this.engine.set_sampling_fps(this.sampling_fps);
 
             this.updateStatus('Loading MediaPipe library...');
             
@@ -444,6 +448,13 @@ class EyeGestures{ // strip export default before making cdn/web embeddable vers
     recalibrate(){
         if (this.engine) {
             this.engine.recalibrate();
+        }
+    };
+
+    setSamplingFps(fps){
+        this.sampling_fps = fps;
+        if (this.engine) {
+            this.engine.set_sampling_fps(fps);
         }
     };
 

@@ -151,6 +151,11 @@ impl Calibrator {
         self.fitted = self.reg_x.fitted && self.reg_y.fitted;
     }
 
+    /// Number of samples gathered so far (pending + committed to the stable set).
+    pub fn sample_count(&self) -> usize {
+        self.tmp_x.len() + self.stable_x.len()
+    }
+
     pub fn predict(&self, keypoints: &[f64]) -> [f64; 2] {
         if !self.fitted {
             return [0.0, 0.0];

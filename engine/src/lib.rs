@@ -1,3 +1,4 @@
+pub mod clock;
 mod calibrator;
 mod fixation;
 mod eyegestures;
@@ -14,6 +15,7 @@ use pyo3::prelude::*;
 pub use calibrator::Calibrator;
 pub use fixation::Fixation;
 pub use eyegestures::EyeGesturesCore;
+pub use clock::{default_now_ms, system_clock, NowFn, DEFAULT_SAMPLING_FPS};
 
 #[cfg(feature = "python")]
 #[pymodule]

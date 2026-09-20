@@ -1,3 +1,4 @@
+use crate::clock::{interval_from_fps, system_clock, NowFn, DEFAULT_SAMPLING_FPS};
 use crate::{Calibrator, euclidean_distance};
 
 pub struct GazeResult {
@@ -7,6 +8,10 @@ pub struct GazeResult {
     pub calib_point: [f64; 2],
 }
 
+/// Tolerance when comparing elapsed time against the sampling interval. Without it a camera
+/// running at exactly the sampling rate drops every other frame to float rounding.
+const SAMPLING_EPSILON_MS: f64 = 1e-6;
+
 /// Shared core gaze tracking logic (wasm + python)
 pub struct EyeGesturesCore {
     pub calibrator: Calibrator,
@@ -14,7 +19,9 @@ pub struct EyeGesturesCore {
     pub screen_height: f64,
     pub calib_counter: usize,
     pub calib_max: usize,
-    pub frames_on_point: usize,
+    pub dynamic_recalib: bool,
+    /// Samples (not frames) accepted while the gaze stayed on the current calibration point.
+    pub samples_on_point: usize,
     pub prev_calib: [f64; 2],
     pub eye_calib_regions: Vec<[f64; 2]>,
     pub buffer: Vec<[f64; 2]>,
@@ -22,17 +29,42 @@ pub struct EyeGesturesCore {
     pub start_height: f64,
     pub head_start: [f64; 2],
     pub last_keypoints: Vec<f64>,
+    /// Calibration data acquisition rate in samples per second. `<= 0.0` samples every frame.
+    pub sampling_fps: f64,
+    /// Total number of calibration samples accepted so far.
+    pub samples_taken: usize,
+    last_sample_ms: Option<f64>,
+    now_ms: NowFn,
 }
 
 impl EyeGesturesCore {
-    pub fn new(screen_width: f64, screen_height: f64) -> Self {
+    pub fn new(screen_width: f64, screen_height: f64, dynamic_recalib: bool) -> Self {
+        Self::new_with_clock(
+            screen_width,
+            screen_height,
+            dynamic_recalib,
+            DEFAULT_SAMPLING_FPS,
+            system_clock(),
+        )
+    }
+
+    /// Same as `new` but with an explicit calibration sampling rate and an injectable clock.
+    /// `sampling_fps <= 0` disables the cap. `now_ms` lets tests drive time deterministically.
+    pub fn new_with_clock(
+        screen_width: f64,
+        screen_height: f64,
+        dynamic_recalib: bool,
+        sampling_fps: f64,
+        now_ms: NowFn,
+    ) -> Self {
         Self {
             calibrator: Calibrator::new(),
             screen_width,
             screen_height,
             calib_counter: 0,
             calib_max: 25,
-            frames_on_point: 0,
+            dynamic_recalib: dynamic_recalib,
+            samples_on_point: 0,
             prev_calib: [0.0, 0.0],
             eye_calib_regions: vec![],
             buffer: vec![],
@@ -40,6 +72,25 @@ impl EyeGesturesCore {
             start_height: 0.0,
             head_start: [0.0, 0.0],
             last_keypoints: vec![],
+            sampling_fps,
+            samples_taken: 0,
+            last_sample_ms: None,
+            now_ms,
+        }
+    }
+
+    /// Cap the calibration data acquisition to `sampling_fps` samples per second.
+    /// `<= 0` disables the cap. Gaze tracking itself keeps running at the full frame rate.
+    pub fn set_sampling_fps(&mut self, sampling_fps: f64) {
+        self.sampling_fps = sampling_fps;
+    }
+
+    /// Current sampling rate in samples per second, `0.0` when the cap is disabled.
+    pub fn sampling_fps(&self) -> f64 {
+        if self.sampling_fps > 0.0 {
+            self.sampling_fps
+        } else {
+            0.0
         }
     }
 
@@ -100,28 +151,41 @@ impl EyeGesturesCore {
         let calib_point = self.calibrator.current_point(self.screen_width, self.screen_height);
 
         if calibrating {
+            // Tracker-side bookkeeping stays per-frame, only data acquisition is throttled.
             self.eye_calib_regions.push(left_eye[0]);
-            self.calibrator.add(keypoints, calib_point);
 
-            let dist = euclidean_distance(&point, &calib_point);
-            if dist < 0.1 * self.screen_width && self.frames_on_point > 20 {
-                self.calibrator.next_point();
-                self.frames_on_point = 0;
-                self.buffer.clear();
-            } else if dist < 0.1 * self.screen_width {
-                self.frames_on_point += 1;
-            }
+            let now = (self.now_ms)();
+            let interval_ms = interval_from_fps(self.sampling_fps);
+            let due = match self.last_sample_ms {
+                None => true,
+                Some(previous) => (now - previous).max(0.0) + SAMPLING_EPSILON_MS >= interval_ms,
+            };
 
-            if self.prev_calib != calib_point {
-                self.prev_calib = calib_point;
-                self.calib_counter += 1;
+            if due {
+                self.last_sample_ms = Some(now);
+                self.samples_taken += 1;
+                self.calibrator.add(keypoints, calib_point);
+
+                let dist = euclidean_distance(&point, &calib_point);
+                if dist < 0.1 * self.screen_width && self.samples_on_point > 20 {
+                    self.calibrator.next_point();
+                    self.samples_on_point = 0;
+                    self.buffer.clear();
+                } else if dist < 0.1 * self.screen_width {
+                    self.samples_on_point += 1;
+                }
+
+                if self.prev_calib != calib_point {
+                    self.prev_calib = calib_point;
+                    self.calib_counter += 1;
+                }
             }
         } else {
             let eye_calib_radius = 0.01;
             let seen = self.eye_calib_regions.iter()
                 .any(|r| euclidean_distance(r, &left_eye[0]) < eye_calib_radius);
 
-            if !seen {
+            if !seen && self.dynamic_recalib{
                 self.calib_max += 5;
             }
         }
@@ -141,5 +205,8 @@ impl EyeGesturesCore {
     pub fn recalibrate(&mut self) {
         self.calibrator.reset();
         self.calib_counter = 0;
+        self.samples_on_point = 0;
+        self.samples_taken = 0;
+        self.last_sample_ms = None;
     }
 }

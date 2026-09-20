@@ -24,8 +24,16 @@ VERSION = "4.0.0"
 class EyeGestures_v4:
     """Main class for EyeGesture tracker. It configures and manages entire algorithm"""
 
-    def __init__(self, calibration_radius: int = 1000) -> None:
+    def __init__(
+        self,
+        calibration_radius: int = 1000,
+        dynamic_recalib: bool = True,
+        sampling_fps: float = 30.0,
+    ) -> None:
         self.calibration_radius = calibration_radius
+        self.dynamic_recalib = dynamic_recalib
+        # Calibration data acquisition rate; tracking itself keeps running at full frame rate.
+        self.sampling_fps = sampling_fps
 
         self.average_points: npt.NDArray[np.float64] = np.zeros((1, 2))
         self.calibration: bool = False
@@ -110,6 +118,12 @@ class EyeGestures_v4:
     def setFixation(self, fix: float) -> None:
         self.fix = fix
 
+    def setSamplingFps(self, sampling_fps: float) -> None:
+        """Change the calibration data acquisition rate, in samples per second (0 disables the cap)."""
+        self.sampling_fps = sampling_fps
+        if self.engine is not None:
+            self.engine.set_sampling_fps(sampling_fps)
+
     @recoverable(ret_error_params=(None, None, None))
     def step(
         self,
@@ -119,7 +133,8 @@ class EyeGestures_v4:
     ):
 
         if self.engine is None:
-            self.engine = RustEyeGesturesEngine(width, height)
+            self.engine = RustEyeGesturesEngine(width, height, self.dynamic_recalib)
+            self.engine.set_sampling_fps(self.sampling_fps)
 
         find_result = self.finder.find(frame)
         if find_result is None or not find_result.face_landmarks:
