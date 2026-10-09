@@ -18,7 +18,7 @@ function __loadEngineModule() {
 
 VERSION = "4.0.0";
 class EyeGestures{ // strip export default before making cdn/web embeddable version 
-    constructor(videoElement_ID, onGaze, dynamic_recalib = true, sampling_fps = 30)
+    constructor(videoElement_ID, onGaze, dynamic_recalib = true, sampling_fps = 30, show_settings = true)
     {
         const cursor = document.createElement('div');
         cursor.id = "cursor";
@@ -27,37 +27,6 @@ class EyeGestures{ // strip export default before making cdn/web embeddable vers
         const calib_cursor = document.createElement('div');
         calib_cursor.id = "calib_cursor";
         calib_cursor.style.display = "None";
-
-        const logoDiv = document.createElement('div');
-        logoDiv.id = "logoDivEyeGestures";
-        logoDiv.style.width = "200px";
-        logoDiv.style.height = "60px";
-        logoDiv.style.position = "fixed";
-        logoDiv.style.bottom = "10px";
-        logoDiv.style.right = "10px";
-        logoDiv.style.zIndex = "9999";
-        logoDiv.style.background = "black";
-        logoDiv.style.borderRadius = "10px";
-        logoDiv.style.display = "none";
-        logoDiv.onclick = function() {
-            window.location.href = "https://eyegestures.com/";
-        };
-        const logo = document.createElement('div');
-        logo.style.margin = "10px";
-        logo.innerHTML = '<img src="https://eyegestures.com/logoEyeGesturesNew.png" alt="Logo" width="120px">';
-        logoDiv.appendChild(logo);
-        const canvas = document.createElement('canvas');
-        canvas.id = "output_canvas";
-        canvas.width = "50"; 
-        canvas.height = "50";
-        canvas.style.margin = "5px";
-        canvas.style.borderRadius = "10px";
-        canvas.style.border = "none";
-        canvas.style.background = "#222";
-        logoDiv.appendChild(canvas);
-        document.body.appendChild(logoDiv);
-        
-        document.body.appendChild(calib_cursor);
 
         this.engine = null;
         this.onGaze = onGaze;
@@ -68,6 +37,13 @@ class EyeGestures{ // strip export default before making cdn/web embeddable vers
         this.dynamic_recalib = dynamic_recalib;
         // Calibration data acquisition rate; gaze tracking itself keeps running at full frame rate.
         this.sampling_fps = sampling_fps;
+        // Show the settings (FPS cap + dynamic calibration) section inside the banner
+        this.show_settings = show_settings;
+        this.__settings_open = false;
+
+        this.__createBanner();
+
+        document.body.appendChild(calib_cursor);
 
         this.updateViewportSize();
 
@@ -83,6 +59,192 @@ class EyeGestures{ // strip export default before making cdn/web embeddable vers
     updateViewportSize() {
         this.screen_width = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
         this.screen_height = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    }
+
+    // Banner (logo + eye canvas) with an expandable settings section
+    __createBanner() {
+        const logoDiv = document.createElement('div');
+        logoDiv.id = "logoDivEyeGestures";
+        logoDiv.style.width = this.show_settings ? "240px" : "200px";
+        logoDiv.style.height = "60px";
+        logoDiv.style.position = "fixed";
+        logoDiv.style.bottom = "10px";
+        logoDiv.style.right = "10px";
+        logoDiv.style.zIndex = "9999";
+        logoDiv.style.background = "black";
+        logoDiv.style.borderRadius = "10px";
+        logoDiv.style.display = "none";
+        logoDiv.style.flexDirection = "column";
+        logoDiv.style.alignItems = "stretch";
+        logoDiv.style.overflow = "hidden";
+        logoDiv.style.color = "#fff";
+        logoDiv.style.fontFamily = "Arial, sans-serif";
+        logoDiv.style.fontSize = "12px";
+        logoDiv.onclick = function() {
+            window.location.href = "https://eyegestures.com/";
+        };
+
+        const bar = document.createElement('div');
+        bar.id = "barDivEyeGestures";
+        bar.style.display = "flex";
+        bar.style.flexDirection = "row";
+        bar.style.alignItems = "center";
+        bar.style.justifyContent = "space-between";
+
+        const logo = document.createElement('div');
+        logo.style.margin = "10px";
+        logo.innerHTML = '<img src="https://eyegestures.com/logoEyeGesturesNew.png" alt="Logo" width="120px">';
+        bar.appendChild(logo);
+
+        const canvas = document.createElement('canvas');
+        canvas.id = "output_canvas";
+        canvas.width = "50"; 
+        canvas.height = "50";
+        canvas.style.margin = "5px";
+        canvas.style.borderRadius = "10px";
+        canvas.style.border = "none";
+        canvas.style.background = "#222";
+        bar.appendChild(canvas);
+
+        if (this.show_settings) {
+            const gear = document.createElement('button');
+            gear.id = "settingsButtonEyeGestures";
+            gear.type = "button";
+            gear.textContent = "⚙";
+            gear.title = "EyeGestures settings";
+            gear.style.width = "30px";
+            gear.style.height = "30px";
+            gear.style.margin = "5px";
+            gear.style.flex = "0 0 auto";
+            gear.style.padding = "0";
+            gear.style.border = "none";
+            gear.style.borderRadius = "6px";
+            gear.style.background = "#222";
+            gear.style.color = "#fff";
+            gear.style.fontSize = "16px";
+            gear.style.cursor = "pointer";
+            gear.onclick = (event) => {
+                event.stopPropagation();
+                this.toggleBannerSettings();
+            };
+            bar.appendChild(gear);
+        }
+
+        logoDiv.appendChild(bar);
+
+        if (this.show_settings) {
+            logoDiv.appendChild(this.__createSettingsPanel());
+        }
+
+        document.body.appendChild(logoDiv);
+
+        this.__syncBannerSettings();
+    }
+
+    __createSettingsPanel() {
+        const panel = document.createElement('div');
+        panel.id = "settingsPanelEyeGestures";
+        panel.style.display = "none";
+        panel.style.flexDirection = "column";
+        panel.style.padding = "0 10px 10px 10px";
+        // clicks inside the panel must not follow the banner link
+        panel.onclick = (event) => event.stopPropagation();
+
+        const fpsRow = document.createElement('div');
+        fpsRow.style.display = "flex";
+        fpsRow.style.flexDirection = "row";
+        fpsRow.style.alignItems = "center";
+        fpsRow.style.justifyContent = "space-between";
+
+        const fpsLabel = document.createElement('span');
+        fpsLabel.textContent = "FPS cap";
+        fpsRow.appendChild(fpsLabel);
+
+        const fpsValue = document.createElement('span');
+        fpsValue.id = "fpsValueEyeGestures";
+        fpsValue.style.fontWeight = "bold";
+        fpsRow.appendChild(fpsValue);
+
+        const slider = document.createElement('input');
+        slider.id = "fpsSliderEyeGestures";
+        slider.type = "range";
+        slider.min = "0";
+        slider.max = "60";
+        slider.step = "1";
+        slider.value = String(this.sampling_fps);
+        slider.style.width = "100%";
+        slider.style.margin = "5px 0";
+        slider.style.accentColor = "#5e17eb";
+        slider.style.cursor = "pointer";
+        slider.onclick = (event) => event.stopPropagation();
+        slider.oninput = (event) => {
+            event.stopPropagation();
+            this.setSamplingFps(Number(event.target.value));
+        };
+
+        const calibRow = document.createElement('div');
+        calibRow.style.display = "flex";
+        calibRow.style.flexDirection = "row";
+        calibRow.style.alignItems = "center";
+        calibRow.style.justifyContent = "space-between";
+
+        const calibLabel = document.createElement('span');
+        calibLabel.textContent = "Dynamic calib";
+        calibRow.appendChild(calibLabel);
+
+        const toggle = document.createElement('button');
+        toggle.id = "dynamicCalibToggleEyeGestures";
+        toggle.type = "button";
+        toggle.style.padding = "4px 12px";
+        toggle.style.border = "none";
+        toggle.style.borderRadius = "5px";
+        toggle.style.color = "#fff";
+        toggle.style.fontSize = "12px";
+        toggle.style.cursor = "pointer";
+        toggle.onclick = (event) => {
+            event.stopPropagation();
+            this.setDynamicRecalib(!this.dynamic_recalib);
+        };
+        calibRow.appendChild(toggle);
+
+        panel.appendChild(fpsRow);
+        panel.appendChild(slider);
+        panel.appendChild(calibRow);
+
+        return panel;
+    }
+
+    // Expand/collapse the settings section of the banner
+    setBannerSettings(open) {
+        const logoDiv = document.getElementById("logoDivEyeGestures");
+        const panel = document.getElementById("settingsPanelEyeGestures");
+        if (!logoDiv || !panel) {
+            return;
+        }
+        this.__settings_open = open;
+        panel.style.display = open ? "flex" : "none";
+        logoDiv.style.width = open ? "260px" : "240px";
+        logoDiv.style.height = open ? "auto" : "60px";
+    }
+
+    toggleBannerSettings() {
+        this.setBannerSettings(!this.__settings_open);
+    }
+
+    __syncBannerSettings() {
+        const slider = document.getElementById("fpsSliderEyeGestures");
+        const fpsValue = document.getElementById("fpsValueEyeGestures");
+        const toggle = document.getElementById("dynamicCalibToggleEyeGestures");
+        if (slider) {
+            slider.value = String(this.sampling_fps);
+        }
+        if (fpsValue) {
+            fpsValue.textContent = this.sampling_fps > 0 ? `${this.sampling_fps} fps` : "off";
+        }
+        if (toggle) {
+            toggle.textContent = this.dynamic_recalib ? "ON" : "OFF";
+            toggle.style.background = this.dynamic_recalib ? "#5e17eb" : "#555";
+        }
     }
 
     showUpCalibrationInstructions(onRead) {
@@ -456,6 +618,15 @@ class EyeGestures{ // strip export default before making cdn/web embeddable vers
         if (this.engine) {
             this.engine.set_sampling_fps(fps);
         }
+        this.__syncBannerSettings();
+    };
+
+    setDynamicRecalib(enabled){
+        this.dynamic_recalib = enabled;
+        if (this.engine) {
+            this.engine.set_dynamic_recalib(enabled);
+        }
+        this.__syncBannerSettings();
     };
 
     addPointToCalibration(x, y){

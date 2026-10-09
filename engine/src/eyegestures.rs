@@ -94,6 +94,17 @@ impl EyeGesturesCore {
         }
     }
 
+    /// Enable/disable dynamic recalibration at runtime.
+    /// When disabled the tracker keeps its current calibration and never asks for new points.
+    pub fn set_dynamic_recalib(&mut self, dynamic_recalib: bool) {
+        self.dynamic_recalib = dynamic_recalib;
+    }
+
+    /// Whether dynamic recalibration is currently enabled.
+    pub fn dynamic_recalib(&self) -> bool {
+        self.dynamic_recalib
+    }
+
     pub fn process_landmarks(&mut self, landmarks: &[[f64; 2]]) -> GazeResult {
         let left_indices  = [33, 133, 160, 159, 158, 157, 173, 155, 154, 153, 144, 145, 153, 246, 468];
         let right_indices = [362, 263, 387, 386, 385, 384, 398, 382, 381, 380, 374, 373, 374, 466, 473];

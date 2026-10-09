@@ -44,6 +44,17 @@ impl EyeGesturesEnginePython {
         self.core.sampling_fps()
     }
 
+    /// Enable/disable dynamic recalibration at runtime
+    pub fn set_dynamic_recalib(&mut self, dynamic_recalib: bool) {
+        self.core.set_dynamic_recalib(dynamic_recalib);
+    }
+
+    /// Whether dynamic recalibration is currently enabled
+    #[getter]
+    pub fn dynamic_recalib(&self) -> bool {
+        self.core.dynamic_recalib()
+    }
+
     /// Manually add a calibration point at (x, y)
     pub fn add_calibration_point(&mut self, x: f64, y: f64) {
         self.core.add_calibration_point(x, y);

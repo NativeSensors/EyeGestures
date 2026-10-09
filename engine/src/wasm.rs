@@ -49,6 +49,17 @@ impl EyeGesturesEngineWasm {
         self.core.samples_taken
     }
 
+    /// Enable/disable dynamic recalibration at runtime.
+    pub fn set_dynamic_recalib(&mut self, dynamic_recalib: bool) {
+        self.core.set_dynamic_recalib(dynamic_recalib);
+    }
+
+    /// Whether dynamic recalibration is currently enabled
+    #[wasm_bindgen(getter)]
+    pub fn dynamic_recalib(&self) -> bool {
+        self.core.dynamic_recalib()
+    }
+
     pub fn add_calibration_point(&mut self, x: f64, y: f64) {
         self.core.add_calibration_point(x, y);
     }
