@@ -1,6 +1,6 @@
 [package]
 name = "EyegesturesEngine"
-version = "4.0.0"
+version = "5.0.0"
 edition = "2021"
 
 [lib]
@@ -13,11 +13,17 @@ web-sys = { version = "0.3.99", features = ["console"], optional = true }
 # `js_sys::Date::now()` is the only clock available on wasm32-unknown-unknown,
 # `std::time::Instant` panics there ("time not implemented on this platform").
 js-sys = { version = "0.3.99", optional = true }
+getrandom = { version = "0.2", features = ["js"] }
 
 # Python dependencies
 # `generate-import-lib` allows Windows builds when maturin uses bundled sysconfig
 # for discovered interpreters.
 pyo3 = { version = "0.28.2", optional = true, features = ["extension-module", "generate-import-lib"] }
+
+# Reservoir computing dependencies
+ndarray = "0.15.6"
+ndarray-rand = "0.14.0"
+rand = "0.8.5"
 
 [dev-dependencies]
 maturin = "1.13.3"
@@ -26,3 +32,4 @@ maturin = "1.13.3"
 default = ["wasm"]
 wasm = ["wasm-bindgen", "web-sys", "js-sys"]
 python = ["pyo3"]
+test-performance = []

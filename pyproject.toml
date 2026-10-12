@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "eyeGestures"
-version = "4.0.0"
+version = "5.0.0"
 authors = [
   { name="Piotr Walas", email="piotr.walas@eyegestures.com" },
 ]

@@ -1,6 +1,6 @@
 use std::cell::Cell;
 
-use EyegesturesEngine::{EyeGesturesCore, DEFAULT_SAMPLING_FPS};
+use EyegesturesEngine::{EyeGesturesCore, default_sampling_fps};
 
 thread_local! {
     /// Fake clock shared by all tests; each test runs on its own thread.
@@ -57,13 +57,13 @@ impl Harness {
 #[test]
 fn default_sampling_rate_is_30hz() {
     let core = EyeGesturesCore::new(1920.0, 1080.0, true);
-    assert_eq!(core.sampling_fps(), DEFAULT_SAMPLING_FPS);
+    assert_eq!(core.sampling_fps(), default_sampling_fps());
 }
 
 #[test]
 fn high_fps_camera_is_sampled_at_30hz() {
     // 2 seconds of a 120 fps camera -> 240 frames, but only ~60 calibration samples.
-    let mut harness = Harness::new(DEFAULT_SAMPLING_FPS);
+    let mut harness = Harness::new(default_sampling_fps());
     harness.run(240, 120.0);
     let samples = harness.samples();
     assert!(
@@ -82,17 +82,17 @@ fn cap_disabled_samples_every_frame() {
 #[test]
 fn slow_camera_is_unaffected_by_the_cap() {
     // A 30 fps camera samples on every frame, identical to the uncapped behaviour.
-    let mut harness = Harness::new(DEFAULT_SAMPLING_FPS);
+    let mut harness = Harness::new(default_sampling_fps());
     harness.run(60, 30.0);
     assert_eq!(harness.samples(), 60);
 }
 
 #[test]
 fn sampling_rate_is_machine_independent() {
-    let mut slow = Harness::new(DEFAULT_SAMPLING_FPS);
+    let mut slow = Harness::new(default_sampling_fps());
     slow.run(60, 30.0);
 
-    let mut fast = Harness::new(DEFAULT_SAMPLING_FPS);
+    let mut fast = Harness::new(default_sampling_fps());
     fast.run(240, 120.0);
 
     assert_eq!(slow.samples(), 60);
@@ -108,7 +108,7 @@ fn point_pacing_is_sample_based_not_frame_based() {
     // 40 frames at 120 fps is 1/3 of a second: under the old frame-counted rule that was
     // enough to move to the next point, at 30 Hz it is only ~10 of the 20 required samples
     // (20 samples at 30 Hz take ~667 ms on any machine).
-    let mut harness = Harness::new(DEFAULT_SAMPLING_FPS);
+    let mut harness = Harness::new(default_sampling_fps());
     harness.run(40, 120.0);
     let samples = harness.samples();
     assert!(
@@ -122,7 +122,7 @@ fn point_pacing_is_sample_based_not_frame_based() {
 fn gaze_tracking_still_runs_on_every_frame() {
     // The cap must only throttle data acquisition: the smoothing buffer (tracker side)
     // keeps filling at the real frame rate.
-    let mut harness = Harness::new(DEFAULT_SAMPLING_FPS);
+    let mut harness = Harness::new(default_sampling_fps());
     harness.run(20, 120.0);
     assert_eq!(harness.core.buffer.len(), 20);
     assert!(
@@ -161,7 +161,7 @@ fn real_clock_samples_at_30hz() {
 
 #[test]
 fn recalibrate_resets_the_sampling_clock() {
-    let mut harness = Harness::new(DEFAULT_SAMPLING_FPS);
+    let mut harness = Harness::new(default_sampling_fps());
     harness.run(120, 120.0);
     let before = harness.samples();
     harness.core.recalibrate();

@@ -1,4 +1,4 @@
-use crate::clock::{interval_from_fps, system_clock, NowFn, DEFAULT_SAMPLING_FPS};
+use crate::clock::{interval_from_fps, system_clock, NowFn, default_sampling_fps};
 use crate::{Calibrator, euclidean_distance};
 
 pub struct GazeResult {
@@ -43,7 +43,7 @@ impl EyeGesturesCore {
             screen_width,
             screen_height,
             dynamic_recalib,
-            DEFAULT_SAMPLING_FPS,
+            default_sampling_fps(),
             system_clock(),
         )
     }

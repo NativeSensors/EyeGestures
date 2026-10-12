@@ -16,7 +16,7 @@ function __loadEngineModule() {
     return __eyeGesturesEngineModulePromise;
 }
 
-VERSION = "4.0.0";
+VERSION = "5.0.0";
 class EyeGestures{ // strip export default before making cdn/web embeddable version 
     constructor(videoElement_ID, onGaze, dynamic_recalib = true, sampling_fps = 30, show_settings = true)
     {
@@ -635,3 +635,5 @@ class EyeGestures{ // strip export default before making cdn/web embeddable vers
         }
     };
 }
+
+window.EyeGestures = EyeGestures;

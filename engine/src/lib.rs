@@ -1,7 +1,9 @@
 pub mod clock;
+pub mod reservoir;
 mod calibrator;
-mod fixation;
 mod eyegestures;
+mod eyegestures_v5;
+mod fixation;
 
 #[cfg(target_arch = "wasm32")]
 pub mod wasm;
@@ -13,15 +15,20 @@ pub mod python;
 use pyo3::prelude::*;
 
 pub use calibrator::Calibrator;
-pub use fixation::Fixation;
 pub use eyegestures::EyeGesturesCore;
-pub use clock::{default_now_ms, system_clock, NowFn, DEFAULT_SAMPLING_FPS};
+pub use eyegestures_v5::EyeGesturesCoreV5;
+pub use fixation::Fixation;
+pub use clock::{default_now_ms, default_sampling_fps, system_clock, NowFn};
+
+#[cfg(feature = "python")]
+pub mod python_v5;
 
 #[cfg(feature = "python")]
 #[pymodule]
 #[pyo3(name = "EyegesturesEngine")]
 fn eyegestures_engine(_py: Python<'_>, module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<python::EyeGesturesEnginePython>()?;
+    module.add_class::<python_v5::EyeGesturesEnginePythonV5>()?;
     Ok(())
 }
 

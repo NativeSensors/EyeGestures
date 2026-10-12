@@ -4,7 +4,9 @@
 pub type NowFn = fn() -> f64;
 
 /// Default sampling frequency of the calibration data acquisition, in samples per second.
-pub const DEFAULT_SAMPLING_FPS: f64 = 30.0;
+pub fn default_sampling_fps() -> f64 {
+    30.0
+}
 
 /// `std::time::Instant` is unsupported on `wasm32-unknown-unknown` and panics at runtime,
 /// so browsers get `Date.now()` instead. `Date.now()` is wall-clock time, therefore callers
